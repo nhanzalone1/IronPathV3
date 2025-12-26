@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>IronPath Sandbox</title>
+<title>IronPath V4</title>
 <style>
-  /* --- 1. CORE VARIABLES --- */
+  /* --- 1. VARIABLES & RESET --- */
   :root { --bg: #0f0f13; --card: #1a1a24; --text: #ffffff; --accent: #ff4757; --success: #2ed573; --dim: #888; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; padding: 0; background-color: var(--bg); color: var(--text); font-family: -apple-system, system-ui, sans-serif; overflow-x: hidden; padding-bottom: 90px; }
-  
+
   /* --- 2. UTILS --- */
   .hidden { display: none !important; }
   .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 13px; margin-top: 10px; transition: 0.1s; }
@@ -17,7 +17,8 @@
   .btn-main { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; }
   .btn-sec { background: #333; color: white; border: 1px solid #444; }
   .btn-danger { background: #2a1a1a; color: #ff4757; border: 1px solid #522; font-size: 11px; padding: 10px; }
-  
+  .btn-ghost { background: transparent; border: 1px dashed #444; color: #666; font-size: 10px; padding: 8px; width: auto; display: inline-block; }
+
   h1 { text-align: center; margin: 25px 0 5px; font-size: 26px; letter-spacing: -1px; }
   .sub { text-align: center; color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; }
   input { background: #121212; border: 1px solid #333; color: white; padding: 14px; border-radius: 10px; width: 100%; font-size: 16px; margin-bottom: 10px; }
@@ -33,34 +34,39 @@
   .day-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #222; align-items: center; }
   .tag { font-size: 9px; padding: 3px 6px; border-radius: 4px; color: black; font-weight: 800; margin-left: 8px; text-transform: uppercase; }
   .tag-h { background: #ff4757; } .tag-l { background: #2ed573; } .tag-m { background: #ffa502; }
-  .completed { text-decoration: line-through; opacity: 0.5; color: var(--success); }
   .chk { width: 22px; height: 22px; border: 2px solid #555; border-radius: 50%; margin-right: 12px; display: inline-block; }
   .completed .chk { background: var(--success); border-color: var(--success); }
+  .completed { text-decoration: line-through; opacity: 0.5; color: var(--success); }
+  
+  /* WARMUP SECTION */
+  .warmup-box { background: #151515; border-top: 1px solid #333; padding: 10px 15px; display: none; }
+  .wu-row { display: flex; justify-content: space-between; font-size: 12px; color: #aaa; margin-bottom: 5px; }
+  .wu-title { color: #ffa502; font-size: 10px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: block; }
 
-  /* --- 5. LOG STYLES --- */
-  /* Split List */
+  /* --- 5. LOG STYLES (SHOPPING CART) --- */
   .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #333; }
-  .day-info { flex-grow: 1; cursor: pointer; }
-  .day-actions { display: flex; gap: 8px; }
   .icon-btn { background: #222; border: 1px solid #444; color: #ccc; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
   
-  /* Exercise List */
-  .ex-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; position: relative; }
-  .ex-top-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-  .ex-title { font-weight: bold; font-size: 16px; width: 70%; }
+  /* ACTIVE CART (Top) */
+  #active-workout-area { min-height: 100px; margin-bottom: 30px; }
+  .ex-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; position: relative; animation: slideIn 0.2s ease; }
+  @keyframes slideIn { from{transform:translateX(-10px);opacity:0} to{transform:translateX(0);opacity:1} }
+  .ex-top { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .ex-name { font-weight: bold; font-size: 16px; }
+  .ex-hist { font-size: 11px; color: var(--success); display: block; margin-bottom: 10px; }
   
-  .ex-controls { display: flex; gap: 5px; }
-  .move-btn { background: #222; border: 1px solid #444; color: #aaa; width: 28px; height: 28px; border-radius: 5px; cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; }
-  .del-btn { background: #3a1a1a; border: 1px solid #522; color: #ff4757; width: 28px; height: 28px; border-radius: 5px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+  /* LIBRARY SHELF (Bottom) */
+  .shelf-title { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; border-top: 1px solid #333; padding-top: 20px; }
+  .tile-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tile { background: #222; border: 1px solid #444; color: #ccc; padding: 8px 12px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500; transition: 0.1s; }
+  .tile:active { background: var(--accent); color: black; border-color: var(--accent); }
+  .tile-add { border-style: dashed; color: #666; }
 
-  .hist-text { font-size: 11px; color: var(--success); margin-bottom: 10px; display: block; font-weight: bold; }
-  .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-  /* --- 6. MODAL SYSTEM --- */
+  /* --- 6. MODAL --- */
   #modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
   .modal-box { background: #1e1e1e; padding: 25px; border-radius: 15px; width: 85%; max-width: 350px; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
   .modal-title { margin-top: 0; color: white; font-size: 18px; }
-  
+
   /* --- 7. TOOLS & NAV --- */
   .tool-box { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; text-align: center; }
   .timer-display { font-size: 45px; font-weight: 900; margin: 15px 0; font-variant-numeric: tabular-nums; }
@@ -107,8 +113,11 @@
       
       <button class="btn btn-sec" style="border-style:dashed; color:#888;" onclick="promptAddDay()">+ CREATE NEW FOLDER</button>
       
-      <div style="margin-top:40px; border-top:1px solid #333; padding-top:20px;">
-        <p style="text-align:center; color:#555; font-size:12px;">OPTIONAL PRESETS</p>
+      <div id="preset-area" style="margin-top:40px; border-top:1px solid #333; padding-top:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span style="color:#555; font-size:10px;">PRESETS</span>
+            <span onclick="hidePresets()" style="color:#ff4757; font-size:10px; cursor:pointer;">HIDE FOREVER</span>
+        </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
            <button class="btn btn-sec" style="margin:0; font-size:10px;" onclick="loadPreset('PPL')">LOAD PPL</button>
            <button class="btn btn-sec" style="margin:0; font-size:10px;" onclick="loadPreset('UL')">LOAD UPPER/LOWER</button>
@@ -117,15 +126,22 @@
   </div>
 
   <div id="session-logger" class="hidden">
-      <div style="display:flex; align-items:center; margin-bottom:15px;">
-        <button class="btn btn-sec" onclick="closeSession()" style="width:auto; margin:0; padding:10px 15px;">← BACK</button>
-        <h2 id="session-title" style="margin:0 0 0 15px; color:var(--accent); font-size:20px;"></h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <div style="display:flex; align-items:center;">
+            <button class="btn btn-sec" onclick="closeSession()" style="width:auto; margin:0; padding:10px 15px;">←</button>
+            <h2 id="session-title" style="margin:0 0 0 15px; color:var(--accent); font-size:20px;"></h2>
+        </div>
+        <button class="btn-ghost" onclick="clearCart()">NEW WORKOUT</button>
       </div>
       
-      <div id="exercises-container"></div>
-      
-      <button class="btn btn-sec" style="border-style:dashed; margin-top:20px;" onclick="promptAddEx()">+ ADD EXERCISE</button>
-      <button class="btn btn-main" style="margin-top:30px;" onclick="finishSession()">FINISH & SAVE LOG</button>
+      <div id="active-workout-area">
+          <div style="text-align:center; color:#444; padding:20px;">Tap tiles below to add exercises</div>
+      </div>
+
+      <button class="btn btn-main" onclick="finishSession()">FINISH & SAVE LOG</button>
+
+      <div class="shelf-title">EXERCISE LIBRARY (TAP TO ADD)</div>
+      <div id="tile-area" class="tile-grid"></div>
   </div>
 </div>
 
@@ -160,14 +176,18 @@
 </div>
 
 <script>
-// --- STATE MANAGEMENT ---
+// --- STATE ---
 let myDays = JSON.parse(localStorage.getItem('myDays') || '[]'); 
-let myExs = JSON.parse(localStorage.getItem('myExs') || '{}');
+let myLibrary = JSON.parse(localStorage.getItem('myLibrary') || '{}'); // { "Chest": ["Bench", "Fly"] }
+let activeCart = []; // Current session array
 let history = JSON.parse(localStorage.getItem('liftHistory') || '{}');
+let showPresets = localStorage.getItem('hidePresets') !== 'true';
 
+// --- INIT ---
 renderDays();
+if(!showPresets) document.getElementById('preset-area').style.display = 'none';
 
-// --- NAVIGATION ---
+// --- NAV ---
 function switchTab(id, btn) {
     document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
     document.getElementById('view-'+id).classList.remove('hidden');
@@ -175,21 +195,20 @@ function switchTab(id, btn) {
     btn.classList.add('active');
 }
 
-// --- LOG: FOLDER SYSTEM ---
+// --- LOG LOGIC ---
 function renderDays() {
     const list = document.getElementById('my-split-list');
     list.innerHTML = "";
     if(myDays.length === 0) list.innerHTML = "<div style='text-align:center; color:#555; margin:30px 0;'>No folders created.</div>";
     
-    myDays.forEach((day, idx) => {
-        const count = (myExs[day]||[]).length;
+    myDays.forEach((day) => {
+        const count = (myLibrary[day]||[]).length;
         list.innerHTML += `
         <div class="day-card">
-            <div class="day-info" onclick="openSession('${day}')">
-                <b>${day}</b><br>
-                <span style="font-size:11px; color:#666;">${count} Exercises</span>
+            <div style="flex-grow:1" onclick="openSession('${day}')">
+                <b>${day}</b><br><span style="font-size:11px; color:#666;">${count} Saved Exercises</span>
             </div>
-            <div class="day-actions">
+            <div style="display:flex; gap:8px;">
                 <button class="icon-btn" onclick="renameFolder('${day}')">✎</button>
                 <button class="icon-btn" style="color:#ff4757; border-color:#522;" onclick="delFolder('${day}')">✕</button>
             </div>
@@ -197,85 +216,53 @@ function renderDays() {
     });
 }
 
-function promptAddDay() {
-    openModal("New Folder Name", "e.g. Chest Day", (val) => {
-        if(val && !myDays.includes(val)) {
-            myDays.push(val); saveData(); renderDays();
-        }
-    });
-}
-
-function renameFolder(oldName) {
-    openModal("Rename " + oldName, oldName, (newName) => {
-        if(newName && newName !== oldName) {
-            // Update array
-            const idx = myDays.indexOf(oldName);
-            if(idx !== -1) myDays[idx] = newName;
-            
-            // Move exercises to new key
-            if(myExs[oldName]) {
-                myExs[newName] = myExs[oldName];
-                delete myExs[oldName];
-            }
-            saveData(); renderDays();
-        }
-    });
-}
-
-function delFolder(name) {
-    if(confirm("Delete folder '" + name + "'?")) {
-        const idx = myDays.indexOf(name);
-        if(idx > -1) myDays.splice(idx, 1);
-        delete myExs[name];
-        saveData(); renderDays();
-    }
-}
-
-function loadPreset(type) {
-    let add = [];
-    if(type === 'PPL') add = ["Push", "Pull", "Legs"];
-    if(type === 'UL') add = ["Upper", "Lower"];
-    add.forEach(d => { if(!myDays.includes(d)) myDays.push(d); });
-    saveData(); renderDays();
-}
-
-// --- LOG: EXERCISE SYSTEM ---
-let activeDay = "";
+// --- SESSION LOGIC (CART SYSTEM) ---
+let currentFolder = "";
 
 function openSession(day) {
-    activeDay = day;
+    currentFolder = day;
     document.getElementById('split-manager').classList.add('hidden');
     document.getElementById('session-logger').classList.remove('hidden');
     document.getElementById('session-title').innerText = day;
-    renderExs();
+    
+    // Clear cart on open? User requested manual clear. 
+    // We will start empty if cart is empty, otherwise show what's there.
+    renderCart();
+    renderShelf();
 }
 
 function closeSession() {
     document.getElementById('session-logger').classList.add('hidden');
     document.getElementById('split-manager').classList.remove('hidden');
+    activeCart = []; // Auto-clear cart on exit? User said "Start Fresh" button. Let's safe clear.
 }
 
-function renderExs() {
-    const con = document.getElementById('exercises-container');
-    con.innerHTML = "";
-    const list = myExs[activeDay] || [];
-    
-    if(list.length === 0) con.innerHTML = "<div style='text-align:center; color:#555; padding:20px;'>Empty folder.</div>";
+function clearCart() {
+    if(confirm("Start Fresh? Clears current workout (History saved).")) {
+        activeCart = [];
+        renderCart();
+    }
+}
 
-    list.forEach((ex, idx) => {
+// Render the Active Workout (Top)
+function renderCart() {
+    const area = document.getElementById('active-workout-area');
+    area.innerHTML = "";
+    if(activeCart.length === 0) {
+        area.innerHTML = "<div style='text-align:center; color:#444; padding:30px; border:1px dashed #333; border-radius:10px;'>Active Workout Empty<br><span style='font-size:11px'>Tap tiles below to add</span></div>";
+        return;
+    }
+    
+    activeCart.forEach((ex, idx) => {
         const last = history[ex] || "No history";
-        con.innerHTML += `
+        area.innerHTML += `
         <div class="ex-card">
-            <div class="ex-top-row">
-                <div class="ex-title">${ex}</div>
-                <div class="ex-controls">
-                    <button class="move-btn" onclick="moveEx(${idx}, -1)">▲</button>
-                    <button class="move-btn" onclick="moveEx(${idx}, 1)">▼</button>
-                    <button class="del-btn" onclick="delEx(${idx})">✕</button>
-                </div>
+            <div class="ex-top">
+                <span class="ex-name">${ex}</span>
+                <button onclick="removeFromCart(${idx})" style="background:none; border:none; color:#555; cursor:pointer;">✕</button>
             </div>
-            <span class="hist-text">LAST: ${last}</span>
-            <div class="input-group">
+            <span class="ex-hist">LAST: ${last}</span>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                 <input type="number" placeholder="Lbs" id="w-${idx}">
                 <input type="number" placeholder="Reps" id="r-${idx}">
             </div>
@@ -283,68 +270,103 @@ function renderExs() {
     });
 }
 
-function promptAddEx() {
-    openModal("Add Exercise", "e.g. Incline Bench", (val) => {
+// Render the Library (Bottom)
+function renderShelf() {
+    const area = document.getElementById('tile-area');
+    area.innerHTML = "";
+    const list = myLibrary[currentFolder] || [];
+    
+    // Add New Button
+    area.innerHTML += `<div class="tile tile-add" onclick="promptNewEx()">+ NEW</div>`;
+    
+    list.forEach(ex => {
+        area.innerHTML += `<div class="tile" onclick="addToCart('${ex}')">${ex}</div>`;
+    });
+}
+
+function addToCart(exName) {
+    activeCart.push(exName);
+    renderCart();
+}
+
+function removeFromCart(idx) {
+    activeCart.splice(idx, 1);
+    renderCart();
+}
+
+function promptNewEx() {
+    openModal("New Exercise", "e.g. Incline Bench", (val) => {
         if(val) {
-            if(!myExs[activeDay]) myExs[activeDay] = [];
-            myExs[activeDay].push(val);
-            saveData(); renderExs();
+            if(!myLibrary[currentFolder]) myLibrary[currentFolder] = [];
+            if(!myLibrary[currentFolder].includes(val)) {
+                myLibrary[currentFolder].push(val);
+                saveData();
+                renderShelf();
+                addToCart(val); // Auto add to cart
+            }
         }
     });
 }
 
-function moveEx(idx, dir) {
-    const list = myExs[activeDay];
-    const newIdx = idx + dir;
-    if(newIdx >= 0 && newIdx < list.length) {
-        // Swap
-        [list[idx], list[newIdx]] = [list[newIdx], list[idx]];
-        saveData(); renderExs();
-    }
-}
-
-function delEx(idx) {
-    if(confirm("Remove exercise?")) {
-        myExs[activeDay].splice(idx, 1);
-        saveData(); renderExs();
-    }
-}
-
 function finishSession() {
-    const list = myExs[activeDay] || [];
-    let savedCount = 0;
-    list.forEach((ex, idx) => {
+    let count = 0;
+    activeCart.forEach((ex, idx) => {
         const w = document.getElementById(`w-${idx}`).value;
         const r = document.getElementById(`r-${idx}`).value;
         if(w && r) {
             history[ex] = `${w} lbs x ${r}`;
-            savedCount++;
+            count++;
         }
     });
     localStorage.setItem('liftHistory', JSON.stringify(history));
-    alert(savedCount > 0 ? "Log Saved!" : "Session closed.");
+    alert(count > 0 ? "Log Saved!" : "Nothing logged.");
     closeSession();
 }
 
+// --- FOLDER MGMT ---
+function promptAddDay() {
+    openModal("New Folder", "e.g. Chest Day", (val) => {
+        if(val && !myDays.includes(val)) { myDays.push(val); saveData(); renderDays(); }
+    });
+}
+function renameFolder(old) {
+    openModal("Rename", old, (val) => {
+        if(val && val !== old) {
+            const idx = myDays.indexOf(old);
+            if(idx !== -1) myDays[idx] = val;
+            if(myLibrary[old]) { myLibrary[val] = myLibrary[old]; delete myLibrary[old]; }
+            saveData(); renderDays();
+        }
+    });
+}
+function delFolder(name) {
+    if(confirm("Delete folder?")) {
+        myDays = myDays.filter(d => d !== name);
+        delete myLibrary[name];
+        saveData(); renderDays();
+    }
+}
+function hidePresets() {
+    document.getElementById('preset-area').style.display = 'none';
+    localStorage.setItem('hidePresets', 'true');
+}
+function loadPreset(t) {
+    let a=[]; if(t=='PPL')a=['Push','Pull','Legs']; if(t=='UL')a=['Upper','Lower'];
+    a.forEach(d=>{if(!myDays.includes(d))myDays.push(d)}); saveData(); renderDays();
+}
 function saveData() {
     localStorage.setItem('myDays', JSON.stringify(myDays));
-    localStorage.setItem('myExs', JSON.stringify(myExs));
+    localStorage.setItem('myLibrary', JSON.stringify(myLibrary));
 }
 
 // --- MODAL ---
-function openModal(title, place, callback) {
-    const m = document.getElementById('modal-overlay');
-    const inp = document.getElementById('modal-input');
-    const btn = document.getElementById('modal-ok');
-    document.getElementById('modal-title').innerText = title;
-    inp.value = ""; inp.placeholder = place;
-    m.style.display = 'flex'; inp.focus();
-    
-    let newBtn = btn.cloneNode(true);
-    btn.parentNode.replaceChild(newBtn, btn);
-    newBtn.addEventListener('click', () => { m.style.display = 'none'; callback(inp.value); });
+function openModal(t, p, cb) {
+    const m=document.getElementById('modal-overlay'), i=document.getElementById('modal-input'), b=document.getElementById('modal-ok');
+    document.getElementById('modal-title').innerText=t; i.value=""; i.placeholder=p; m.style.display='flex'; i.focus();
+    let n=b.cloneNode(true); b.parentNode.replaceChild(n,b);
+    n.addEventListener('click',()=>{m.style.display='none';cb(i.value)});
 }
-function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+function closeModal(){document.getElementById('modal-overlay').style.display='none'}
 
 // --- TOOLS ---
 let timer;
@@ -358,7 +380,7 @@ function calcPlates() {
 }
 function nuke() { if(confirm("DELETE ALL DATA?")) { localStorage.clear(); location.reload(); } }
 
-// --- ENGINE ---
+// --- ENGINE (WITH WARMUP) ---
 function genProgram() {
     const w = parseFloat(document.getElementById('w').value); const r = parseFloat(document.getElementById('r').value); if(!w || !r) return;
     const rnd=n=>Math.round(n/5)*5; const max=rnd(w*(1+(0.033*r))); const rm5=rnd(max*0.87); const rm3=rnd(max*0.93);
@@ -367,8 +389,23 @@ function genProgram() {
     weeks.forEach(wk=>{ let m=rnd(wk.b*wk.m), wL=rnd(m*(wk.w||.85)), f=rnd(m*(wk.f||.95)); if(wk.n===4)wL=rnd(m*.8); html+=`<div class="week"><div class="week-head"><span>Week ${wk.n}</span><span style="color:#ff4757">${wk.t}</span></div>${row(wk.n, 'Mon', m, 'tag-h', 'H', wk.r)} ${row(wk.n, 'Wed', wL, 'tag-l', 'L', wk.r)} ${row(wk.n, 'Fri', f, 'tag-m', 'M', wk.r)}</div>`; });
     document.getElementById('schedule-area').innerHTML = html;
 }
-function row(wk, d, l, c, t, r) { const id = `w${wk}-${d}`; const done = localStorage.getItem(id) ? 'completed' : ''; return `<div class="day-row ${done}" id="row-${id}" onclick="tog('${id}')"><div style="display:flex;align-items:center"><span class="chk"></span><b>${d}</b></div><div><b>${l}x${r}</b><span class="tag ${c}">${t}</span></div></div>`; }
-function tog(id) { const el = document.getElementById('row-'+id); if(el.classList.contains('completed')) { el.classList.remove('completed'); localStorage.removeItem(id); } else { el.classList.add('completed'); localStorage.setItem(id,'1'); } }
+function row(wk, d, l, c, t, r) { 
+    const id = `w${wk}-${d}`; const done = localStorage.getItem(id) ? 'completed' : ''; 
+    // Warmup math
+    const w1=45, w2=Math.round((l*0.5)/5)*5, w3=Math.round((l*0.7)/5)*5, w4=Math.round((l*0.9)/5)*5;
+    return `<div class="${done}" id="row-${id}">
+      <div class="day-row" onclick="togW('${id}')"><div style="display:flex;align-items:center"><span class="chk" onclick="tog('${id}', event)"></span><b>${d}</b></div><div><b>${l}x${r}</b><span class="tag ${c}">${t}</span></div></div>
+      <div id="wu-${id}" class="warmup-box">
+         <span class="wu-title">Warm-up Sets (Do First)</span>
+         <div class="wu-row"><span>1. Empty Bar</span><span>10 x 45</span></div>
+         <div class="wu-row"><span>2. 50%</span><span>5 x ${w2}</span></div>
+         <div class="wu-row"><span>3. 70%</span><span>3 x ${w3}</span></div>
+         <div class="wu-row"><span>4. 90% (Primer)</span><span>1 x ${w4}</span></div>
+      </div>
+    </div>`; 
+}
+function tog(id, e) { e.stopPropagation(); const el = document.getElementById('row-'+id); if(el.classList.contains('completed')) { el.classList.remove('completed'); localStorage.removeItem(id); } else { el.classList.add('completed'); localStorage.setItem(id,'1'); } }
+function togW(id) { const w = document.getElementById('wu-'+id); w.style.display = w.style.display === 'block' ? 'none' : 'block'; }
 </script>
 </body>
 </html>
