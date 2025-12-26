@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>IronPath Pro</title>
+<title>IronPath Sandbox</title>
 <style>
   /* --- 1. CORE VARIABLES --- */
   :root { --bg: #0f0f13; --card: #1a1a24; --text: #ffffff; --accent: #ff4757; --success: #2ed573; --dim: #888; }
@@ -12,11 +12,12 @@
   
   /* --- 2. UTILS --- */
   .hidden { display: none !important; }
-  .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 14px; margin-top: 10px; transition: 0.1s; }
+  .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 13px; margin-top: 10px; transition: 0.1s; }
   .btn:active { transform: scale(0.98); }
   .btn-main { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; }
   .btn-sec { background: #333; color: white; border: 1px solid #444; }
-  .btn-danger { background: #2a1a1a; color: #ff4757; border: 1px solid #522; font-size: 12px; padding: 10px; }
+  .btn-danger { background: #2a1a1a; color: #ff4757; border: 1px solid #522; font-size: 11px; padding: 10px; }
+  
   h1 { text-align: center; margin: 25px 0 5px; font-size: 26px; letter-spacing: -1px; }
   .sub { text-align: center; color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; }
   input { background: #121212; border: 1px solid #333; color: white; padding: 14px; border-radius: 10px; width: 100%; font-size: 16px; margin-bottom: 10px; }
@@ -37,20 +38,27 @@
   .completed .chk { background: var(--success); border-color: var(--success); }
 
   /* --- 5. LOG STYLES --- */
-  .split-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #222; padding: 15px; border-radius: 12px; border: 1px solid #333; }
-  .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 18px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #333; cursor: pointer; }
-  .day-card:active { border-color: var(--accent); }
+  /* Split List */
+  .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #333; }
+  .day-info { flex-grow: 1; cursor: pointer; }
+  .day-actions { display: flex; gap: 8px; }
+  .icon-btn { background: #222; border: 1px solid #444; color: #ccc; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
   
+  /* Exercise List */
   .ex-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; position: relative; }
-  .ex-head { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; font-size: 16px; padding-right: 25px; }
-  .del-btn { position: absolute; top: 15px; right: 15px; color: #555; background: none; border: none; font-size: 16px; padding: 0; margin: 0; width: auto; cursor: pointer; }
-  .del-btn:active { color: red; }
+  .ex-top-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .ex-title { font-weight: bold; font-size: 16px; width: 70%; }
+  
+  .ex-controls { display: flex; gap: 5px; }
+  .move-btn { background: #222; border: 1px solid #444; color: #aaa; width: 28px; height: 28px; border-radius: 5px; cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+  .del-btn { background: #3a1a1a; border: 1px solid #522; color: #ff4757; width: 28px; height: 28px; border-radius: 5px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+
   .hist-text { font-size: 11px; color: var(--success); margin-bottom: 10px; display: block; font-weight: bold; }
   .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-  /* --- 6. CUSTOM MODAL (NO GOOGLE POPUPS) --- */
+  /* --- 6. MODAL SYSTEM --- */
   #modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
-  .modal-box { background: #1e1e1e; padding: 25px; border-radius: 15px; width: 85%; max-width: 350px; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: translateY(0); transition: 0.2s; }
+  .modal-box { background: #1e1e1e; padding: 25px; border-radius: 15px; width: 85%; max-width: 350px; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
   .modal-title { margin-top: 0; color: white; font-size: 18px; }
   
   /* --- 7. TOOLS & NAV --- */
@@ -92,24 +100,25 @@
 
 <div id="view-log" class="view hidden">
   <h1>TRAINING LOG</h1>
-  <p class="sub">CUSTOM BUILDER</p>
+  <p class="sub">SANDBOX MODE</p>
 
   <div id="split-manager">
       <div id="my-split-list"></div>
-      <button class="btn btn-sec" style="border-style:dashed; color:#888;" onclick="promptAddDay()">+ ADD FOLDER (e.g. 'Push')</button>
+      
+      <button class="btn btn-sec" style="border-style:dashed; color:#888;" onclick="promptAddDay()">+ CREATE NEW FOLDER</button>
       
       <div style="margin-top:40px; border-top:1px solid #333; padding-top:20px;">
-        <p style="text-align:center; color:#555; font-size:12px;">PRESETS (ADDS FOLDERS ONLY)</p>
+        <p style="text-align:center; color:#555; font-size:12px;">OPTIONAL PRESETS</p>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-           <button class="btn btn-sec" style="margin:0; font-size:11px;" onclick="loadPreset('PPL')">LOAD PPL</button>
-           <button class="btn btn-sec" style="margin:0; font-size:11px;" onclick="loadPreset('UL')">LOAD UPPER/LOWER</button>
+           <button class="btn btn-sec" style="margin:0; font-size:10px;" onclick="loadPreset('PPL')">LOAD PPL</button>
+           <button class="btn btn-sec" style="margin:0; font-size:10px;" onclick="loadPreset('UL')">LOAD UPPER/LOWER</button>
         </div>
       </div>
   </div>
 
   <div id="session-logger" class="hidden">
       <div style="display:flex; align-items:center; margin-bottom:15px;">
-        <button class="btn btn-sec" onclick="closeSession()" style="width:auto; margin:0; padding:10px 15px;">←</button>
+        <button class="btn btn-sec" onclick="closeSession()" style="width:auto; margin:0; padding:10px 15px;">← BACK</button>
         <h2 id="session-title" style="margin:0 0 0 15px; color:var(--accent); font-size:20px;"></h2>
       </div>
       
@@ -152,14 +161,13 @@
 
 <script>
 // --- STATE MANAGEMENT ---
-let myDays = JSON.parse(localStorage.getItem('myDays') || '[]'); // ["Push", "Pull"]
-let myExs = JSON.parse(localStorage.getItem('myExs') || '{}');   // { "Push": ["Bench"] }
+let myDays = JSON.parse(localStorage.getItem('myDays') || '[]'); 
+let myExs = JSON.parse(localStorage.getItem('myExs') || '{}');
 let history = JSON.parse(localStorage.getItem('liftHistory') || '{}');
 
-// --- INIT ---
 renderDays();
 
-// --- TABS ---
+// --- NAVIGATION ---
 function switchTab(id, btn) {
     document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
     document.getElementById('view-'+id).classList.remove('hidden');
@@ -171,36 +179,64 @@ function switchTab(id, btn) {
 function renderDays() {
     const list = document.getElementById('my-split-list');
     list.innerHTML = "";
-    if(myDays.length === 0) list.innerHTML = "<div style='text-align:center; color:#555; margin:30px 0;'>No folders yet.<br>Create one or load a preset.</div>";
+    if(myDays.length === 0) list.innerHTML = "<div style='text-align:center; color:#555; margin:30px 0;'>No folders created.</div>";
     
     myDays.forEach((day, idx) => {
+        const count = (myExs[day]||[]).length;
         list.innerHTML += `
-        <div class="day-card" onclick="openSession('${day}')">
-            <b>${day}</b>
-            <span style="font-size:12px; color:#666;">${(myExs[day]||[]).length} Exercises ▶</span>
+        <div class="day-card">
+            <div class="day-info" onclick="openSession('${day}')">
+                <b>${day}</b><br>
+                <span style="font-size:11px; color:#666;">${count} Exercises</span>
+            </div>
+            <div class="day-actions">
+                <button class="icon-btn" onclick="renameFolder('${day}')">✎</button>
+                <button class="icon-btn" style="color:#ff4757; border-color:#522;" onclick="delFolder('${day}')">✕</button>
+            </div>
         </div>`;
     });
 }
 
 function promptAddDay() {
-    openModal("Name your Folder", "e.g. Chest Day", (val) => {
+    openModal("New Folder Name", "e.g. Chest Day", (val) => {
         if(val && !myDays.includes(val)) {
-            myDays.push(val);
-            saveData();
-            renderDays();
+            myDays.push(val); saveData(); renderDays();
         }
     });
 }
 
+function renameFolder(oldName) {
+    openModal("Rename " + oldName, oldName, (newName) => {
+        if(newName && newName !== oldName) {
+            // Update array
+            const idx = myDays.indexOf(oldName);
+            if(idx !== -1) myDays[idx] = newName;
+            
+            // Move exercises to new key
+            if(myExs[oldName]) {
+                myExs[newName] = myExs[oldName];
+                delete myExs[oldName];
+            }
+            saveData(); renderDays();
+        }
+    });
+}
+
+function delFolder(name) {
+    if(confirm("Delete folder '" + name + "'?")) {
+        const idx = myDays.indexOf(name);
+        if(idx > -1) myDays.splice(idx, 1);
+        delete myExs[name];
+        saveData(); renderDays();
+    }
+}
+
 function loadPreset(type) {
-    if(myDays.length > 0 && !confirm("This will add folders to your list. Continue?")) return;
     let add = [];
     if(type === 'PPL') add = ["Push", "Pull", "Legs"];
     if(type === 'UL') add = ["Upper", "Lower"];
-    
     add.forEach(d => { if(!myDays.includes(d)) myDays.push(d); });
-    saveData();
-    renderDays();
+    saveData(); renderDays();
 }
 
 // --- LOG: EXERCISE SYSTEM ---
@@ -224,15 +260,19 @@ function renderExs() {
     con.innerHTML = "";
     const list = myExs[activeDay] || [];
     
-    if(list.length === 0) con.innerHTML = "<div style='text-align:center; color:#555; padding:20px;'>Empty folder.<br>Add an exercise to start.</div>";
+    if(list.length === 0) con.innerHTML = "<div style='text-align:center; color:#555; padding:20px;'>Empty folder.</div>";
 
     list.forEach((ex, idx) => {
         const last = history[ex] || "No history";
         con.innerHTML += `
         <div class="ex-card">
-            <div class="ex-head">
-                <span>${ex}</span>
-                <button class="del-btn" onclick="delEx(${idx})">✕</button>
+            <div class="ex-top-row">
+                <div class="ex-title">${ex}</div>
+                <div class="ex-controls">
+                    <button class="move-btn" onclick="moveEx(${idx}, -1)">▲</button>
+                    <button class="move-btn" onclick="moveEx(${idx}, 1)">▼</button>
+                    <button class="del-btn" onclick="delEx(${idx})">✕</button>
+                </div>
             </div>
             <span class="hist-text">LAST: ${last}</span>
             <div class="input-group">
@@ -244,21 +284,29 @@ function renderExs() {
 }
 
 function promptAddEx() {
-    openModal("Add Exercise", "e.g. Bench Press", (val) => {
+    openModal("Add Exercise", "e.g. Incline Bench", (val) => {
         if(val) {
             if(!myExs[activeDay]) myExs[activeDay] = [];
             myExs[activeDay].push(val);
-            saveData();
-            renderExs();
+            saveData(); renderExs();
         }
     });
 }
 
+function moveEx(idx, dir) {
+    const list = myExs[activeDay];
+    const newIdx = idx + dir;
+    if(newIdx >= 0 && newIdx < list.length) {
+        // Swap
+        [list[idx], list[newIdx]] = [list[newIdx], list[idx]];
+        saveData(); renderExs();
+    }
+}
+
 function delEx(idx) {
-    if(confirm("Remove this exercise?")) {
+    if(confirm("Remove exercise?")) {
         myExs[activeDay].splice(idx, 1);
-        saveData();
-        renderExs();
+        saveData(); renderExs();
     }
 }
 
@@ -274,7 +322,7 @@ function finishSession() {
         }
     });
     localStorage.setItem('liftHistory', JSON.stringify(history));
-    alert(savedCount > 0 ? "Log Saved!" : "Session closed (Nothing logged).");
+    alert(savedCount > 0 ? "Log Saved!" : "Session closed.");
     closeSession();
 }
 
@@ -283,26 +331,18 @@ function saveData() {
     localStorage.setItem('myExs', JSON.stringify(myExs));
 }
 
-// --- MODAL SYSTEM ---
+// --- MODAL ---
 function openModal(title, place, callback) {
     const m = document.getElementById('modal-overlay');
     const inp = document.getElementById('modal-input');
     const btn = document.getElementById('modal-ok');
-    
     document.getElementById('modal-title').innerText = title;
-    inp.value = "";
-    inp.placeholder = place;
-    m.style.display = 'flex';
-    inp.focus();
+    inp.value = ""; inp.placeholder = place;
+    m.style.display = 'flex'; inp.focus();
     
-    // Clear old listeners
     let newBtn = btn.cloneNode(true);
     btn.parentNode.replaceChild(newBtn, btn);
-    
-    newBtn.addEventListener('click', () => {
-        m.style.display = 'none';
-        callback(inp.value);
-    });
+    newBtn.addEventListener('click', () => { m.style.display = 'none'; callback(inp.value); });
 }
 function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
 
