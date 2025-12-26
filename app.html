@@ -5,12 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>IronPath V3</title>
 <style>
-  /* --- 1. RESET & VARIABLES --- */
   :root { --bg: #0f0f13; --card: #1a1a24; --text: #ffffff; --accent: #ff4757; --success: #2ed573; --dim: #888; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; padding: 0; background-color: var(--bg); color: var(--text); font-family: -apple-system, system-ui, sans-serif; overflow-x: hidden; padding-bottom: 80px; }
-
-  /* --- 2. UTILITY CLASSES --- */
   .hidden { display: none !important; }
   .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 14px; margin-top: 10px; }
   .btn-main { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; }
@@ -18,13 +15,8 @@
   h1 { text-align: center; margin: 20px 0 5px; font-size: 24px; letter-spacing: -1px; }
   .sub { text-align: center; color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
   input { background: #121212; border: 1px solid #333; color: white; padding: 12px; border-radius: 8px; width: 100%; font-size: 16px; margin-bottom: 10px; }
-  input:focus { outline:none; border-color: var(--accent); }
-
-  /* --- 3. LAYOUT --- */
   .view { padding: 20px; max-width: 600px; margin: 0 auto; animation: fade 0.3s; }
   @keyframes fade { from{opacity:0; transform:translateY(5px)} to{opacity:1; transform:translateY(0)} }
-
-  /* --- 4. PROGRAM STYLES --- */
   .week { background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; overflow: hidden; }
   .week-head { display: flex; justify-content: space-between; padding: 15px; background: #222; border-bottom: 1px solid #333; font-weight: bold; }
   .day-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #222; align-items: center; }
@@ -33,10 +25,7 @@
   .completed { text-decoration: line-through; opacity: 0.5; color: var(--success); }
   .chk { width: 20px; height: 20px; border: 2px solid #555; border-radius: 50%; margin-right: 10px; display: inline-block; }
   .completed .chk { background: var(--success); border-color: var(--success); }
-
-  /* --- 5. LOG STYLES --- */
   .split-card { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #333; text-align: center; cursor: pointer; transition: 0.2s; }
-  .split-card:active { transform: scale(0.98); border-color: var(--accent); }
   .split-title { font-size: 18px; font-weight: bold; margin-bottom: 5px; color: white; }
   .split-desc { font-size: 12px; color: var(--dim); }
   .workout-day { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #333; cursor: pointer; }
@@ -44,14 +33,9 @@
   .ex-head { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; font-size: 15px; }
   .hist-text { font-size: 11px; color: var(--success); margin-bottom: 8px; display: block; font-weight: bold; }
   .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  
-  /* --- 6. TOOLS STYLES --- */
   .tool-box { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; text-align: center; }
   .timer-display { font-size: 40px; font-weight: 900; margin: 15px 0; font-variant-numeric: tabular-nums; }
-  .plate-row { display: flex; justify-content: center; gap: 5px; flex-wrap: wrap; margin-top: 10px; }
   .plate { padding: 5px 10px; border-radius: 4px; color: black; font-weight: bold; font-size: 11px; }
-
-  /* --- 7. BOTTOM NAV --- */
   .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: #181818; border-top: 1px solid #333; display: grid; grid-template-columns: 1fr 1fr 1fr; z-index: 1000; padding-bottom: 15px; }
   .nav-btn { background: none; border: none; color: #666; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
   .nav-btn.active { color: var(--accent); }
@@ -130,7 +114,6 @@
 </div>
 
 <script>
-// --- DATA & STATE ---
 const SPLITS = {
     "PPL": {"PUSH":["Bench Press","Overhead Press","Incline Dumbbell","Lateral Raise","Tricep Pushdown"],"PULL":["Deadlift","Pullups","Barbell Row","Face Pulls","Bicep Curl"],"LEGS":["Squat","RDL","Leg Press","Leg Curl","Calf Raise"]},
     "UL": {"UPPER":["Bench Press","Barbell Row","Overhead Press","Pullups","Curls"],"LOWER":["Squat","RDL","Lunges","Leg Extension","Calf Raise"]},
@@ -143,15 +126,12 @@ let history = JSON.parse(localStorage.getItem('liftHistory') || '{}');
 
 if(currentSplit) showDays(currentSplit);
 
-// --- TABS ---
 function switchTab(id, btn) {
     document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
     document.getElementById('view-'+id).classList.remove('hidden');
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 }
-
-// --- LOGGING ---
 function setSplit(name) { currentSplit = name; localStorage.setItem('userSplit', name); showDays(name); }
 function resetSplit() { if(confirm("Change Split?")) { currentSplit = null; localStorage.removeItem('userSplit'); document.getElementById('split-selector').classList.remove('hidden'); document.getElementById('day-selector').classList.add('hidden'); } }
 function showDays(name) {
@@ -185,8 +165,6 @@ function finishSession() {
     list.forEach(ex => { const w = document.getElementById('w-'+ex).value; const r = document.getElementById('r-'+ex).value; if(w && r) history[ex] = `${w} lbs x ${r}`; });
     localStorage.setItem('liftHistory', JSON.stringify(history)); alert("Saved!"); closeSession();
 }
-
-// --- TOOLS ---
 let timer;
 function startTimer(s) { clearInterval(timer); const end = Date.now() + s*1000; disp(s); timer = setInterval(()=>{const r=Math.round((end-Date.now())/1000); if(r<0){clearInterval(timer);document.getElementById('t-disp').innerText="DONE";return;} disp(r);},1000); }
 function disp(s){const m=Math.floor(s/60);const r=s%60;document.getElementById('t-disp').innerText=`${m}:${r<10?'0':''}${r}`;}
@@ -198,8 +176,6 @@ function calcPlates() {
 }
 function nuke() { if(confirm("DELETE EVERYTHING?")) { localStorage.clear(); location.reload(); } }
 function exportData() { navigator.clipboard.writeText(JSON.stringify(history)); alert("History copied to clipboard!"); }
-
-// --- ENGINE ---
 function genProgram() {
     const w = parseFloat(document.getElementById('w').value); const r = parseFloat(document.getElementById('r').value); if(!w || !r) return;
     const rnd=n=>Math.round(n/5)*5; const max=rnd(w*(1+(0.033*r))); const rm5=rnd(max*0.87); const rm3=rnd(max*0.93);
