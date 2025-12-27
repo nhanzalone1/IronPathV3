@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>IronPath V6</title>
+<title>IronPath V7</title>
 <style>
   /* --- 1. VARIABLES & RESET --- */
   :root { --bg: #0f0f13; --card: #1a1a24; --text: #ffffff; --accent: #ff4757; --success: #2ed573; --dim: #888; --input-bg: #121212; }
@@ -78,10 +78,15 @@
   .tile:active { background: var(--accent); color: black; border-color: var(--accent); }
   .tile-add { border-style: dashed; color: #666; }
 
-  /* --- 6. MODAL --- */
-  #modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+  /* --- 6. MODALS & TOASTS --- */
+  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
   .modal-box { background: #1e1e1e; padding: 25px; border-radius: 15px; width: 85%; max-width: 350px; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-  .modal-title { margin-top: 0; color: white; font-size: 18px; }
+  .modal-title { margin-top: 0; color: white; font-size: 18px; margin-bottom: 10px; }
+  .modal-desc { color: #888; font-size: 13px; margin-bottom: 20px; }
+  
+  #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #222; border: 1px solid #333; color: white; padding: 12px 24px; border-radius: 30px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: 0.3s; z-index: 3000; }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
+  .toast-icon { color: var(--success); }
 
   /* --- 7. TOOLS & NAV --- */
   .tool-box { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333; text-align: center; }
@@ -96,16 +101,29 @@
 </head>
 <body>
 
-<div id="modal-overlay">
+<div id="modal-input-overlay" class="modal-overlay">
   <div class="modal-box">
     <h3 id="modal-title" class="modal-title">Input</h3>
     <input type="text" id="modal-input" placeholder="...">
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;">
-      <button class="btn btn-sec" onclick="closeModal()" style="margin:0">CANCEL</button>
+      <button class="btn btn-sec" onclick="closeInputModal()" style="margin:0">CANCEL</button>
       <button class="btn btn-main" id="modal-ok" style="margin:0">SAVE</button>
     </div>
   </div>
 </div>
+
+<div id="modal-confirm-overlay" class="modal-overlay">
+  <div class="modal-box">
+    <h3 class="modal-title">Confirm</h3>
+    <p id="confirm-desc" class="modal-desc">Are you sure?</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+      <button class="btn btn-sec" onclick="closeConfirmModal()" style="margin:0">CANCEL</button>
+      <button class="btn btn-main" id="confirm-ok" style="margin:0; background: #333; border: 1px solid #555;">YES</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><span class="toast-icon">✓</span> <span id="toast-msg">Saved</span></div>
 
 <div id="view-program" class="view">
   <h1>IRONPATH</h1>
@@ -206,8 +224,8 @@ let myDays = JSON.parse(localStorage.getItem('myDays') || '[]');
 let myLibrary = JSON.parse(localStorage.getItem('myLibrary') || '{}'); 
 let activeCart = JSON.parse(localStorage.getItem('activeCart') || '[]'); 
 let sessionData = JSON.parse(localStorage.getItem('sessionData') || '{}'); 
-let history = JSON.parse(localStorage.getItem('liftHistory') || '{}'); // Summary
-let globalLog = JSON.parse(localStorage.getItem('globalLog') || '[]'); // Full Log
+let history = JSON.parse(localStorage.getItem('liftHistory') || '{}'); 
+let globalLog = JSON.parse(localStorage.getItem('globalLog') || '[]'); 
 let showPresets = localStorage.getItem('hidePresets') !== 'true';
 
 // --- INIT ---
@@ -261,12 +279,13 @@ function closeSession() {
 }
 
 function clearCart() {
-    if(confirm("Start Fresh? Clears current workout.")) {
+    showConfirm("Start fresh? This clears the current workout.", () => {
         activeCart = [];
         sessionData = {};
         saveSession();
         renderCart();
-    }
+        showToast("Session Cleared");
+    });
 }
 
 function renderCart() {
@@ -307,7 +326,7 @@ function renderCart() {
         <div class="ex-card">
             <div class="ex-top">
                 <span class="ex-name">${ex}</span>
-                <button onclick="removeExFromCart('${ex}')" style="background:none; border:none; color:#555; cursor:pointer;">REMOVE EXERCISE</button>
+                <button onclick="removeExFromCart('${ex}')" style="background:none; border:none; color:#555; cursor:pointer;">REMOVE</button>
             </div>
             <div class="ex-hist-line">
                 <span class="ex-hist">BEST: ${last}</span>
@@ -375,7 +394,7 @@ function saveSession() {
 }
 
 function promptNewEx() {
-    openModal("New Exercise", "e.g. Incline Bench", (val) => {
+    openInputModal("New Exercise", "e.g. Incline Bench", (val) => {
         if(val) {
             if(!myLibrary[currentFolder]) myLibrary[currentFolder] = [];
             if(!myLibrary[currentFolder].includes(val)) {
@@ -387,74 +406,67 @@ function promptNewEx() {
 }
 
 function finishSession() {
-    if(!confirm("Finish Workout & Save History?")) return;
-    
-    let count = 0;
-    const today = new Date().toISOString().split('T')[0];
+    showConfirm("Finish Workout & Save History?", () => {
+        let count = 0;
+        const today = new Date().toISOString().split('T')[0];
 
-    activeCart.forEach(ex => {
-        const sets = sessionData[ex] || [];
-        // 1. Calculate Best for Summary
-        let best1RM = 0;
-        let bestStr = "";
-        
-        sets.forEach(set => {
-            const w = parseFloat(set.w);
-            const r = parseFloat(set.r);
-            if(w && r) {
-                // Save to Summary if best
-                const e1rm = w * (1 + (0.033 * r));
-                if(e1rm > best1RM) {
-                    best1RM = e1rm;
-                    bestStr = `${w} lbs x ${r}`;
+        activeCart.forEach(ex => {
+            const sets = sessionData[ex] || [];
+            let best1RM = 0;
+            let bestStr = "";
+            
+            sets.forEach(set => {
+                const w = parseFloat(set.w);
+                const r = parseFloat(set.r);
+                if(w && r) {
+                    const e1rm = w * (1 + (0.033 * r));
+                    if(e1rm > best1RM) {
+                        best1RM = e1rm;
+                        bestStr = `${w} lbs x ${r}`;
+                    }
+                    globalLog.push({ date: today, ex: ex, w: w, r: r, rm: Math.round(e1rm) });
+                    count++;
                 }
-                // Save to GLOBAL LOG
-                globalLog.push({ date: today, ex: ex, w: w, r: r, rm: Math.round(e1rm) });
-                count++;
-            }
+            });
+            
+            if(bestStr) history[ex] = bestStr;
         });
         
-        if(bestStr) history[ex] = bestStr;
+        localStorage.setItem('liftHistory', JSON.stringify(history));
+        localStorage.setItem('globalLog', JSON.stringify(globalLog));
+        
+        if(count > 0) {
+            activeCart = [];
+            sessionData = {};
+            saveSession();
+            closeSession();
+            showToast("Log Saved!");
+        } else {
+            showToast("Nothing to save.");
+        }
     });
-    
-    localStorage.setItem('liftHistory', JSON.stringify(history));
-    localStorage.setItem('globalLog', JSON.stringify(globalLog));
-    
-    alert(count > 0 ? "Saved! Log updated." : "Nothing valid to save.");
-    
-    // Clear session
-    activeCart = [];
-    sessionData = {};
-    saveSession();
-    closeSession();
 }
 
 // --- CSV EXPORT ---
 function exportCSV() {
-    if(globalLog.length === 0) { alert("No history to export yet!"); return; }
-    
+    if(globalLog.length === 0) { showToast("No history yet"); return; }
     let csvContent = "data:text/csv;charset=utf-8,Date,Exercise,Weight,Reps,Est1RM\n";
-    globalLog.forEach(row => {
-        csvContent += `${row.date},${row.ex},${row.w},${row.r},${row.rm}\n`;
-    });
-    
+    globalLog.forEach(row => { csvContent += `${row.date},${row.ex},${row.w},${row.r},${row.rm}\n`; });
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
     link.setAttribute("download", "ironpath_data.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
 
 // --- FOLDER MGMT ---
 function promptAddDay() {
-    openModal("New Folder", "e.g. Chest Day", (val) => {
+    openInputModal("New Folder", "e.g. Chest Day", (val) => {
         if(val && !myDays.includes(val)) { myDays.push(val); saveData(); renderDays(); }
     });
 }
 function renameFolder(old) {
-    openModal("Rename", old, (val) => {
+    openInputModal("Rename", old, (val) => {
         if(val && val !== old) {
             const idx = myDays.indexOf(old);
             if(idx !== -1) myDays[idx] = val;
@@ -464,11 +476,12 @@ function renameFolder(old) {
     });
 }
 function delFolder(name) {
-    if(confirm("Delete folder?")) {
+    showConfirm("Delete folder?", () => {
         myDays = myDays.filter(d => d !== name);
         delete myLibrary[name];
         saveData(); renderDays();
-    }
+        showToast("Folder Deleted");
+    });
 }
 function hidePresets() {
     document.getElementById('preset-area').style.display = 'none';
@@ -477,20 +490,38 @@ function hidePresets() {
 function loadPreset(t) {
     let a=[]; if(t=='PPL')a=['Push','Pull','Legs']; if(t=='UL')a=['Upper','Lower'];
     a.forEach(d=>{if(!myDays.includes(d))myDays.push(d)}); saveData(); renderDays();
+    showToast("Preset Loaded");
 }
 function saveData() {
     localStorage.setItem('myDays', JSON.stringify(myDays));
     localStorage.setItem('myLibrary', JSON.stringify(myLibrary));
 }
 
-// --- MODAL ---
-function openModal(t, p, cb) {
-    const m=document.getElementById('modal-overlay'), i=document.getElementById('modal-input'), b=document.getElementById('modal-ok');
+// --- UI HELPERS (TOAST & MODALS) ---
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').innerText = msg;
+    t.classList.add('show');
+    setTimeout(() => { t.classList.remove('show'); }, 3000);
+}
+
+function openInputModal(t, p, cb) {
+    const m=document.getElementById('modal-input-overlay'), i=document.getElementById('modal-input'), b=document.getElementById('modal-ok');
     document.getElementById('modal-title').innerText=t; i.value=""; i.placeholder=p; m.style.display='flex'; i.focus();
     let n=b.cloneNode(true); b.parentNode.replaceChild(n,b);
     n.addEventListener('click',()=>{m.style.display='none';cb(i.value)});
 }
-function closeModal(){document.getElementById('modal-overlay').style.display='none'}
+function closeInputModal(){document.getElementById('modal-input-overlay').style.display='none'}
+
+function showConfirm(msg, cb) {
+    const m = document.getElementById('modal-confirm-overlay');
+    const b = document.getElementById('confirm-ok');
+    document.getElementById('confirm-desc').innerText = msg;
+    m.style.display = 'flex';
+    let n = b.cloneNode(true); b.parentNode.replaceChild(n,b);
+    n.addEventListener('click', () => { m.style.display = 'none'; cb(); });
+}
+function closeConfirmModal(){document.getElementById('modal-confirm-overlay').style.display='none'}
 
 // --- TOOLS ---
 let timer;
@@ -502,9 +533,13 @@ function calcPlates() {
     let r=(w-45)/2, h=""; [45,35,25,10,5,2.5].forEach(s=>{while(r>=s){ let c="#eee";if(s==45)c="#45aaf2";if(s==25)c="#2ed573"; h+=`<span class="plate" style="background:${c}">${s}</span> `;r-=s; }});
     div.innerHTML = h + `<div style='margin-top:10px; color:#2ed573; font-weight:bold'>Load ${(w-45)/2}/side</div>`;
 }
-function nuke() { if(confirm("DELETE ALL DATA?")) { localStorage.clear(); location.reload(); } }
+function nuke() { 
+    showConfirm("DELETE ALL DATA? This cannot be undone.", () => {
+        localStorage.clear(); location.reload();
+    });
+}
 
-// --- ENGINE (WITH WARMUP ARROW) ---
+// --- ENGINE ---
 function genProgram() {
     const w = parseFloat(document.getElementById('w').value); const r = parseFloat(document.getElementById('r').value); if(!w || !r) return;
     const rnd=n=>Math.round(n/5)*5; const max=rnd(w*(1+(0.033*r))); const rm5=rnd(max*0.87); const rm3=rnd(max*0.93);
