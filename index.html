@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>IronPath V7</title>
+<title>IronPath V7.1</title>
 <style>
   /* --- 1. VARIABLES & RESET --- */
   :root { --bg: #0f0f13; --card: #1a1a24; --text: #ffffff; --accent: #ff4757; --success: #2ed573; --dim: #888; --input-bg: #121212; }
@@ -539,20 +539,46 @@ function nuke() {
     });
 }
 
-// --- ENGINE ---
+// --- ENGINE (UPDATED FOR SETS) ---
 function genProgram() {
     const w = parseFloat(document.getElementById('w').value); const r = parseFloat(document.getElementById('r').value); if(!w || !r) return;
     const rnd=n=>Math.round(n/5)*5; const max=rnd(w*(1+(0.033*r))); const rm5=rnd(max*0.87); const rm3=rnd(max*0.93);
+    
+    // UPDATED WEEK LOGIC (SETS/REPS)
+    const weeks = [
+        {n:1, t:"BASE",    b:rm5, m:.85,  s:4, r:6},
+        {n:2, t:"LOAD",    b:rm5, m:.9,   s:4, r:6},
+        {n:3, t:"INTENSE", b:rm5, m:.95,  s:4, r:6},
+        {n:4, t:"PEAK",    b:rm5, m:1.05, s:4, r:6},
+        {n:5, t:"UNLOAD",  b:rm5, m:.85,  s:2, r:4, f:.9},
+        {n:6, t:"SPEED",   b:rm3, m:1,    s:3, r:4, w:.75, f:.85},
+        {n:7, t:"FORCE",   b:rm3, m:1,    s:3, r:4, w:.85, f:.9},
+        {n:8, t:"MAX",     b:rm3, m:1,    s:3, r:4, w:.7, f:.85}
+    ];
+
     let html = `<div style="text-align:center; margin-bottom:20px; color:#2ed573; font-weight:bold; border:1px solid #333; padding:10px; border-radius:10px;">EST 1RM: ${max} LBS</div>`;
-    const weeks = [{n:1,t:"BASE",b:rm5,m:.85,r:"5-6"},{n:2,t:"LOAD",b:rm5,m:.9,r:"5-6"},{n:3,t:"INTENSE",b:rm5,m:.95,r:"5-6"},{n:4,t:"PEAK",b:rm5,m:1.05,r:"5-6"},{n:5,t:"UNLOAD",b:rm5,m:.85,r:"2-4",f:.9},{n:6,t:"SPEED",b:rm3,m:1,r:"2-4",w:.75,f:.85},{n:7,t:"FORCE",b:rm3,m:1,r:"2-4",w:.85,f:.9},{n:8,t:"MAX",b:rm3,m:1,r:"2-3",w:.7,f:.85}];
-    weeks.forEach(wk=>{ let m=rnd(wk.b*wk.m), wL=rnd(m*(wk.w||.85)), f=rnd(m*(wk.f||.95)); if(wk.n===4)wL=rnd(m*.8); html+=`<div class="week"><div class="week-head"><span>Week ${wk.n}</span><span style="color:#ff4757">${wk.t}</span></div>${row(wk.n, 'Mon', m, 'tag-h', 'H', wk.r)} ${row(wk.n, 'Wed', wL, 'tag-l', 'L', wk.r)} ${row(wk.n, 'Fri', f, 'tag-m', 'M', wk.r)}</div>`; });
+    
+    weeks.forEach(wk=>{ 
+        let m=rnd(wk.b*wk.m), wL=rnd(m*(wk.w||.85)), f=rnd(m*(wk.f||.95)); 
+        if(wk.n===4) wL=rnd(m*.8); 
+        html+=`<div class="week"><div class="week-head"><span>Week ${wk.n}</span><span style="color:#ff4757">${wk.t}</span></div>
+        ${row(wk.n, 'Mon', m, 'tag-h', 'H', wk.s, wk.r)} 
+        ${row(wk.n, 'Wed', wL, 'tag-l', 'L', wk.s, wk.r)} 
+        ${row(wk.n, 'Fri', f, 'tag-m', 'M', wk.s, wk.r)}</div>`; 
+    });
     document.getElementById('schedule-area').innerHTML = html;
 }
-function row(wk, d, l, c, t, r) { 
+
+function row(wk, d, l, c, t, s, r) { 
     const id = `w${wk}-${d}`; const done = localStorage.getItem(id) ? 'completed' : ''; 
     const w2=Math.round((l*0.5)/5)*5, w3=Math.round((l*0.7)/5)*5, w4=Math.round((l*0.9)/5)*5;
+    
+    // UPDATED DISPLAY STRING: Load lbs SetsxReps
     return `<div class="${done}" id="row-${id}">
-      <div class="day-row" onclick="togW('${id}', this)"><div style="display:flex;align-items:center"><span class="chk" onclick="tog('${id}', event)"></span><b>${d}</b><span class="arrow-icon">▼</span></div><div><b>${l}x${r}</b><span class="tag ${c}">${t}</span></div></div>
+      <div class="day-row" onclick="togW('${id}', this)">
+        <div style="display:flex;align-items:center"><span class="chk" onclick="tog('${id}', event)"></span><b>${d}</b><span class="arrow-icon">▼</span></div>
+        <div><b>${l} lbs ${s}x${r}</b><span class="tag ${c}">${t}</span></div>
+      </div>
       <div id="wu-${id}" class="warmup-box">
          <span class="wu-title">Warm-up Sets</span>
          <div class="wu-row"><span>1. Empty Bar</span><span>10 x 45</span></div>
@@ -562,6 +588,7 @@ function row(wk, d, l, c, t, r) {
       </div>
     </div>`; 
 }
+
 function tog(id, e) { e.stopPropagation(); const el = document.getElementById('row-'+id); if(el.classList.contains('completed')) { el.classList.remove('completed'); localStorage.removeItem(id); } else { el.classList.add('completed'); localStorage.setItem(id,'1'); } }
 function togW(id, el) { const w = document.getElementById('wu-'+id); w.style.display = w.style.display === 'block' ? 'none' : 'block'; el.classList.toggle('open'); }
 </script>
