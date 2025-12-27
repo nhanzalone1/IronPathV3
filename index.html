@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>IronPath V5</title>
+<title>IronPath V6</title>
 <style>
   /* --- 1. VARIABLES & RESET --- */
   :root { --bg: #0f0f13; --card: #1a1a24; --text: #ffffff; --accent: #ff4757; --success: #2ed573; --dim: #888; --input-bg: #121212; }
@@ -46,25 +46,32 @@
   .arrow-icon { color: #666; font-size: 10px; margin-left: 8px; transition: 0.2s; }
   .open .arrow-icon { transform: rotate(180deg); color: var(--accent); }
 
-  /* --- 5. LOG STYLES (MULTI-SET) --- */
+  /* --- 5. LOG STYLES --- */
   .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #333; }
   .icon-btn { background: #222; border: 1px solid #444; color: #ccc; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
   
-  /* ACTIVE CART (Top) */
+  /* ACTIVE CART */
   #active-workout-area { min-height: 100px; margin-bottom: 30px; }
   .ex-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; position: relative; animation: slideIn 0.2s ease; }
   @keyframes slideIn { from{transform:translateX(-10px);opacity:0} to{transform:translateX(0);opacity:1} }
   .ex-top { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
   .ex-name { font-weight: bold; font-size: 16px; }
-  .ex-hist { font-size: 11px; color: var(--success); display: block; margin-bottom: 15px; font-weight: bold; }
+  .ex-hist-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+  .ex-hist { font-size: 11px; color: var(--success); font-weight: bold; }
+  .hist-btn { background: none; border: 1px solid #333; color: #888; border-radius: 4px; padding: 2px 6px; font-size: 12px; cursor: pointer; }
   
+  /* HISTORY INSPECTOR */
+  .history-dropdown { background: #111; margin: 0 -15px 15px -15px; padding: 10px 15px; border-top: 1px solid #333; border-bottom: 1px solid #333; display: none; }
+  .hist-row { display: flex; justify-content: space-between; font-size: 11px; color: #ccc; margin-bottom: 4px; border-bottom: 1px solid #222; padding-bottom: 4px; }
+  .hist-date { color: #666; width: 80px; }
+
   /* SET ROWS */
   .set-row { display: grid; grid-template-columns: 30px 1fr 1fr 30px; gap: 10px; align-items: center; margin-bottom: 8px; }
   .set-num { color: #666; font-size: 12px; font-weight: bold; text-align: center; }
   .del-set { color: #555; background: none; border: none; font-size: 16px; cursor: pointer; }
   .del-set:active { color: red; }
 
-  /* LIBRARY SHELF (Bottom) */
+  /* LIBRARY SHELF */
   .shelf-title { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; border-top: 1px solid #333; padding-top: 20px; }
   .tile-grid { display: flex; flex-wrap: wrap; gap: 8px; }
   .tile { background: #222; border: 1px solid #444; color: #ccc; padding: 8px 12px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500; transition: 0.1s; }
@@ -157,6 +164,13 @@
 <div id="view-tools" class="view hidden">
   <h1>TOOLS</h1>
   <p class="sub">UTILITIES</p>
+  
+  <div class="tool-box">
+      <h3 style="margin:0 0 15px 0; color:var(--accent)">DATA MANAGEMENT</h3>
+      <p style="font-size:11px; color:#888; margin-bottom:15px;">Download your entire set-by-set history for Excel.</p>
+      <button class="btn btn-sec" onclick="exportCSV()">DOWNLOAD HISTORY (.CSV)</button>
+  </div>
+
   <div class="tool-box">
       <h3 style="margin:0 0 15px 0; color:var(--accent)">REST TIMER</h3>
       <div class="timer-display" id="t-disp">00:00</div>
@@ -190,9 +204,10 @@
 // --- STATE ---
 let myDays = JSON.parse(localStorage.getItem('myDays') || '[]'); 
 let myLibrary = JSON.parse(localStorage.getItem('myLibrary') || '{}'); 
-let activeCart = JSON.parse(localStorage.getItem('activeCart') || '[]'); // Persist cart
-let sessionData = JSON.parse(localStorage.getItem('sessionData') || '{}'); // Persist sets
-let history = JSON.parse(localStorage.getItem('liftHistory') || '{}');
+let activeCart = JSON.parse(localStorage.getItem('activeCart') || '[]'); 
+let sessionData = JSON.parse(localStorage.getItem('sessionData') || '{}'); 
+let history = JSON.parse(localStorage.getItem('liftHistory') || '{}'); // Summary
+let globalLog = JSON.parse(localStorage.getItem('globalLog') || '[]'); // Full Log
 let showPresets = localStorage.getItem('hidePresets') !== 'true';
 
 // --- INIT ---
@@ -228,7 +243,7 @@ function renderDays() {
     });
 }
 
-// --- SESSION LOGIC (STICKY CART + MULTI SET) ---
+// --- SESSION LOGIC ---
 let currentFolder = "";
 
 function openSession(day) {
@@ -243,7 +258,6 @@ function openSession(day) {
 function closeSession() {
     document.getElementById('session-logger').classList.add('hidden');
     document.getElementById('split-manager').classList.remove('hidden');
-    // We do NOT clear activeCart here anymore. It's sticky.
 }
 
 function clearCart() {
@@ -278,17 +292,37 @@ function renderCart() {
             </div>`;
         });
 
+        // History list logic
+        const histRows = globalLog.filter(l => l.ex === ex).sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0,5);
+        let histHtml = "";
+        if(histRows.length > 0) {
+            histRows.forEach(h => {
+                histHtml += `<div class="hist-row"><span class="hist-date">${h.date}</span><span>${h.w} x ${h.r}</span></div>`;
+            });
+        } else {
+            histHtml = "<div style='text-align:center; color:#555; font-size:10px;'>No recorded history</div>";
+        }
+
         area.innerHTML += `
         <div class="ex-card">
             <div class="ex-top">
                 <span class="ex-name">${ex}</span>
                 <button onclick="removeExFromCart('${ex}')" style="background:none; border:none; color:#555; cursor:pointer;">REMOVE EXERCISE</button>
             </div>
-            <span class="ex-hist">LAST BEST: ${last}</span>
+            <div class="ex-hist-line">
+                <span class="ex-hist">BEST: ${last}</span>
+                <button class="hist-btn" onclick="toggleHist('${ex}')">🕒 HISTORY</button>
+            </div>
+            <div id="hist-${ex}" class="history-dropdown">${histHtml}</div>
             <div id="sets-${ex}">${setsHtml}</div>
             <button class="btn btn-sec btn-sm" onclick="addSet('${ex}')">+ ADD SET</button>
         </div>`;
     });
+}
+
+function toggleHist(ex) {
+    const el = document.getElementById('hist-'+ex);
+    el.style.display = el.style.display === 'block' ? 'none' : 'block';
 }
 
 function renderShelf() {
@@ -304,7 +338,7 @@ function renderShelf() {
 function addToCart(exName) {
     if(!activeCart.includes(exName)) {
         activeCart.push(exName);
-        if(!sessionData[exName]) sessionData[exName] = [{w:'', r:''}]; // Start with 1 set
+        if(!sessionData[exName]) sessionData[exName] = [{w:'', r:''}]; 
         saveSession();
         renderCart();
     }
@@ -356,9 +390,11 @@ function finishSession() {
     if(!confirm("Finish Workout & Save History?")) return;
     
     let count = 0;
+    const today = new Date().toISOString().split('T')[0];
+
     activeCart.forEach(ex => {
         const sets = sessionData[ex] || [];
-        // Find best set (Estimated 1RM)
+        // 1. Calculate Best for Summary
         let best1RM = 0;
         let bestStr = "";
         
@@ -366,28 +402,49 @@ function finishSession() {
             const w = parseFloat(set.w);
             const r = parseFloat(set.r);
             if(w && r) {
+                // Save to Summary if best
                 const e1rm = w * (1 + (0.033 * r));
                 if(e1rm > best1RM) {
                     best1RM = e1rm;
                     bestStr = `${w} lbs x ${r}`;
                 }
+                // Save to GLOBAL LOG
+                globalLog.push({ date: today, ex: ex, w: w, r: r, rm: Math.round(e1rm) });
+                count++;
             }
         });
         
-        if(bestStr) {
-            history[ex] = bestStr;
-            count++;
-        }
+        if(bestStr) history[ex] = bestStr;
     });
     
     localStorage.setItem('liftHistory', JSON.stringify(history));
-    alert(count > 0 ? "Saved! Great work." : "Nothing valid to save.");
+    localStorage.setItem('globalLog', JSON.stringify(globalLog));
+    
+    alert(count > 0 ? "Saved! Log updated." : "Nothing valid to save.");
     
     // Clear session
     activeCart = [];
     sessionData = {};
     saveSession();
     closeSession();
+}
+
+// --- CSV EXPORT ---
+function exportCSV() {
+    if(globalLog.length === 0) { alert("No history to export yet!"); return; }
+    
+    let csvContent = "data:text/csv;charset=utf-8,Date,Exercise,Weight,Reps,Est1RM\n";
+    globalLog.forEach(row => {
+        csvContent += `${row.date},${row.ex},${row.w},${row.r},${row.rm}\n`;
+    });
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "ironpath_data.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 // --- FOLDER MGMT ---
