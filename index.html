@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>IronPath V4</title>
+<title>IronPath V5</title>
 <style>
   /* --- 1. VARIABLES & RESET --- */
-  :root { --bg: #0f0f13; --card: #1a1a24; --text: #ffffff; --accent: #ff4757; --success: #2ed573; --dim: #888; }
+  :root { --bg: #0f0f13; --card: #1a1a24; --text: #ffffff; --accent: #ff4757; --success: #2ed573; --dim: #888; --input-bg: #121212; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; padding: 0; background-color: var(--bg); color: var(--text); font-family: -apple-system, system-ui, sans-serif; overflow-x: hidden; padding-bottom: 90px; }
 
@@ -17,11 +17,12 @@
   .btn-main { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; }
   .btn-sec { background: #333; color: white; border: 1px solid #444; }
   .btn-danger { background: #2a1a1a; color: #ff4757; border: 1px solid #522; font-size: 11px; padding: 10px; }
-  .btn-ghost { background: transparent; border: 1px dashed #444; color: #666; font-size: 10px; padding: 8px; width: auto; display: inline-block; }
+  .btn-ghost { background: transparent; border: 1px dashed #444; color: #666; font-size: 10px; padding: 6px 10px; width: auto; display: inline-block; cursor: pointer; }
+  .btn-sm { padding: 8px; font-size: 11px; width: auto; display: inline-block; margin: 0; }
 
   h1 { text-align: center; margin: 25px 0 5px; font-size: 26px; letter-spacing: -1px; }
   .sub { text-align: center; color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; }
-  input { background: #121212; border: 1px solid #333; color: white; padding: 14px; border-radius: 10px; width: 100%; font-size: 16px; margin-bottom: 10px; }
+  input { background: var(--input-bg); border: 1px solid #333; color: white; padding: 12px; border-radius: 8px; width: 100%; font-size: 16px; margin-bottom: 5px; }
   input:focus { outline:none; border-color: var(--accent); }
 
   /* --- 3. LAYOUT --- */
@@ -31,7 +32,7 @@
   /* --- 4. PROGRAM STYLES --- */
   .week { background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; overflow: hidden; }
   .week-head { display: flex; justify-content: space-between; padding: 15px; background: #222; border-bottom: 1px solid #333; font-weight: bold; }
-  .day-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #222; align-items: center; }
+  .day-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #222; align-items: center; cursor: pointer; }
   .tag { font-size: 9px; padding: 3px 6px; border-radius: 4px; color: black; font-weight: 800; margin-left: 8px; text-transform: uppercase; }
   .tag-h { background: #ff4757; } .tag-l { background: #2ed573; } .tag-m { background: #ffa502; }
   .chk { width: 22px; height: 22px; border: 2px solid #555; border-radius: 50%; margin-right: 12px; display: inline-block; }
@@ -42,8 +43,10 @@
   .warmup-box { background: #151515; border-top: 1px solid #333; padding: 10px 15px; display: none; }
   .wu-row { display: flex; justify-content: space-between; font-size: 12px; color: #aaa; margin-bottom: 5px; }
   .wu-title { color: #ffa502; font-size: 10px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: block; }
+  .arrow-icon { color: #666; font-size: 10px; margin-left: 8px; transition: 0.2s; }
+  .open .arrow-icon { transform: rotate(180deg); color: var(--accent); }
 
-  /* --- 5. LOG STYLES (SHOPPING CART) --- */
+  /* --- 5. LOG STYLES (MULTI-SET) --- */
   .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #333; }
   .icon-btn { background: #222; border: 1px solid #444; color: #ccc; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
   
@@ -51,10 +54,16 @@
   #active-workout-area { min-height: 100px; margin-bottom: 30px; }
   .ex-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; position: relative; animation: slideIn 0.2s ease; }
   @keyframes slideIn { from{transform:translateX(-10px);opacity:0} to{transform:translateX(0);opacity:1} }
-  .ex-top { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .ex-top { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
   .ex-name { font-weight: bold; font-size: 16px; }
-  .ex-hist { font-size: 11px; color: var(--success); display: block; margin-bottom: 10px; }
+  .ex-hist { font-size: 11px; color: var(--success); display: block; margin-bottom: 15px; font-weight: bold; }
   
+  /* SET ROWS */
+  .set-row { display: grid; grid-template-columns: 30px 1fr 1fr 30px; gap: 10px; align-items: center; margin-bottom: 8px; }
+  .set-num { color: #666; font-size: 12px; font-weight: bold; text-align: center; }
+  .del-set { color: #555; background: none; border: none; font-size: 16px; cursor: pointer; }
+  .del-set:active { color: red; }
+
   /* LIBRARY SHELF (Bottom) */
   .shelf-title { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; border-top: 1px solid #333; padding-top: 20px; }
   .tile-grid { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -106,7 +115,7 @@
 
 <div id="view-log" class="view hidden">
   <h1>TRAINING LOG</h1>
-  <p class="sub">SANDBOX MODE</p>
+  <p class="sub">TRACKER</p>
 
   <div id="split-manager">
       <div id="my-split-list"></div>
@@ -131,7 +140,7 @@
             <button class="btn btn-sec" onclick="closeSession()" style="width:auto; margin:0; padding:10px 15px;">←</button>
             <h2 id="session-title" style="margin:0 0 0 15px; color:var(--accent); font-size:20px;"></h2>
         </div>
-        <button class="btn-ghost" onclick="clearCart()">NEW WORKOUT</button>
+        <button class="btn-ghost" onclick="clearCart()">START FRESH</button>
       </div>
       
       <div id="active-workout-area">
@@ -158,12 +167,14 @@
       </div>
       <button class="btn btn-main" style="margin-top:10px; background:#333;" onclick="clearInterval(timer);document.getElementById('t-disp').innerText='00:00'">STOP</button>
   </div>
+  
   <div class="tool-box">
       <h3 style="margin:0 0 15px 0; color:var(--accent)">PLATE CALC</h3>
       <input type="number" id="pIn" placeholder="Target Weight (45+ lbs)">
       <button class="btn btn-main" style="background:var(--success); color:black;" onclick="calcPlates()">CALCULATE</button>
       <div id="pOut" style="margin-top:15px;"></div>
   </div>
+  
   <div class="tool-box" style="border-color:#444;">
       <button class="btn btn-danger" onclick="nuke()">FACTORY RESET APP</button>
   </div>
@@ -178,8 +189,9 @@
 <script>
 // --- STATE ---
 let myDays = JSON.parse(localStorage.getItem('myDays') || '[]'); 
-let myLibrary = JSON.parse(localStorage.getItem('myLibrary') || '{}'); // { "Chest": ["Bench", "Fly"] }
-let activeCart = []; // Current session array
+let myLibrary = JSON.parse(localStorage.getItem('myLibrary') || '{}'); 
+let activeCart = JSON.parse(localStorage.getItem('activeCart') || '[]'); // Persist cart
+let sessionData = JSON.parse(localStorage.getItem('sessionData') || '{}'); // Persist sets
 let history = JSON.parse(localStorage.getItem('liftHistory') || '{}');
 let showPresets = localStorage.getItem('hidePresets') !== 'true';
 
@@ -205,7 +217,7 @@ function renderDays() {
         const count = (myLibrary[day]||[]).length;
         list.innerHTML += `
         <div class="day-card">
-            <div style="flex-grow:1" onclick="openSession('${day}')">
+            <div style="flex-grow:1; cursor:pointer;" onclick="openSession('${day}')">
                 <b>${day}</b><br><span style="font-size:11px; color:#666;">${count} Saved Exercises</span>
             </div>
             <div style="display:flex; gap:8px;">
@@ -216,7 +228,7 @@ function renderDays() {
     });
 }
 
-// --- SESSION LOGIC (CART SYSTEM) ---
+// --- SESSION LOGIC (STICKY CART + MULTI SET) ---
 let currentFolder = "";
 
 function openSession(day) {
@@ -224,9 +236,6 @@ function openSession(day) {
     document.getElementById('split-manager').classList.add('hidden');
     document.getElementById('session-logger').classList.remove('hidden');
     document.getElementById('session-title').innerText = day;
-    
-    // Clear cart on open? User requested manual clear. 
-    // We will start empty if cart is empty, otherwise show what's there.
     renderCart();
     renderShelf();
 }
@@ -234,17 +243,18 @@ function openSession(day) {
 function closeSession() {
     document.getElementById('session-logger').classList.add('hidden');
     document.getElementById('split-manager').classList.remove('hidden');
-    activeCart = []; // Auto-clear cart on exit? User said "Start Fresh" button. Let's safe clear.
+    // We do NOT clear activeCart here anymore. It's sticky.
 }
 
 function clearCart() {
-    if(confirm("Start Fresh? Clears current workout (History saved).")) {
+    if(confirm("Start Fresh? Clears current workout.")) {
         activeCart = [];
+        sessionData = {};
+        saveSession();
         renderCart();
     }
 }
 
-// Render the Active Workout (Top)
 function renderCart() {
     const area = document.getElementById('active-workout-area');
     area.innerHTML = "";
@@ -253,45 +263,81 @@ function renderCart() {
         return;
     }
     
-    activeCart.forEach((ex, idx) => {
+    activeCart.forEach((ex) => {
         const last = history[ex] || "No history";
+        const sets = sessionData[ex] || [];
+        
+        let setsHtml = "";
+        sets.forEach((set, idx) => {
+            setsHtml += `
+            <div class="set-row">
+                <span class="set-num">${idx+1}</span>
+                <input type="number" placeholder="Lbs" value="${set.w}" onchange="updateSet('${ex}', ${idx}, 'w', this.value)">
+                <input type="number" placeholder="Reps" value="${set.r}" onchange="updateSet('${ex}', ${idx}, 'r', this.value)">
+                <button class="del-set" onclick="removeSet('${ex}', ${idx})">✕</button>
+            </div>`;
+        });
+
         area.innerHTML += `
         <div class="ex-card">
             <div class="ex-top">
                 <span class="ex-name">${ex}</span>
-                <button onclick="removeFromCart(${idx})" style="background:none; border:none; color:#555; cursor:pointer;">✕</button>
+                <button onclick="removeExFromCart('${ex}')" style="background:none; border:none; color:#555; cursor:pointer;">REMOVE EXERCISE</button>
             </div>
-            <span class="ex-hist">LAST: ${last}</span>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <input type="number" placeholder="Lbs" id="w-${idx}">
-                <input type="number" placeholder="Reps" id="r-${idx}">
-            </div>
+            <span class="ex-hist">LAST BEST: ${last}</span>
+            <div id="sets-${ex}">${setsHtml}</div>
+            <button class="btn btn-sec btn-sm" onclick="addSet('${ex}')">+ ADD SET</button>
         </div>`;
     });
 }
 
-// Render the Library (Bottom)
 function renderShelf() {
     const area = document.getElementById('tile-area');
     area.innerHTML = "";
     const list = myLibrary[currentFolder] || [];
-    
-    // Add New Button
     area.innerHTML += `<div class="tile tile-add" onclick="promptNewEx()">+ NEW</div>`;
-    
     list.forEach(ex => {
         area.innerHTML += `<div class="tile" onclick="addToCart('${ex}')">${ex}</div>`;
     });
 }
 
 function addToCart(exName) {
-    activeCart.push(exName);
+    if(!activeCart.includes(exName)) {
+        activeCart.push(exName);
+        if(!sessionData[exName]) sessionData[exName] = [{w:'', r:''}]; // Start with 1 set
+        saveSession();
+        renderCart();
+    }
+}
+
+function removeExFromCart(exName) {
+    activeCart = activeCart.filter(e => e !== exName);
+    delete sessionData[exName];
+    saveSession();
     renderCart();
 }
 
-function removeFromCart(idx) {
-    activeCart.splice(idx, 1);
+function addSet(exName) {
+    if(!sessionData[exName]) sessionData[exName] = [];
+    sessionData[exName].push({w:'', r:''});
+    saveSession();
     renderCart();
+}
+
+function removeSet(exName, idx) {
+    sessionData[exName].splice(idx, 1);
+    saveSession();
+    renderCart();
+}
+
+function updateSet(exName, idx, field, val) {
+    sessionData[exName][idx][field] = val;
+    saveSession();
+}
+
+function saveSession() {
+    localStorage.setItem('activeCart', JSON.stringify(activeCart));
+    localStorage.setItem('sessionData', JSON.stringify(sessionData));
 }
 
 function promptNewEx() {
@@ -300,26 +346,47 @@ function promptNewEx() {
             if(!myLibrary[currentFolder]) myLibrary[currentFolder] = [];
             if(!myLibrary[currentFolder].includes(val)) {
                 myLibrary[currentFolder].push(val);
-                saveData();
-                renderShelf();
-                addToCart(val); // Auto add to cart
+                saveData(); renderShelf(); addToCart(val);
             }
         }
     });
 }
 
 function finishSession() {
+    if(!confirm("Finish Workout & Save History?")) return;
+    
     let count = 0;
-    activeCart.forEach((ex, idx) => {
-        const w = document.getElementById(`w-${idx}`).value;
-        const r = document.getElementById(`r-${idx}`).value;
-        if(w && r) {
-            history[ex] = `${w} lbs x ${r}`;
+    activeCart.forEach(ex => {
+        const sets = sessionData[ex] || [];
+        // Find best set (Estimated 1RM)
+        let best1RM = 0;
+        let bestStr = "";
+        
+        sets.forEach(set => {
+            const w = parseFloat(set.w);
+            const r = parseFloat(set.r);
+            if(w && r) {
+                const e1rm = w * (1 + (0.033 * r));
+                if(e1rm > best1RM) {
+                    best1RM = e1rm;
+                    bestStr = `${w} lbs x ${r}`;
+                }
+            }
+        });
+        
+        if(bestStr) {
+            history[ex] = bestStr;
             count++;
         }
     });
+    
     localStorage.setItem('liftHistory', JSON.stringify(history));
-    alert(count > 0 ? "Log Saved!" : "Nothing logged.");
+    alert(count > 0 ? "Saved! Great work." : "Nothing valid to save.");
+    
+    // Clear session
+    activeCart = [];
+    sessionData = {};
+    saveSession();
     closeSession();
 }
 
@@ -380,7 +447,7 @@ function calcPlates() {
 }
 function nuke() { if(confirm("DELETE ALL DATA?")) { localStorage.clear(); location.reload(); } }
 
-// --- ENGINE (WITH WARMUP) ---
+// --- ENGINE (WITH WARMUP ARROW) ---
 function genProgram() {
     const w = parseFloat(document.getElementById('w').value); const r = parseFloat(document.getElementById('r').value); if(!w || !r) return;
     const rnd=n=>Math.round(n/5)*5; const max=rnd(w*(1+(0.033*r))); const rm5=rnd(max*0.87); const rm3=rnd(max*0.93);
@@ -391,12 +458,11 @@ function genProgram() {
 }
 function row(wk, d, l, c, t, r) { 
     const id = `w${wk}-${d}`; const done = localStorage.getItem(id) ? 'completed' : ''; 
-    // Warmup math
-    const w1=45, w2=Math.round((l*0.5)/5)*5, w3=Math.round((l*0.7)/5)*5, w4=Math.round((l*0.9)/5)*5;
+    const w2=Math.round((l*0.5)/5)*5, w3=Math.round((l*0.7)/5)*5, w4=Math.round((l*0.9)/5)*5;
     return `<div class="${done}" id="row-${id}">
-      <div class="day-row" onclick="togW('${id}')"><div style="display:flex;align-items:center"><span class="chk" onclick="tog('${id}', event)"></span><b>${d}</b></div><div><b>${l}x${r}</b><span class="tag ${c}">${t}</span></div></div>
+      <div class="day-row" onclick="togW('${id}', this)"><div style="display:flex;align-items:center"><span class="chk" onclick="tog('${id}', event)"></span><b>${d}</b><span class="arrow-icon">▼</span></div><div><b>${l}x${r}</b><span class="tag ${c}">${t}</span></div></div>
       <div id="wu-${id}" class="warmup-box">
-         <span class="wu-title">Warm-up Sets (Do First)</span>
+         <span class="wu-title">Warm-up Sets</span>
          <div class="wu-row"><span>1. Empty Bar</span><span>10 x 45</span></div>
          <div class="wu-row"><span>2. 50%</span><span>5 x ${w2}</span></div>
          <div class="wu-row"><span>3. 70%</span><span>3 x ${w3}</span></div>
@@ -405,7 +471,7 @@ function row(wk, d, l, c, t, r) {
     </div>`; 
 }
 function tog(id, e) { e.stopPropagation(); const el = document.getElementById('row-'+id); if(el.classList.contains('completed')) { el.classList.remove('completed'); localStorage.removeItem(id); } else { el.classList.add('completed'); localStorage.setItem(id,'1'); } }
-function togW(id) { const w = document.getElementById('wu-'+id); w.style.display = w.style.display === 'block' ? 'none' : 'block'; }
+function togW(id, el) { const w = document.getElementById('wu-'+id); w.style.display = w.style.display === 'block' ? 'none' : 'block'; el.classList.toggle('open'); }
 </script>
 </body>
 </html>
