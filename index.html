@@ -20,6 +20,8 @@
   .btn:active { transform: scale(0.98); }
   .btn-main { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; }
   .btn-sec { background: #333; color: white; border: 1px solid #444; }
+  .btn-ghost { background: transparent; border: 1px dashed #444; color: #666; font-size: 10px; padding: 6px 10px; width: auto; display: inline-block; cursor: pointer; }
+  .btn-sm { padding: 8px; font-size: 11px; width: auto; display: inline-block; margin: 0; }
   
   h1 { text-align: center; margin: 25px 0 5px; font-size: 26px; letter-spacing: -1px; font-weight: 900; color: white; }
   .brand-span { color: var(--accent); }
@@ -32,8 +34,12 @@
   @keyframes fade { from{opacity:0; transform:translateY(5px)} to{opacity:1; transform:translateY(0)} }
 
   /* --- 4. COMPONENTS --- */
-  .gym-selector-header { background: #222; border: 1px solid #333; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; }
-  .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #333; }
+  /* GYM HEADER (Restored V8.1 Styles) */
+  .gym-selector-header { background: #222; border: 1px solid #333; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; }
+  .gym-label { font-size: 10px; color: #888; text-transform: uppercase; }
+  .gym-name { font-weight: bold; font-size: 14px; color: var(--accent); }
+
+  .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #333; transition: 0.1s; }
   .icon-btn { background: #222; border: 1px solid #444; color: #ccc; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
 
   /* SESSION EXERCISE CARD */
@@ -55,14 +61,12 @@
   
   .set-num { color: #666; font-size: 12px; font-weight: bold; text-align: center; }
   .set-tag { font-size: 9px; font-weight: bold; text-transform: uppercase; text-align: center; }
-  .tag-drop { color: var(--drop); }
-  .tag-super { color: var(--super); }
 
   .calc-btn { background: #222; border: 1px solid #444; color: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; height: 42px; }
   .menu-btn { background: none; border: 1px solid #333; color: #888; border-radius: 6px; cursor: pointer; height: 42px; display: flex; align-items: center; justify-content: center; font-weight: bold; padding-bottom: 5px; }
   .del-btn { background: none; border: none; color: #555; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; height: 42px; }
 
-  /* LIBRARY SHELF FIX */
+  /* SHELF */
   .shelf-title { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; border-top: 1px solid #333; padding-top: 20px; margin-top: 20px; }
   .tile-grid { display: flex; flex-wrap: wrap; gap: 8px; }
   .tile { display: inline-flex; align-items: center; justify-content: center; background: #222; border: 1px solid #444; color: #ccc; padding: 12px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500; transition: 0.1s; }
@@ -87,7 +91,7 @@
   .nav-btn { background: none; border: none; color: #666; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
   .nav-btn.active { color: var(--accent); }
 
-  /* PROGRAM STYLES (PRESERVED) */
+  /* PROGRAM STYLES */
   .week { background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; overflow: hidden; }
   .week-head { display: flex; justify-content: space-between; padding: 15px; background: #222; border-bottom: 1px solid #333; font-weight: bold; }
   .day-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #222; align-items: center; cursor: pointer; }
@@ -156,9 +160,14 @@
   <h1>TRAINING LOG</h1>
   <p class="sub">TRACKER</p>
 
-  <div class="gym-selector-header" onclick="showGymManager()">
-      <div><div class="gym-label">CURRENT LOCATION</div><div class="gym-name" id="current-gym-display">Main Gym</div></div>
-      <div style="color:#666">▼</div>
+  <div id="split-manager">
+      <div class="gym-selector-header" onclick="showGymManager()">
+          <div><div class="gym-label">CURRENT LOCATION</div><div class="gym-name" id="current-gym-display">Main Gym</div></div>
+          <div style="color:#666">▼</div>
+      </div>
+
+      <div id="my-split-list"></div>
+      <button class="btn btn-sec" style="border-style:dashed; color:#888;" onclick="promptAddDay()">+ NEW FOLDER</button>
   </div>
 
   <div id="gym-manager" class="hidden">
@@ -168,18 +177,13 @@
       <button class="btn btn-sec" style="margin-top:20px;" onclick="closeGymManager()">← BACK</button>
   </div>
 
-  <div id="split-manager">
-      <div id="my-split-list"></div>
-      <button class="btn btn-sec" style="border-style:dashed; color:#888;" onclick="promptAddDay()">+ NEW FOLDER</button>
-  </div>
-
   <div id="session-logger" class="hidden">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
         <div style="display:flex; align-items:center;">
             <button class="btn btn-sec" onclick="closeSession()" style="width:auto; margin:0; padding:10px 15px;">←</button>
             <h2 id="session-title" style="margin:0 0 0 15px; color:var(--accent); font-size:20px;"></h2>
         </div>
-        <button class="btn-ghost" onclick="clearCart()">RESET</button>
+        <button class="btn-ghost" onclick="clearCart()">START FRESH</button>
       </div>
       
       <div id="active-workout-area"></div>
@@ -335,38 +339,37 @@ function renderCart() {
         const isLR = sessionData[ex + '_LR'] === true; 
         
         let html = "";
-        
-        // Grouping logic: Iterate sets
-        // We will output either a standalone row or a container for linked sets
         let i = 0;
+        let setCounter = 1;
+
         while(i < sets.length) {
             const set = sets[i];
             const nextSet = sets[i+1];
             
-            // Check if current set starts a group (is parent) or is standalone
-            // In our simple model: if set.type is drop or super, it links to next
-            // BUT for rendering, we check if WE are the parent of the next
-            
-            // Actually, simplified: If set is 'drop_parent', wrap this and next in box
-            // Since we add child immediately after, we can look ahead
-            
-            if (set.type === 'drop_parent' && nextSet && nextSet.type === 'drop_child') {
-                // RENDER DROP GROUP
-                html += `<div class="set-group-box set-group-drop">
-                            ${renderRow(ex, i, set, 'DROP')}
-                            ${renderRow(ex, i+1, nextSet, 'DROP +')}
-                         </div>`;
-                i += 2; // Skip next
-            } else if (set.type === 'super_parent' && nextSet && nextSet.type === 'super_child') {
-                // RENDER SUPER GROUP
-                html += `<div class="set-group-box set-group-super">
-                            ${renderRow(ex, i, set, 'SUPER A')}
-                            ${renderRow(ex, i+1, nextSet, 'SUPER B')}
-                         </div>`;
-                i += 2; // Skip next
+            // Determine the display label for this set
+            let label = setCounter;
+            if (set.side) {
+                label = `${setCounter} ${set.side}`;
+                // Logic: If L, next is usually R (same set num). If R, increment count.
+                if (set.side === 'R') setCounter++;
             } else {
-                // STANDARD ROW
-                html += `<div class="set-container">${renderRow(ex, i, set, (i+1))}</div>`;
+                setCounter++;
+            }
+
+            if (set.type === 'drop_parent' && nextSet && nextSet.type === 'drop_child') {
+                html += `<div class="set-group-box set-group-drop">
+                            ${renderRow(ex, i, set, label)}
+                            ${renderRow(ex, i+1, nextSet, "DROP")}
+                         </div>`;
+                i += 2; 
+            } else if (set.type === 'super_parent' && nextSet && nextSet.type === 'super_child') {
+                html += `<div class="set-group-box set-group-super">
+                            ${renderRow(ex, i, set, label)}
+                            ${renderRow(ex, i+1, nextSet, "SUPER")}
+                         </div>`;
+                i += 2;
+            } else {
+                html += `<div class="set-container">${renderRow(ex, i, set, label)}</div>`;
                 i++;
             }
         }
@@ -391,7 +394,7 @@ function renderRow(ex, idx, set, label) {
     return `
     <div class="set-row">
         <div style="display:flex;flex-direction:column;align-items:center;">
-             <span class="set-num">${set.side || label}</span>
+             <span class="set-num">${label}</span>
         </div>
         <input type="number" id="${inputId}" placeholder="Lbs" value="${set.w}" onchange="updateSet('${ex}', ${idx}, 'w', this.value)">
         <button class="calc-btn" onclick="openCalc('${inputId}')">🧮</button>
@@ -408,14 +411,9 @@ function applySetType(type) {
     if(optTarget) {
         const {ex, idx} = optTarget;
         const currentSet = sessionData[ex][idx];
-        
-        // Add new set immediately after
         const newSet = {w: currentSet.w, r:'', type: type+'_child'};
         sessionData[ex].splice(idx + 1, 0, newSet);
-        
-        // Update current set to parent
         currentSet.type = type+'_parent';
-        
         saveSession(); renderCart();
         document.getElementById('modal-set-opt').style.display = 'none';
     }
