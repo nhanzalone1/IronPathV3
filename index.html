@@ -50,14 +50,21 @@
   .open .arrow-icon { transform: rotate(180deg); color: var(--accent); }
 
   /* --- 5. LOG STYLES --- */
-  /* GYM SELECTOR */
-  .gym-selector { background: #222; border: 1px solid #333; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; }
-  .gym-label { font-size: 10px; color: #888; text-transform: uppercase; }
-  .gym-name { font-weight: bold; font-size: 14px; color: var(--accent); }
+  /* GYM SELECTOR HEADER */
+  .gym-selector-header { background: #222; border: 1px solid #333; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+  .gym-label { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+  .gym-name { font-weight: 800; font-size: 15px; color: var(--accent); margin-top: 2px; }
 
-  .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #333; }
+  /* CARDS */
+  .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #333; transition: 0.1s; }
+  .day-card:active { transform: scale(0.99); border-color: #555; }
   .icon-btn { background: #222; border: 1px solid #444; color: #ccc; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
   
+  /* GYM MANAGER SPECIFIC */
+  .gym-card-active { border: 1px solid var(--accent); background: #2a1a1a; }
+  .gym-badge { background: var(--accent); color: white; font-size: 9px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
+
+  /* SESSION */
   #active-workout-area { min-height: 100px; margin-bottom: 30px; }
   .ex-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; position: relative; animation: slideIn 0.2s ease; }
   @keyframes slideIn { from{transform:translateX(-10px);opacity:0} to{transform:translateX(0);opacity:1} }
@@ -92,7 +99,7 @@
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
   .toast-icon { color: var(--success); }
 
-  /* PLATE CALC MODAL SPECIFIC */
+  /* PLATE CALC MODAL */
   .plate-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
   .p-btn { background: #222; border: 1px solid #444; color: white; padding: 15px 0; border-radius: 8px; font-weight: bold; cursor: pointer; }
   .p-btn:active { background: var(--accent); border-color: var(--accent); }
@@ -193,12 +200,19 @@
   <h1>TRAINING LOG</h1>
   <p class="sub">TRACKER</p>
 
-  <div class="gym-selector" onclick="toggleGymSelect()">
+  <div class="gym-selector-header" onclick="showGymManager()">
       <div>
         <div class="gym-label">CURRENT LOCATION</div>
         <div class="gym-name" id="current-gym-display">Main Gym</div>
       </div>
       <div style="color:#666">▼</div>
+  </div>
+
+  <div id="gym-manager" class="hidden">
+      <h3 style="color:var(--dim); font-size:12px; margin-bottom:15px;">SELECT OR EDIT GYMS</h3>
+      <div id="gym-list"></div>
+      <button class="btn btn-sec" style="border-style:dashed; margin-top:15px;" onclick="promptAddGym()">+ ADD NEW GYM</button>
+      <button class="btn btn-sec" style="margin-top:20px;" onclick="closeGymManager()">← BACK TO WORKOUTS</button>
   </div>
 
   <div id="split-manager">
@@ -257,6 +271,13 @@
       <button class="btn btn-main" style="margin-top:10px; background:#333;" onclick="clearInterval(timer);document.getElementById('t-disp').innerText='00:00'">STOP</button>
   </div>
   
+  <div class="tool-box">
+      <h3 style="margin:0 0 15px 0; color:var(--accent)">PLATE CALC</h3>
+      <input type="number" id="pIn" placeholder="Target Weight (45+ lbs)">
+      <button class="btn btn-main" style="background:var(--success); color:black;" onclick="calcPlates()">CALCULATE</button>
+      <div id="pOut" style="margin-top:15px;"></div>
+  </div>
+  
   <div class="tool-box" style="border-color:#444;">
       <button class="btn btn-danger" onclick="nuke()">FACTORY RESET APP</button>
   </div>
@@ -269,19 +290,15 @@
 </div>
 
 <script>
-// --- MIGRATION & INIT ---
-// New Data Structure: { gyms: { "GymName": { folders: [], library: {} } }, currentGym: "Main Gym" }
+// --- DATA INIT ---
 let appData = JSON.parse(localStorage.getItem('netGainsData') || 'null');
-
-// MIGRATION SCRIPT (Runs once)
 if (!appData) {
+    // Migration fallback
     const oldDays = JSON.parse(localStorage.getItem('myDays') || '[]');
     const oldLib = JSON.parse(localStorage.getItem('myLibrary') || '{}');
     appData = {
         currentGym: 'Main Gym',
-        gyms: {
-            'Main Gym': { folders: oldDays, library: oldLib }
-        }
+        gyms: { 'Main Gym': { folders: oldDays, library: oldLib } }
     };
     localStorage.setItem('netGainsData', JSON.stringify(appData));
 }
@@ -292,9 +309,8 @@ let history = JSON.parse(localStorage.getItem('liftHistory') || '{}');
 let globalLog = JSON.parse(localStorage.getItem('globalLog') || '[]'); 
 let showPresets = localStorage.getItem('hidePresets') !== 'true';
 
-// PWA CHECK
+// PWA WARNING
 if (!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone) {
-    // Only show if not installed
     if (!sessionStorage.getItem('pwaDismissed')) {
         document.getElementById('modal-pwa').style.display = 'flex';
         sessionStorage.setItem('pwaDismissed', 'true');
@@ -312,7 +328,7 @@ function switchTab(id, btn) {
     btn.classList.add('active');
 }
 
-// --- GYM LOGIC ---
+// --- GYM MANAGER LOGIC ---
 function getCurrentGymData() {
     if(!appData.gyms[appData.currentGym]) {
         appData.gyms[appData.currentGym] = { folders: [], library: {} };
@@ -320,19 +336,90 @@ function getCurrentGymData() {
     return appData.gyms[appData.currentGym];
 }
 
-function toggleGymSelect() {
-    // Simple way: Input modal to switch/add
-    openInputModal("Switch/Add Gym", "Enter Gym Name (e.g. Home)", (val) => {
-        if(val) {
-            appData.currentGym = val;
-            if(!appData.gyms[val]) appData.gyms[val] = { folders: [], library: {} };
+function showGymManager() {
+    document.getElementById('split-manager').classList.add('hidden');
+    document.getElementById('gym-manager').classList.remove('hidden');
+    renderGymList();
+}
+
+function closeGymManager() {
+    document.getElementById('gym-manager').classList.add('hidden');
+    document.getElementById('split-manager').classList.remove('hidden');
+}
+
+function renderGymList() {
+    const div = document.getElementById('gym-list');
+    div.innerHTML = "";
+    Object.keys(appData.gyms).forEach(gym => {
+        const isActive = (gym === appData.currentGym);
+        const activeClass = isActive ? 'gym-card-active' : '';
+        const badge = isActive ? '<span class="gym-badge">ACTIVE</span>' : '';
+        const folderCount = appData.gyms[gym].folders.length;
+        
+        div.innerHTML += `
+        <div class="day-card ${activeClass}">
+            <div style="flex-grow:1; cursor:pointer;" onclick="selectGym('${gym}')">
+                <b style="${isActive ? 'color:white' : ''}">${gym}</b>${badge}<br>
+                <span style="font-size:11px; color:#666;">${folderCount} Folders</span>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button class="icon-btn" onclick="renameGym('${gym}')">✎</button>
+                <button class="icon-btn" style="color:#ff4757; border-color:#522;" onclick="delGym('${gym}')">✕</button>
+            </div>
+        </div>`;
+    });
+}
+
+function selectGym(name) {
+    appData.currentGym = name;
+    saveAppData();
+    renderDays(); // Update header and list
+    closeGymManager(); // Go back
+    showToast("Switched to " + name);
+}
+
+function promptAddGym() {
+    openInputModal("New Gym Name", "e.g. Home Gym", (val) => {
+        if(val && !appData.gyms[val]) {
+            appData.gyms[val] = { folders: [], library: {} };
+            appData.currentGym = val; // Auto switch
             saveAppData();
             renderDays();
-            showToast("Switched to " + val);
+            closeGymManager();
+            showToast("Created " + val);
         }
     });
 }
 
+function renameGym(oldName) {
+    openInputModal("Rename Gym", oldName, (val) => {
+        if(val && val !== oldName) {
+            // Rename key logic
+            appData.gyms[val] = appData.gyms[oldName];
+            delete appData.gyms[oldName];
+            if(appData.currentGym === oldName) appData.currentGym = val;
+            saveAppData();
+            renderGymList();
+            renderDays(); // Update header if active
+        }
+    });
+}
+
+function delGym(name) {
+    if(Object.keys(appData.gyms).length <= 1) { showToast("Cannot delete last gym"); return; }
+    showConfirm("Delete " + name + " and all its data?", () => {
+        delete appData.gyms[name];
+        // If we deleted active gym, switch to first available
+        if(appData.currentGym === name) {
+            appData.currentGym = Object.keys(appData.gyms)[0];
+        }
+        saveAppData();
+        renderGymList();
+        renderDays();
+    });
+}
+
+// --- FOLDER/SESSION LOGIC ---
 function renderDays() {
     const gymData = getCurrentGymData();
     document.getElementById('current-gym-display').innerText = appData.currentGym;
@@ -340,7 +427,7 @@ function renderDays() {
     const list = document.getElementById('my-split-list');
     list.innerHTML = "";
     
-    if(gymData.folders.length === 0) list.innerHTML = "<div style='text-align:center; color:#555; margin:30px 0;'>No folders in this gym.</div>";
+    if(gymData.folders.length === 0) list.innerHTML = "<div style='text-align:center; color:#555; margin:30px 0;'>No folders created.<br>Add one below or use a preset.</div>";
     
     gymData.folders.forEach((day) => {
         const count = (gymData.library[day]||[]).length;
@@ -357,9 +444,7 @@ function renderDays() {
     });
 }
 
-// --- SESSION LOGIC ---
 let currentFolder = "";
-
 function openSession(day) {
     currentFolder = day;
     document.getElementById('split-manager').classList.add('hidden');
@@ -398,7 +483,6 @@ function renderCart() {
         
         let setsHtml = "";
         sets.forEach((set, idx) => {
-            // New: Input ID for calculator targeting
             const inputId = `w-${ex}-${idx}`;
             setsHtml += `
             <div class="set-row">
@@ -410,16 +494,10 @@ function renderCart() {
             </div>`;
         });
 
-        // History list logic
         const histRows = globalLog.filter(l => l.ex === ex).sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0,5);
         let histHtml = "";
-        if(histRows.length > 0) {
-            histRows.forEach(h => {
-                histHtml += `<div class="hist-row"><span class="hist-date">${h.date}</span><span>${h.w} x ${h.r}</span></div>`;
-            });
-        } else {
-            histHtml = "<div style='text-align:center; color:#555; font-size:10px;'>No recorded history</div>";
-        }
+        if(histRows.length > 0) histRows.forEach(h => { histHtml += `<div class="hist-row"><span class="hist-date">${h.date}</span><span>${h.w} x ${h.r}</span></div>`; });
+        else histHtml = "<div style='text-align:center; color:#555; font-size:10px;'>No recorded history</div>";
 
         area.innerHTML += `
         <div class="ex-card">
@@ -438,7 +516,7 @@ function renderCart() {
     });
 }
 
-// --- PLATE CALCULATOR LOGIC ---
+// --- PLATE CALC LOGIC ---
 let calcTargetId = null;
 let calcSideWeight = 0;
 let calcBar = 45;
@@ -450,7 +528,6 @@ function openCalc(inputId) {
     updateCalcDisplay();
     document.getElementById('modal-plate-calc').style.display = 'flex';
 }
-
 function toggleBar() {
     calcBar = calcBar === 45 ? 0 : 45;
     const txt = document.getElementById('bar-status');
@@ -458,88 +535,30 @@ function toggleBar() {
     txt.style.color = calcBar === 45 ? "var(--success)" : "#555";
     updateCalcDisplay();
 }
-
-function addPlate(w) {
-    calcSideWeight += w;
-    updateCalcDisplay();
-}
-
-function resetCalc() {
-    calcSideWeight = 0;
-    updateCalcDisplay();
-}
-
-function updateCalcDisplay() {
-    const total = (calcSideWeight * 2) + calcBar;
-    document.getElementById('calc-total').innerText = total + " lbs";
-}
-
+function addPlate(w) { calcSideWeight += w; updateCalcDisplay(); }
+function resetCalc() { calcSideWeight = 0; updateCalcDisplay(); }
+function updateCalcDisplay() { document.getElementById('calc-total').innerText = ((calcSideWeight * 2) + calcBar) + " lbs"; }
 function applyCalc() {
     const total = (calcSideWeight * 2) + calcBar;
     const el = document.getElementById(calcTargetId);
-    if(el) {
-        el.value = total;
-        // Trigger change event to save
-        el.dispatchEvent(new Event('change'));
-    }
+    if(el) { el.value = total; el.dispatchEvent(new Event('change')); }
     document.getElementById('modal-plate-calc').style.display = 'none';
 }
 
-
-function toggleHist(ex) {
-    const el = document.getElementById('hist-'+ex);
-    el.style.display = el.style.display === 'block' ? 'none' : 'block';
-}
-
+function toggleHist(ex) { const el = document.getElementById('hist-'+ex); el.style.display = el.style.display === 'block' ? 'none' : 'block'; }
 function renderShelf() {
-    const area = document.getElementById('tile-area');
-    area.innerHTML = "";
+    const area = document.getElementById('tile-area'); area.innerHTML = "";
     const gymData = getCurrentGymData();
     const list = gymData.library[currentFolder] || [];
     area.innerHTML += `<div class="tile tile-add" onclick="promptNewEx()">+ NEW</div>`;
-    list.forEach(ex => {
-        area.innerHTML += `<div class="tile" onclick="addToCart('${ex}')">${ex}</div>`;
-    });
+    list.forEach(ex => { area.innerHTML += `<div class="tile" onclick="addToCart('${ex}')">${ex}</div>`; });
 }
-
-function addToCart(exName) {
-    if(!activeCart.includes(exName)) {
-        activeCart.push(exName);
-        if(!sessionData[exName]) sessionData[exName] = [{w:'', r:''}]; 
-        saveSession();
-        renderCart();
-    }
-}
-
-function removeExFromCart(exName) {
-    activeCart = activeCart.filter(e => e !== exName);
-    delete sessionData[exName];
-    saveSession();
-    renderCart();
-}
-
-function addSet(exName) {
-    if(!sessionData[exName]) sessionData[exName] = [];
-    sessionData[exName].push({w:'', r:''});
-    saveSession();
-    renderCart();
-}
-
-function removeSet(exName, idx) {
-    sessionData[exName].splice(idx, 1);
-    saveSession();
-    renderCart();
-}
-
-function updateSet(exName, idx, field, val) {
-    sessionData[exName][idx][field] = val;
-    saveSession();
-}
-
-function saveSession() {
-    localStorage.setItem('activeCart', JSON.stringify(activeCart));
-    localStorage.setItem('sessionData', JSON.stringify(sessionData));
-}
+function addToCart(exName) { if(!activeCart.includes(exName)) { activeCart.push(exName); if(!sessionData[exName]) sessionData[exName] = [{w:'', r:''}]; saveSession(); renderCart(); } }
+function removeExFromCart(exName) { activeCart = activeCart.filter(e => e !== exName); delete sessionData[exName]; saveSession(); renderCart(); }
+function addSet(exName) { if(!sessionData[exName]) sessionData[exName] = []; sessionData[exName].push({w:'', r:''}); saveSession(); renderCart(); }
+function removeSet(exName, idx) { sessionData[exName].splice(idx, 1); saveSession(); renderCart(); }
+function updateSet(exName, idx, field, val) { sessionData[exName][idx][field] = val; saveSession(); }
+function saveSession() { localStorage.setItem('activeCart', JSON.stringify(activeCart)); localStorage.setItem('sessionData', JSON.stringify(sessionData)); }
 
 function promptNewEx() {
     openInputModal("New Exercise", "e.g. Incline Bench", (val) => {
@@ -558,41 +577,22 @@ function finishSession() {
     showConfirm("Finish Workout & Save History?", () => {
         let count = 0;
         const today = new Date().toISOString().split('T')[0];
-
         activeCart.forEach(ex => {
             const sets = sessionData[ex] || [];
-            let best1RM = 0;
-            let bestStr = "";
-            
+            let best1RM = 0; let bestStr = "";
             sets.forEach(set => {
-                const w = parseFloat(set.w);
-                const r = parseFloat(set.r);
+                const w = parseFloat(set.w); const r = parseFloat(set.r);
                 if(w && r) {
                     const e1rm = w * (1 + (0.033 * r));
-                    if(e1rm > best1RM) {
-                        best1RM = e1rm;
-                        bestStr = `${w} lbs x ${r}`;
-                    }
+                    if(e1rm > best1RM) { best1RM = e1rm; bestStr = `${w} lbs x ${r}`; }
                     globalLog.push({ date: today, ex: ex, w: w, r: r, rm: Math.round(e1rm) });
                     count++;
                 }
             });
-            
             if(bestStr) history[ex] = bestStr;
         });
-        
-        localStorage.setItem('liftHistory', JSON.stringify(history));
-        localStorage.setItem('globalLog', JSON.stringify(globalLog));
-        
-        if(count > 0) {
-            activeCart = [];
-            sessionData = {};
-            saveSession();
-            closeSession();
-            showToast("Log Saved!");
-        } else {
-            showToast("Nothing to save.");
-        }
+        localStorage.setItem('liftHistory', JSON.stringify(history)); localStorage.setItem('globalLog', JSON.stringify(globalLog));
+        if(count > 0) { activeCart = []; sessionData = {}; saveSession(); closeSession(); showToast("Log Saved!"); } else { showToast("Nothing to save."); }
     });
 }
 
@@ -601,9 +601,7 @@ function exportCSV() {
     let csvContent = "data:text/csv;charset=utf-8,Date,Exercise,Weight,Reps,Est1RM\n";
     globalLog.forEach(row => { csvContent += `${row.date},${row.ex},${row.w},${row.r},${row.rm}\n`; });
     const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "netgains_data.csv");
+    const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", "netgains_data.csv");
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
 
@@ -612,14 +610,10 @@ function promptAddDay() {
     openInputModal("New Folder", "e.g. Chest Day", (val) => {
         if(val) {
              const gymData = getCurrentGymData();
-             if(!gymData.folders.includes(val)) {
-                 gymData.folders.push(val);
-                 saveAppData(); renderDays();
-             }
+             if(!gymData.folders.includes(val)) { gymData.folders.push(val); saveAppData(); renderDays(); }
         }
     });
 }
-
 function renameFolder(old) {
     openInputModal("Rename", old, (val) => {
         if(val && val !== old) {
@@ -631,99 +625,40 @@ function renameFolder(old) {
         }
     });
 }
-
 function delFolder(name) {
     showConfirm("Delete folder?", () => {
         const gymData = getCurrentGymData();
         gymData.folders = gymData.folders.filter(d => d !== name);
         delete gymData.library[name];
-        saveAppData(); renderDays();
-        showToast("Folder Deleted");
+        saveAppData(); renderDays(); showToast("Folder Deleted");
     });
 }
-
-function hidePresets() {
-    document.getElementById('preset-area').style.display = 'none';
-    localStorage.setItem('hidePresets', 'true');
-}
-
+function hidePresets() { document.getElementById('preset-area').style.display = 'none'; localStorage.setItem('hidePresets', 'true'); }
 function loadPreset(t) {
     const gymData = getCurrentGymData();
     let a=[]; if(t=='PPL')a=['Push','Pull','Legs']; if(t=='UL')a=['Upper','Lower'];
     a.forEach(d=>{if(!gymData.folders.includes(d)) gymData.folders.push(d)}); 
-    saveAppData(); renderDays();
-    showToast("Preset Loaded");
+    saveAppData(); renderDays(); showToast("Preset Loaded");
 }
-
-function saveAppData() {
-    localStorage.setItem('netGainsData', JSON.stringify(appData));
-}
+function saveAppData() { localStorage.setItem('netGainsData', JSON.stringify(appData)); }
 
 // --- UI HELPERS ---
-function showToast(msg) {
-    const t = document.getElementById('toast');
-    document.getElementById('toast-msg').innerText = msg;
-    t.classList.add('show');
-    setTimeout(() => { t.classList.remove('show'); }, 3000);
-}
-
-function openInputModal(t, p, cb) {
-    const m=document.getElementById('modal-input-overlay'), i=document.getElementById('modal-input'), b=document.getElementById('modal-ok');
-    document.getElementById('modal-title').innerText=t; i.value=""; i.placeholder=p; m.style.display='flex'; i.focus();
-    let n=b.cloneNode(true); b.parentNode.replaceChild(n,b);
-    n.addEventListener('click',()=>{m.style.display='none';cb(i.value)});
-}
+function showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toast-msg').innerText = msg; t.classList.add('show'); setTimeout(() => { t.classList.remove('show'); }, 3000); }
+function openInputModal(t, p, cb) { const m=document.getElementById('modal-input-overlay'), i=document.getElementById('modal-input'), b=document.getElementById('modal-ok'); document.getElementById('modal-title').innerText=t; i.value=""; i.placeholder=p; m.style.display='flex'; i.focus(); let n=b.cloneNode(true); b.parentNode.replaceChild(n,b); n.addEventListener('click',()=>{m.style.display='none';cb(i.value)}); }
 function closeInputModal(){document.getElementById('modal-input-overlay').style.display='none'}
-
-function showConfirm(msg, cb) {
-    const m = document.getElementById('modal-confirm-overlay');
-    const b = document.getElementById('confirm-ok');
-    document.getElementById('confirm-desc').innerText = msg;
-    m.style.display = 'flex';
-    let n = b.cloneNode(true); b.parentNode.replaceChild(n,b);
-    n.addEventListener('click', () => { m.style.display = 'none'; cb(); });
-}
+function showConfirm(msg, cb) { const m = document.getElementById('modal-confirm-overlay'); const b = document.getElementById('confirm-ok'); document.getElementById('confirm-desc').innerText = msg; m.style.display = 'flex'; let n = b.cloneNode(true); b.parentNode.replaceChild(n,b); n.addEventListener('click', () => { m.style.display = 'none'; cb(); }); }
 function closeConfirmModal(){document.getElementById('modal-confirm-overlay').style.display='none'}
 
 // --- ENGINE ---
 function genProgram() {
     const w = parseFloat(document.getElementById('w').value); const r = parseFloat(document.getElementById('r').value); if(!w || !r) return;
     const rnd=n=>Math.round(n/5)*5; const max=rnd(w*(1+(0.033*r))); const rm5=rnd(max*0.87); const rm3=rnd(max*0.93);
-    const weeks = [
-        {n:1, t:"BASE",    b:rm5, m:.85,  s:4, r:6},
-        {n:2, t:"LOAD",    b:rm5, m:.9,   s:4, r:6},
-        {n:3, t:"INTENSE", b:rm5, m:.95,  s:4, r:6},
-        {n:4, t:"PEAK",    b:rm5, m:1.05, s:4, r:6},
-        {n:5, t:"UNLOAD",  b:rm5, m:.85,  s:2, r:4, f:.9},
-        {n:6, t:"SPEED",   b:rm3, m:1,    s:3, r:4, w:.75, f:.85},
-        {n:7, t:"FORCE",   b:rm3, m:1,    s:3, r:4, w:.85, f:.9},
-        {n:8, t:"MAX",     b:rm3, m:1,    s:3, r:4, w:.7, f:.85}
-    ];
+    const weeks = [{n:1, t:"BASE",b:rm5,m:.85,s:4,r:6},{n:2, t:"LOAD",b:rm5,m:.9,s:4,r:6},{n:3, t:"INTENSE",b:rm5,m:.95,s:4,r:6},{n:4, t:"PEAK",b:rm5,m:1.05,s:4,r:6},{n:5, t:"UNLOAD",b:rm5,m:.85,s:2,r:4,f:.9},{n:6, t:"SPEED",b:rm3,m:1,s:3,r:4,w:.75,f:.85},{n:7, t:"FORCE",b:rm3,m:1,s:3,r:4,w:.85,f:.9},{n:8, t:"MAX",b:rm3,m:1,s:3,r:4,w:.7,f:.85}];
     let html = `<div style="text-align:center; margin-bottom:20px; color:#2ed573; font-weight:bold; border:1px solid #333; padding:10px; border-radius:10px;">EST 1RM: ${max} LBS</div>`;
-    weeks.forEach(wk=>{ 
-        let m=rnd(wk.b*wk.m), wL=rnd(m*(wk.w||.85)), f=rnd(m*(wk.f||.95)); if(wk.n===4) wL=rnd(m*.8); 
-        html+=`<div class="week"><div class="week-head"><span>Week ${wk.n}</span><span style="color:#ff4757">${wk.t}</span></div>
-        ${row(wk.n, 'Mon', m, 'tag-h', 'H', wk.s, wk.r)} ${row(wk.n, 'Wed', wL, 'tag-l', 'L', wk.s, wk.r)} ${row(wk.n, 'Fri', f, 'tag-m', 'M', wk.s, wk.r)}</div>`; 
-    });
+    weeks.forEach(wk=>{ let m=rnd(wk.b*wk.m), wL=rnd(m*(wk.w||.85)), f=rnd(m*(wk.f||.95)); if(wk.n===4) wL=rnd(m*.8); html+=`<div class="week"><div class="week-head"><span>Week ${wk.n}</span><span style="color:#ff4757">${wk.t}</span></div>${row(wk.n, 'Mon', m, 'tag-h', 'H', wk.s, wk.r)} ${row(wk.n, 'Wed', wL, 'tag-l', 'L', wk.s, wk.r)} ${row(wk.n, 'Fri', f, 'tag-m', 'M', wk.s, wk.r)}</div>`; });
     document.getElementById('schedule-area').innerHTML = html;
 }
-function row(wk, d, l, c, t, s, r) { 
-    const id = `w${wk}-${d}`; const done = localStorage.getItem(id) ? 'completed' : ''; 
-    const w2=Math.round((l*0.5)/5)*5, w3=Math.round((l*0.7)/5)*5, w4=Math.round((l*0.9)/5)*5;
-    return `<div class="${done}" id="row-${id}">
-      <div class="day-row" onclick="togW('${id}', this)">
-        <div style="display:flex;align-items:center"><span class="chk" onclick="tog('${id}', event)"></span><b>${d}</b><span class="arrow-icon">▼</span></div>
-        <div><b>${l} lbs ${s}x${r}</b><span class="tag ${c}">${t}</span></div>
-      </div>
-      <div id="wu-${id}" class="warmup-box">
-         <span class="wu-title">Warm-up Sets</span>
-         <div class="wu-row"><span>1. Empty Bar</span><span>10 x 45</span></div>
-         <div class="wu-row"><span>2. 50%</span><span>5 x ${w2}</span></div>
-         <div class="wu-row"><span>3. 70%</span><span>3 x ${w3}</span></div>
-         <div class="wu-row"><span>4. 90% (Primer)</span><span>1 x ${w4}</span></div>
-      </div>
-    </div>`; 
-}
+function row(wk, d, l, c, t, s, r) { const id = `w${wk}-${d}`; const done = localStorage.getItem(id) ? 'completed' : ''; const w2=Math.round((l*0.5)/5)*5, w3=Math.round((l*0.7)/5)*5, w4=Math.round((l*0.9)/5)*5; return `<div class="${done}" id="row-${id}"><div class="day-row" onclick="togW('${id}', this)"><div style="display:flex;align-items:center"><span class="chk" onclick="tog('${id}', event)"></span><b>${d}</b><span class="arrow-icon">▼</span></div><div><b>${l} lbs ${s}x${r}</b><span class="tag ${c}">${t}</span></div></div><div id="wu-${id}" class="warmup-box"><span class="wu-title">Warm-up Sets</span><div class="wu-row"><span>1. Empty Bar</span><span>10 x 45</span></div><div class="wu-row"><span>2. 50%</span><span>5 x ${w2}</span></div><div class="wu-row"><span>3. 70%</span><span>3 x ${w3}</span></div><div class="wu-row"><span>4. 90% (Primer)</span><span>1 x ${w4}</span></div></div></div>`; }
 function tog(id, e) { e.stopPropagation(); const el = document.getElementById('row-'+id); if(el.classList.contains('completed')) { el.classList.remove('completed'); localStorage.removeItem(id); } else { el.classList.add('completed'); localStorage.setItem(id,'1'); } }
 function togW(id, el) { const w = document.getElementById('wu-'+id); w.style.display = w.style.display === 'block' ? 'none' : 'block'; el.classList.toggle('open'); }
 function nuke() { showConfirm("DELETE ALL DATA? This cannot be undone.", () => { localStorage.clear(); location.reload(); }); }
