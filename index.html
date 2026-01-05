@@ -20,7 +20,6 @@
   .btn:active { transform: scale(0.98); }
   .btn-main { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; }
   .btn-sec { background: #333; color: white; border: 1px solid #444; }
-  .btn-sm { padding: 8px; font-size: 11px; width: auto; display: inline-block; margin: 0; }
   .btn-icon { background: none; border: none; font-size: 16px; cursor: pointer; color: #888; padding: 5px; }
   
   h1 { text-align: center; margin: 25px 0 5px; font-size: 26px; letter-spacing: -1px; font-weight: 900; color: white; }
@@ -33,7 +32,60 @@
   .view { padding: 20px; max-width: 600px; margin: 0 auto; animation: fade 0.3s; }
   @keyframes fade { from{opacity:0; transform:translateY(5px)} to{opacity:1; transform:translateY(0)} }
 
-  /* --- 4. PROGRAM STYLES --- */
+  /* --- 4. COMPONENTS --- */
+  /* GYM HEADER */
+  .gym-selector-header { background: #222; border: 1px solid #333; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; }
+  .gym-label { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+  .gym-name { font-weight: 800; font-size: 15px; color: var(--accent); margin-top: 2px; }
+
+  /* FOLDERS */
+  .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #333; transition: 0.1s; }
+  .icon-btn { background: #222; border: 1px solid #444; color: #ccc; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
+
+  /* SESSION EXERCISE CARD */
+  .ex-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; }
+  .ex-top { display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center; }
+  .ex-name { font-weight: bold; font-size: 16px; }
+  .ex-tools { display: flex; gap: 10px; align-items: center; }
+  .toggle-lr { font-size: 10px; background: #222; color: #666; padding: 5px 10px; border-radius: 4px; border: 1px solid #444; cursor: pointer; font-weight: bold; }
+  .toggle-lr.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  /* SET ROWS (CLEANED UP) */
+  .set-row { display: grid; grid-template-columns: 35px 1fr 40px 1fr 30px 30px; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .set-num-box { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .set-num { color: #666; font-size: 12px; font-weight: bold; }
+  .set-badge { font-size: 10px; line-height: 10px; margin-top: 2px; }
+  
+  .calc-btn { background: #222; border: 1px solid #444; color: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; height: 42px; }
+  .menu-btn { background: none; border: 1px solid #333; color: #888; border-radius: 6px; cursor: pointer; height: 42px; display: flex; align-items: center; justify-content: center; font-weight: bold; padding-bottom: 5px; }
+  .del-btn { background: none; border: none; color: #555; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; height: 42px; }
+
+  /* SHELF (RESTORED TO V8 STYLE) */
+  .shelf-title { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; border-top: 1px solid #333; padding-top: 20px; margin-top: 20px; }
+  .tile-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tile { background: #222; border: 1px solid #444; color: #ccc; padding: 10px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500; transition: 0.1s; }
+  .tile:active { background: var(--accent); color: black; border-color: var(--accent); }
+  .tile-add { border: 1px dashed #666; color: #888; background: transparent; }
+
+  /* MODALS */
+  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+  .modal-box { background: #1e1e1e; padding: 25px; border-radius: 15px; width: 85%; max-width: 350px; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  
+  #qrcode { background: white; padding: 10px; border-radius: 10px; margin: 20px auto; width: fit-content; }
+  #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #222; border: 1px solid #333; color: white; padding: 12px 24px; border-radius: 30px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: 0.3s; z-index: 3000; }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
+  
+  /* PLATE CALC STYLES */
+  .plate-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+  .p-btn { background: #222; border: 1px solid #444; color: white; padding: 15px 0; border-radius: 8px; font-weight: bold; cursor: pointer; }
+  .calc-display { text-align: center; font-size: 24px; font-weight: bold; color: var(--success); margin-bottom: 15px; padding: 10px; background: #111; border-radius: 8px; }
+
+  /* NAV */
+  .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: #181818; border-top: 1px solid #333; display: grid; grid-template-columns: 1fr 1fr 1fr; z-index: 1000; padding-bottom: 20px; }
+  .nav-btn { background: none; border: none; color: #666; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+  .nav-btn.active { color: var(--accent); }
+
+  /* PROGRAM STYLES (PRESERVED) */
   .week { background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; overflow: hidden; }
   .week-head { display: flex; justify-content: space-between; padding: 15px; background: #222; border-bottom: 1px solid #333; font-weight: bold; }
   .day-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #222; align-items: center; cursor: pointer; }
@@ -45,52 +97,6 @@
   .warmup-box { background: #151515; border-top: 1px solid #333; padding: 10px 15px; display: none; }
   .wu-row { display: flex; justify-content: space-between; font-size: 12px; color: #aaa; margin-bottom: 5px; }
   .wu-title { color: #ffa502; font-size: 10px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: block; }
-
-  /* --- 5. LOG STYLES --- */
-  .gym-selector-header { background: #222; border: 1px solid #333; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-  .gym-label { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-  .gym-name { font-weight: 800; font-size: 15px; color: var(--accent); margin-top: 2px; }
-
-  .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #333; transition: 0.1s; }
-  .day-card:active { transform: scale(0.99); border-color: #555; }
-  .icon-btn { background: #222; border: 1px solid #444; color: #ccc; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
-
-  /* SESSION */
-  .ex-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; position: relative; }
-  .ex-top { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
-  .ex-name { font-weight: bold; font-size: 16px; }
-  .ex-header-tools { display: flex; gap: 8px; }
-  .toggle-lr { font-size: 10px; background: #222; color: #666; padding: 4px 8px; border-radius: 4px; border: 1px solid #444; cursor: pointer; }
-  .toggle-lr.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-  /* SET ROWS */
-  .set-row { display: grid; grid-template-columns: 30px 1fr 40px 1fr 25px 25px; gap: 5px; align-items: center; margin-bottom: 8px; padding: 4px; border-radius: 6px; }
-  .set-row.drop { border: 1px solid var(--drop); background: rgba(255, 107, 129, 0.1); }
-  .set-row.super { border: 1px solid var(--super); background: rgba(162, 155, 254, 0.1); }
-  .set-num { color: #666; font-size: 12px; font-weight: bold; text-align: center; }
-  .del-set { color: #555; background: none; border: none; font-size: 16px; cursor: pointer; }
-  .calc-btn { background: #222; border: 1px solid #444; color: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; height: 42px; }
-  .opt-btn { background: none; border: none; color: #888; font-weight: bold; cursor: pointer; font-size: 14px; }
-
-  /* MODALS */
-  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-  .modal-box { background: #1e1e1e; padding: 25px; border-radius: 15px; width: 85%; max-width: 350px; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-  
-  /* QR MODAL */
-  #qrcode { background: white; padding: 10px; border-radius: 10px; margin: 20px auto; width: fit-content; }
-  
-  /* PLATE CALC MODAL */
-  .plate-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-  .p-btn { background: #222; border: 1px solid #444; color: white; padding: 15px 0; border-radius: 8px; font-weight: bold; cursor: pointer; }
-  .calc-display { text-align: center; font-size: 24px; font-weight: bold; color: var(--success); margin-bottom: 15px; padding: 10px; background: #111; border-radius: 8px; }
-  
-  /* NAV */
-  .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: #181818; border-top: 1px solid #333; display: grid; grid-template-columns: 1fr 1fr 1fr; z-index: 1000; padding-bottom: 20px; }
-  .nav-btn { background: none; border: none; color: #666; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
-  .nav-btn.active { color: var(--accent); }
-  .nav-icon { font-size: 22px; margin-bottom: 5px; }
-  #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #222; border: 1px solid #333; color: white; padding: 12px 24px; border-radius: 30px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: 0.3s; z-index: 3000; }
-  #toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
 </style>
 </head>
 <body>
@@ -173,8 +179,10 @@
         </div>
         <button class="btn-ghost" onclick="clearCart()">RESET</button>
       </div>
+      
       <div id="active-workout-area"></div>
       <button class="btn btn-main" onclick="finishSession()">FINISH & SAVE LOG</button>
+      
       <div class="shelf-title">EXERCISE LIBRARY</div>
       <div id="tile-area" class="tile-grid"></div>
   </div>
@@ -247,13 +255,12 @@ function confirmImport() {
     saveAppData();
     renderDays();
     document.getElementById('modal-import').style.display = 'none';
-    window.history.replaceState({}, document.title, "/"); // Clean URL
+    window.history.replaceState({}, document.title, "/"); 
     showToast("Imported Successfully!");
 }
 
 // --- APP INIT ---
 renderDays();
-
 function switchTab(id, btn) {
     document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
     document.getElementById('view-'+id).classList.remove('hidden');
@@ -281,26 +288,20 @@ function selectGym(name) { appData.currentGym = name; saveAppData(); renderDays(
 function promptAddGym() { openInputModal("New Gym", "Name", (val) => { if(val){ appData.gyms[val]={folders:[],library:{}}; selectGym(val); } }); }
 function delGym(name) { if(Object.keys(appData.gyms).length<=1)return; showConfirm("Delete?",()=>{ delete appData.gyms[name]; selectGym(Object.keys(appData.gyms)[0]); }); }
 
-// --- SHARING LOGIC ---
+// --- SHARING ---
 function shareFolder(name) {
     const gymData = getCurrentGymData();
     const data = { name: name, exs: gymData.library[name] || [] };
     const str = btoa(JSON.stringify(data));
     const link = window.location.origin + window.location.pathname + "?import=" + str;
-    
-    // QR
     document.getElementById('qrcode').innerHTML = "";
     new QRCode(document.getElementById("qrcode"), { text: link, width: 128, height: 128 });
-    
-    // Store link for copy
     window.shareLink = link;
     document.getElementById('modal-share').style.display = 'flex';
 }
-function copyShareLink() {
-    navigator.clipboard.writeText(window.shareLink).then(() => showToast("Link Copied!"));
-}
+function copyShareLink() { navigator.clipboard.writeText(window.shareLink).then(() => showToast("Link Copied!")); }
 
-// --- FOLDER LIST ---
+// --- FOLDERS ---
 function renderDays() {
     const gymData = getCurrentGymData();
     document.getElementById('current-gym-display').innerText = appData.currentGym;
@@ -317,7 +318,7 @@ function renderDays() {
     });
 }
 
-// --- SESSION LOGIC ---
+// --- SESSION ---
 let currentFolder = "";
 function openSession(day) { currentFolder = day; document.getElementById('split-manager').classList.add('hidden'); document.getElementById('session-logger').classList.remove('hidden'); document.getElementById('session-title').innerText = day; renderCart(); renderShelf(); }
 function closeSession() { document.getElementById('session-logger').classList.add('hidden'); document.getElementById('split-manager').classList.remove('hidden'); }
@@ -329,23 +330,30 @@ function renderCart() {
     
     activeCart.forEach((ex) => {
         const sets = sessionData[ex] || [];
-        const isLR = sessionData[ex + '_LR'] === true; // Check if L/R mode is active
+        const isLR = sessionData[ex + '_LR'] === true; 
         
         let setsHtml = "";
         sets.forEach((set, idx) => {
             const inputId = `w-${ex}-${idx}`;
-            // Determine label (Num or L/R)
             let label = idx + 1;
-            if (set.side) label = set.side; 
+            if (set.side) label = set.side;
+            
+            // BADGE LOGIC
+            let badge = "";
+            if(set.type === 'drop') badge = "💧";
+            if(set.type === 'super') badge = "🔗";
 
             setsHtml += `
-            <div class="set-row ${set.type || ''}">
-                <span class="set-num">${label}</span>
+            <div class="set-row">
+                <div class="set-num-box">
+                    <span class="set-num">${label}</span>
+                    <span class="set-badge">${badge}</span>
+                </div>
                 <input type="number" id="${inputId}" placeholder="Lbs" value="${set.w}" onchange="updateSet('${ex}', ${idx}, 'w', this.value)">
                 <button class="calc-btn" onclick="openCalc('${inputId}')">🧮</button>
                 <input type="number" placeholder="Reps" value="${set.r}" onchange="updateSet('${ex}', ${idx}, 'r', this.value)">
-                <button class="opt-btn" onclick="openSetOpt('${ex}', ${idx})">...</button>
-                <button class="del-set" onclick="removeSet('${ex}', ${idx})">✕</button>
+                <button class="menu-btn" onclick="openSetOpt('${ex}', ${idx})">...</button>
+                <button class="del-btn" onclick="removeSet('${ex}', ${idx})">✕</button>
             </div>`;
         });
 
@@ -353,7 +361,7 @@ function renderCart() {
         <div class="ex-card">
             <div class="ex-top">
                 <span class="ex-name">${ex}</span>
-                <div class="ex-header-tools">
+                <div class="ex-tools">
                    <div class="toggle-lr ${isLR ? 'active' : ''}" onclick="toggleLR('${ex}')">L+R</div>
                    <button onclick="removeExFromCart('${ex}')" style="background:none;border:none;color:#555;">✕</button>
                 </div>
@@ -364,7 +372,7 @@ function renderCart() {
     });
 }
 
-// --- SET LOGIC (V9 UPDATES) ---
+// --- SET OPERATIONS ---
 let optTarget = null;
 function openSetOpt(ex, idx) { optTarget = {ex, idx}; document.getElementById('modal-set-opt').style.display = 'flex'; }
 function applySetType(type) {
@@ -374,19 +382,14 @@ function applySetType(type) {
         document.getElementById('modal-set-opt').style.display = 'none';
     }
 }
-
 function toggleLR(ex) {
     const current = sessionData[ex + '_LR'] === true;
     sessionData[ex + '_LR'] = !current;
     saveSession(); renderCart();
 }
-
 function addSet(ex) {
     if(!sessionData[ex]) sessionData[ex] = [];
-    
-    // Check if L/R mode is ON
     if(sessionData[ex + '_LR'] === true) {
-        // Add Left AND Right
         sessionData[ex].push({w:'', r:'', side:'L'});
         sessionData[ex].push({w:'', r:'', side:'R'});
     } else {
@@ -394,7 +397,6 @@ function addSet(ex) {
     }
     saveSession(); renderCart();
 }
-
 function removeSet(ex, idx) { sessionData[ex].splice(idx, 1); saveSession(); renderCart(); }
 function updateSet(ex, idx, field, val) { sessionData[ex][idx][field] = val; saveSession(); }
 
@@ -402,7 +404,7 @@ function renderShelf() {
     const area = document.getElementById('tile-area'); area.innerHTML = "";
     const gymData = getCurrentGymData();
     const list = gymData.library[currentFolder] || [];
-    area.innerHTML += `<div class="tile tile-add" onclick="promptNewEx()">+ NEW</div>`;
+    area.innerHTML += `<button class="tile tile-add" onclick="promptNewEx()">+ NEW</button>`;
     list.forEach(ex => { area.innerHTML += `<div class="tile" onclick="addToCart('${ex}')">${ex}</div>`; });
 }
 function addToCart(ex) { if(!activeCart.includes(ex)) { activeCart.push(ex); if(!sessionData[ex]) sessionData[ex] = [{w:'', r:''}]; saveSession(); renderCart(); } }
@@ -411,7 +413,6 @@ function promptNewEx() { openInputModal("New Exercise", "Name", (val) => { if(va
 
 function saveSession() { localStorage.setItem('activeCart', JSON.stringify(activeCart)); localStorage.setItem('sessionData', JSON.stringify(sessionData)); }
 function saveAppData() { localStorage.setItem('netGainsData', JSON.stringify(appData)); }
-
 function finishSession() {
     showConfirm("Save Log?", () => {
         let count = 0; const today = new Date().toISOString().split('T')[0];
