@@ -20,7 +20,8 @@
   .btn:active { transform: scale(0.98); }
   .btn-main { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; }
   .btn-sec { background: #333; color: white; border: 1px solid #444; }
-  .btn-ghost { background: transparent; border: 1px dashed #444; color: #666; font-size: 10px; padding: 6px 10px; width: auto; display: inline-block; cursor: pointer; }
+  /* RESTORED V8 GHOST BUTTON STYLE */
+  .btn-ghost { background: transparent; border: 1px dashed #444; color: #666; font-size: 10px; padding: 6px 10px; width: auto; display: inline-block; cursor: pointer; border-radius: 6px; }
   .btn-sm { padding: 8px; font-size: 11px; width: auto; display: inline-block; margin: 0; }
   
   h1 { text-align: center; margin: 25px 0 5px; font-size: 26px; letter-spacing: -1px; font-weight: 900; color: white; }
@@ -34,11 +35,12 @@
   @keyframes fade { from{opacity:0; transform:translateY(5px)} to{opacity:1; transform:translateY(0)} }
 
   /* --- 4. COMPONENTS --- */
-  /* GYM HEADER (Restored V8.1 Styles) */
-  .gym-selector-header { background: #222; border: 1px solid #333; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; }
-  .gym-label { font-size: 10px; color: #888; text-transform: uppercase; }
-  .gym-name { font-weight: bold; font-size: 14px; color: var(--accent); }
+  /* GYM HEADER */
+  .gym-selector-header { background: #222; border: 1px solid #333; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; }
+  .gym-label { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+  .gym-name { font-weight: 800; font-size: 14px; color: var(--accent); margin-top: 2px; }
 
+  /* FOLDERS */
   .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #333; transition: 0.1s; }
   .icon-btn { background: #222; border: 1px solid #444; color: #ccc; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
 
@@ -50,23 +52,21 @@
   .toggle-lr { font-size: 10px; background: #222; color: #666; padding: 5px 10px; border-radius: 4px; border: 1px solid #444; cursor: pointer; font-weight: bold; }
   .toggle-lr.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-  /* SET GROUPING LOGIC */
-  .set-container { margin-bottom: 8px; }
+  /* SET ROWS */
+  .set-row { display: grid; grid-template-columns: 35px 1fr 40px 1fr 30px 30px; gap: 8px; align-items: center; margin-bottom: 8px; }
+  /* SET GROUPS */
   .set-group-box { border: 1px solid #444; border-left-width: 4px; padding: 8px; border-radius: 8px; background: rgba(255,255,255,0.03); margin-bottom: 8px; }
   .set-group-drop { border-left-color: var(--drop); }
   .set-group-super { border-left-color: var(--super); }
-  
-  .set-row { display: grid; grid-template-columns: 35px 1fr 40px 1fr 30px 30px; gap: 8px; align-items: center; margin-bottom: 4px; }
-  .set-row:last-child { margin-bottom: 0; }
+  .set-container { margin-bottom: 4px; }
   
   .set-num { color: #666; font-size: 12px; font-weight: bold; text-align: center; }
-  .set-tag { font-size: 9px; font-weight: bold; text-transform: uppercase; text-align: center; }
 
   .calc-btn { background: #222; border: 1px solid #444; color: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; height: 42px; }
   .menu-btn { background: none; border: 1px solid #333; color: #888; border-radius: 6px; cursor: pointer; height: 42px; display: flex; align-items: center; justify-content: center; font-weight: bold; padding-bottom: 5px; }
   .del-btn { background: none; border: none; color: #555; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; height: 42px; }
 
-  /* SHELF */
+  /* SHELF (Restored buttons) */
   .shelf-title { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; border-top: 1px solid #333; padding-top: 20px; margin-top: 20px; }
   .tile-grid { display: flex; flex-wrap: wrap; gap: 8px; }
   .tile { display: inline-flex; align-items: center; justify-content: center; background: #222; border: 1px solid #444; color: #ccc; padding: 12px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500; transition: 0.1s; }
@@ -81,12 +81,10 @@
   #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #222; border: 1px solid #333; color: white; padding: 12px 24px; border-radius: 30px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: 0.3s; z-index: 3000; }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
   
-  /* PLATE CALC STYLES */
   .plate-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
   .p-btn { background: #222; border: 1px solid #444; color: white; padding: 15px 0; border-radius: 8px; font-weight: bold; cursor: pointer; }
   .calc-display { text-align: center; font-size: 24px; font-weight: bold; color: var(--success); margin-bottom: 15px; padding: 10px; background: #111; border-radius: 8px; }
 
-  /* NAV */
   .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: #181818; border-top: 1px solid #333; display: grid; grid-template-columns: 1fr 1fr 1fr; z-index: 1000; padding-bottom: 20px; }
   .nav-btn { background: none; border: none; color: #666; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
   .nav-btn.active { color: var(--accent); }
@@ -346,11 +344,11 @@ function renderCart() {
             const set = sets[i];
             const nextSet = sets[i+1];
             
-            // Determine the display label for this set
+            // Generate Label
             let label = setCounter;
             if (set.side) {
                 label = `${setCounter} ${set.side}`;
-                // Logic: If L, next is usually R (same set num). If R, increment count.
+                // If this is R, we complete the pair and increment. If L, we wait.
                 if (set.side === 'R') setCounter++;
             } else {
                 setCounter++;
