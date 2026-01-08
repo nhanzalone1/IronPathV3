@@ -10,7 +10,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   /* --- 1. VARIABLES & RESET --- */
-  :root { --bg: #0f0f13; --card: #1a1a24; --text: #ffffff; --accent: #ff4757; --success: #2ed573; --drop: #ff6b81; --super: #a29bfe; --input-bg: #121212; }
+  :root { --bg: #0f0f13; --card: #1a1a24; --text: #ffffff; --accent: #ff4757; --success: #2ed573; --drop: #ff6b81; --super: #a29bfe; --assist: #00d2d3; --input-bg: #121212; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; padding: 0; background-color: var(--bg); color: var(--text); font-family: -apple-system, system-ui, sans-serif; overflow-x: hidden; padding-bottom: 90px; }
 
@@ -20,7 +20,6 @@
   .btn:active { transform: scale(0.98); }
   .btn-main { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; }
   .btn-sec { background: #333; color: white; border: 1px solid #444; }
-  /* RESTORED V8 GHOST BUTTON STYLE */
   .btn-ghost { background: transparent; border: 1px dashed #444; color: #666; font-size: 10px; padding: 6px 10px; width: auto; display: inline-block; cursor: pointer; border-radius: 6px; }
   .btn-sm { padding: 8px; font-size: 11px; width: auto; display: inline-block; margin: 0; }
   
@@ -35,12 +34,10 @@
   @keyframes fade { from{opacity:0; transform:translateY(5px)} to{opacity:1; transform:translateY(0)} }
 
   /* --- 4. COMPONENTS --- */
-  /* GYM HEADER */
-  .gym-selector-header { background: #222; border: 1px solid #333; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; }
-  .gym-label { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-  .gym-name { font-weight: 800; font-size: 14px; color: var(--accent); margin-top: 2px; }
+  .gym-selector-header { background: #222; border: 1px solid #333; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; }
+  .gym-label { font-size: 10px; color: #888; text-transform: uppercase; }
+  .gym-name { font-weight: bold; font-size: 14px; color: var(--accent); }
 
-  /* FOLDERS */
   .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #333; transition: 0.1s; }
   .icon-btn { background: #222; border: 1px solid #444; color: #ccc; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
 
@@ -58,6 +55,7 @@
   .set-group-box { border: 1px solid #444; border-left-width: 4px; padding: 8px; border-radius: 8px; background: rgba(255,255,255,0.03); margin-bottom: 8px; }
   .set-group-drop { border-left-color: var(--drop); }
   .set-group-super { border-left-color: var(--super); }
+  .set-group-assist { border-left-color: var(--assist); }
   .set-container { margin-bottom: 4px; }
   
   .set-num { color: #666; font-size: 12px; font-weight: bold; text-align: center; }
@@ -66,7 +64,7 @@
   .menu-btn { background: none; border: 1px solid #333; color: #888; border-radius: 6px; cursor: pointer; height: 42px; display: flex; align-items: center; justify-content: center; font-weight: bold; padding-bottom: 5px; }
   .del-btn { background: none; border: none; color: #555; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; height: 42px; }
 
-  /* SHELF (Restored buttons) */
+  /* SHELF */
   .shelf-title { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; border-top: 1px solid #333; padding-top: 20px; margin-top: 20px; }
   .tile-grid { display: flex; flex-wrap: wrap; gap: 8px; }
   .tile { display: inline-flex; align-items: center; justify-content: center; background: #222; border: 1px solid #444; color: #ccc; padding: 12px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500; transition: 0.1s; }
@@ -81,9 +79,11 @@
   #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #222; border: 1px solid #333; color: white; padding: 12px 24px; border-radius: 30px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: 0.3s; z-index: 3000; }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
   
+  /* PLATE CALC & BRIDGE */
   .plate-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
   .p-btn { background: #222; border: 1px solid #444; color: white; padding: 15px 0; border-radius: 8px; font-weight: bold; cursor: pointer; }
   .calc-display { text-align: center; font-size: 24px; font-weight: bold; color: var(--success); margin-bottom: 15px; padding: 10px; background: #111; border-radius: 8px; }
+  .import-textarea { width: 100%; background: #111; color: #0f0; font-family: monospace; border: 1px solid #333; border-radius: 5px; padding: 10px; font-size: 10px; height: 60px; margin-bottom: 10px; }
 
   .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: #181818; border-top: 1px solid #333; display: grid; grid-template-columns: 1fr 1fr 1fr; z-index: 1000; padding-bottom: 20px; }
   .nav-btn { background: none; border: none; color: #666; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
@@ -105,39 +105,52 @@
 </head>
 <body>
 
+<div id="modal-bridge" class="modal-overlay">
+  <div class="modal-box" style="text-align:center;">
+    <h3 class="modal-title" style="color:var(--success)">WORKOUT RECEIVED</h3>
+    <p style="color:#ccc; font-size:13px; margin-bottom:20px;">Tap below to copy, then open the NetGains App and paste it.</p>
+    <button class="btn btn-main" onclick="copyBridgeCode()">📋 COPY WORKOUT CODE</button>
+    <button class="btn btn-sec" style="margin-top:10px" onclick="document.getElementById('modal-bridge').style.display='none'">CLOSE</button>
+  </div>
+</div>
+
+<div id="modal-manual-import" class="modal-overlay">
+  <div class="modal-box">
+    <h3 class="modal-title">Import Workout</h3>
+    <p style="color:#666; font-size:12px;">Paste the code from your friend or the website below.</p>
+    <textarea id="import-area" class="import-textarea" placeholder="Paste gibberish code here..."></textarea>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+      <button class="btn btn-sec" onclick="document.getElementById('modal-manual-import').style.display='none'">CANCEL</button>
+      <button class="btn btn-main" onclick="runManualImport()">IMPORT</button>
+    </div>
+  </div>
+</div>
+
 <div id="modal-share" class="modal-overlay">
   <div class="modal-box">
     <h3 class="modal-title" style="text-align:center">Share Routine</h3>
     <div id="qrcode"></div>
-    <p style="font-size:10px; color:#666; text-align:center;">Scan to import</p>
-    <button class="btn btn-main" onclick="copyShareLink()">COPY LINK</button>
-    <button class="btn btn-sec" onclick="document.getElementById('modal-share').style.display='none'">CLOSE</button>
+    <p style="font-size:10px; color:#666; text-align:center; margin-top:5px;">Scan to view bridge page</p>
+    <div style="margin-top:15px;">
+        <button class="btn btn-main" onclick="copyShareCode()">COPY CODE (FOR TEXTING)</button>
+        <button class="btn btn-sec" style="margin-top:5px" onclick="document.getElementById('modal-share').style.display='none'">CLOSE</button>
+    </div>
   </div>
 </div>
 
 <div id="modal-set-opt" class="modal-overlay">
   <div class="modal-box">
     <h3 class="modal-title">Link Set</h3>
-    <p style="color:#666; font-size:12px; margin-bottom:15px;">This will add a new set linked to the current one.</p>
+    <p style="color:#666; font-size:12px; margin-bottom:15px;">Add a linked set below the current one.</p>
     <button class="btn btn-sec" style="border-color:var(--drop); color:var(--drop);" onclick="applySetType('drop')">💧 Add Drop Set</button>
     <button class="btn btn-sec" style="border-color:var(--super); color:var(--super);" onclick="applySetType('super')">🔗 Add Superset</button>
+    <button class="btn btn-sec" style="border-color:var(--assist); color:var(--assist);" onclick="applySetType('assist')">🤝 Add Assisted</button>
     <button class="btn btn-sec" style="margin-top:20px" onclick="document.getElementById('modal-set-opt').style.display='none'">CANCEL</button>
   </div>
 </div>
 
-<div id="modal-import" class="modal-overlay">
-  <div class="modal-box">
-    <h3 class="modal-title">Incoming Routine</h3>
-    <p class="modal-desc" id="import-desc">Import workout?</p>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-      <button class="btn btn-sec" onclick="document.getElementById('modal-import').style.display='none'">NO</button>
-      <button class="btn btn-main" onclick="confirmImport()">YES, SAVE</button>
-    </div>
-  </div>
-</div>
-
 <div id="modal-input-overlay" class="modal-overlay"><div class="modal-box"><h3 id="modal-title" class="modal-title">Input</h3><input type="text" id="modal-input"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;"><button class="btn btn-sec" onclick="closeInputModal()">CANCEL</button><button class="btn btn-main" id="modal-ok">SAVE</button></div></div></div>
-<div id="modal-plate-calc" class="modal-overlay"><div class="modal-box"><h3 class="modal-title">Plate Math</h3><div class="calc-display" id="calc-total">45 lbs</div><div class="bar-toggle" onclick="toggleBar()" style="display:flex;justify-content:space-between;background:#222;padding:10px;border-radius:6px;margin-bottom:15px;font-size:12px;"><span>Bar (45lbs)</span><span id="bar-status" style="color:var(--success)">ON</span></div><div class="plate-grid"><button class="p-btn" onclick="addPlate(45)">45</button><button class="p-btn" onclick="addPlate(35)">35</button><button class="p-btn" onclick="addPlate(25)">25</button><button class="p-btn" onclick="addPlate(10)">10</button><button class="p-btn" onclick="addPlate(5)">5</button><button class="p-btn" onclick="addPlate(2.5)">2.5</button></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button class="btn btn-sec" onclick="resetCalc()">RESET</button><button class="btn btn-main" onclick="applyCalc()">USE</button></div></div></div>
+<div id="modal-plate-calc" class="modal-overlay"><div class="modal-box"><h3 class="modal-title">Plate Math</h3><div class="calc-display" id="calc-total">45 lbs</div><div class="bar-toggle" onclick="toggleBar()" style="display:flex;justify-content:space-between;background:#222;padding:10px;border-radius:6px;margin-bottom:15px;font-size:12px;"><span>Bar (45lbs)</span><span id="bar-status" style="color:var(--success)">ON</span></div><div class="plate-grid"><button class="p-btn" onclick="addPlate(45)">45</button><button class="p-btn" onclick="addPlate(35)">35</button><button class="p-btn" onclick="addPlate(25)">25</button><button class="p-btn" onclick="addPlate(10)">10</button><button class="p-btn" onclick="addPlate(5)">5</button><button class="p-btn" onclick="addPlate(2.5)">2.5</button></div><button class="btn btn-sec" style="border-style:dashed; margin-bottom:10px;" onclick="useBW()">USE BODYWEIGHT (BW)</button><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button class="btn btn-sec" onclick="resetCalc()">RESET</button><button class="btn btn-main" onclick="applyCalc()">USE</button></div></div></div>
 <div id="modal-confirm-overlay" class="modal-overlay"><div class="modal-box"><h3 class="modal-title">Confirm</h3><p id="confirm-desc" class="modal-desc">Sure?</p><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button class="btn btn-sec" onclick="closeConfirmModal()">CANCEL</button><button class="btn btn-main" id="confirm-ok" style="background:#333">YES</button></div></div></div>
 <div id="toast"><span class="toast-icon">✓</span> <span id="toast-msg">Saved</span></div>
 
@@ -163,6 +176,8 @@
           <div><div class="gym-label">CURRENT LOCATION</div><div class="gym-name" id="current-gym-display">Main Gym</div></div>
           <div style="color:#666">▼</div>
       </div>
+
+      <button class="btn btn-sec" style="border:1px solid var(--accent); color:var(--accent); margin-bottom:20px;" onclick="openManualImport()">📥 IMPORT CODE</button>
 
       <div id="my-split-list"></div>
       <button class="btn btn-sec" style="border-style:dashed; color:#888;" onclick="promptAddDay()">+ NEW FOLDER</button>
@@ -240,27 +255,63 @@ let sessionData = JSON.parse(localStorage.getItem('sessionData') || '{}');
 let history = JSON.parse(localStorage.getItem('liftHistory') || '{}'); 
 let globalLog = JSON.parse(localStorage.getItem('globalLog') || '[]');
 
-// --- IMPORT LOGIC ---
+// --- SHARING BRIDGE LOGIC ---
 const urlParams = new URLSearchParams(window.location.search);
 const importData = urlParams.get('import');
 if(importData) {
-    try {
-        const decoded = JSON.parse(atob(importData));
-        document.getElementById('import-desc').innerText = `Import folder "${decoded.name}" with ${decoded.exs.length} exercises?`;
-        document.getElementById('modal-import').style.display = 'flex';
-        window.tempImport = decoded;
-    } catch(e) { console.log("Import error"); }
+    // Show Bridge Modal
+    window.bridgeCode = importData;
+    document.getElementById('modal-bridge').style.display = 'flex';
 }
-function confirmImport() {
+
+function copyBridgeCode() {
+    navigator.clipboard.writeText(window.bridgeCode).then(() => {
+        showToast("Code Copied! Open App & Import.");
+        document.getElementById('modal-bridge').style.display = 'none';
+        window.history.replaceState({}, document.title, "/"); 
+    });
+}
+
+function openManualImport() {
+    document.getElementById('import-area').value = "";
+    document.getElementById('modal-manual-import').style.display = 'flex';
+}
+
+function runManualImport() {
+    const raw = document.getElementById('import-area').value;
+    if(!raw) return;
+    try {
+        const decoded = JSON.parse(atob(raw));
+        const gymData = getCurrentGymData();
+        const name = decoded.name;
+        if(!gymData.folders.includes(name)) gymData.folders.push(name);
+        gymData.library[name] = decoded.exs;
+        saveAppData();
+        renderDays();
+        document.getElementById('modal-manual-import').style.display = 'none';
+        showToast("Imported: " + name);
+    } catch(e) {
+        showToast("Invalid Code");
+    }
+}
+
+function shareFolder(name) {
     const gymData = getCurrentGymData();
-    const name = window.tempImport.name;
-    if(!gymData.folders.includes(name)) gymData.folders.push(name);
-    gymData.library[name] = window.tempImport.exs;
-    saveAppData();
-    renderDays();
-    document.getElementById('modal-import').style.display = 'none';
-    window.history.replaceState({}, document.title, "/"); 
-    showToast("Imported Successfully!");
+    const data = { name: name, exs: gymData.library[name] || [] };
+    const str = btoa(JSON.stringify(data));
+    // The link takes them to the bridge page
+    const link = window.location.origin + window.location.pathname + "?import=" + str;
+    
+    document.getElementById('qrcode').innerHTML = "";
+    new QRCode(document.getElementById("qrcode"), { text: link, width: 128, height: 128 });
+    
+    // We store just the CODE for copy, not the whole URL, so they can paste easily
+    window.shareCode = str;
+    document.getElementById('modal-share').style.display = 'flex';
+}
+
+function copyShareCode() {
+    navigator.clipboard.writeText(window.shareCode).then(() => showToast("Code Copied!"));
 }
 
 // --- APP INIT ---
@@ -291,19 +342,6 @@ function renderGymList() {
 function selectGym(name) { appData.currentGym = name; saveAppData(); renderDays(); closeGymManager(); showToast("Switched"); }
 function promptAddGym() { openInputModal("New Gym", "Name", (val) => { if(val){ appData.gyms[val]={folders:[],library:{}}; selectGym(val); } }); }
 function delGym(name) { if(Object.keys(appData.gyms).length<=1)return; showConfirm("Delete?",()=>{ delete appData.gyms[name]; selectGym(Object.keys(appData.gyms)[0]); }); }
-
-// --- SHARING ---
-function shareFolder(name) {
-    const gymData = getCurrentGymData();
-    const data = { name: name, exs: gymData.library[name] || [] };
-    const str = btoa(JSON.stringify(data));
-    const link = window.location.origin + window.location.pathname + "?import=" + str;
-    document.getElementById('qrcode').innerHTML = "";
-    new QRCode(document.getElementById("qrcode"), { text: link, width: 128, height: 128 });
-    window.shareLink = link;
-    document.getElementById('modal-share').style.display = 'flex';
-}
-function copyShareLink() { navigator.clipboard.writeText(window.shareLink).then(() => showToast("Link Copied!")); }
 
 // --- FOLDERS ---
 function renderDays() {
@@ -348,7 +386,6 @@ function renderCart() {
             let label = setCounter;
             if (set.side) {
                 label = `${setCounter} ${set.side}`;
-                // If this is R, we complete the pair and increment. If L, we wait.
                 if (set.side === 'R') setCounter++;
             } else {
                 setCounter++;
@@ -364,6 +401,12 @@ function renderCart() {
                 html += `<div class="set-group-box set-group-super">
                             ${renderRow(ex, i, set, label)}
                             ${renderRow(ex, i+1, nextSet, "SUPER")}
+                         </div>`;
+                i += 2;
+            } else if (set.type === 'assist_parent' && nextSet && nextSet.type === 'assist_child') {
+                html += `<div class="set-group-box set-group-assist">
+                            ${renderRow(ex, i, set, label)}
+                            ${renderRow(ex, i+1, nextSet, "ASST")}
                          </div>`;
                 i += 2;
             } else {
@@ -394,7 +437,7 @@ function renderRow(ex, idx, set, label) {
         <div style="display:flex;flex-direction:column;align-items:center;">
              <span class="set-num">${label}</span>
         </div>
-        <input type="number" id="${inputId}" placeholder="Lbs" value="${set.w}" onchange="updateSet('${ex}', ${idx}, 'w', this.value)">
+        <input type="text" id="${inputId}" placeholder="Lbs" value="${set.w}" onchange="updateSet('${ex}', ${idx}, 'w', this.value)">
         <button class="calc-btn" onclick="openCalc('${inputId}')">🧮</button>
         <input type="number" placeholder="Reps" value="${set.r}" onchange="updateSet('${ex}', ${idx}, 'r', this.value)">
         <button class="menu-btn" onclick="openSetOpt('${ex}', ${idx})">...</button>
@@ -409,7 +452,12 @@ function applySetType(type) {
     if(optTarget) {
         const {ex, idx} = optTarget;
         const currentSet = sessionData[ex][idx];
-        const newSet = {w: currentSet.w, r:'', type: type+'_child'};
+        
+        // Smart Weight Logic
+        let newWeight = currentSet.w;
+        if(type === 'drop') newWeight = ""; // Clear for dropset
+        
+        const newSet = {w: newWeight, r:'', type: type+'_child'};
         sessionData[ex].splice(idx + 1, 0, newSet);
         currentSet.type = type+'_parent';
         saveSession(); renderCart();
@@ -454,11 +502,17 @@ function finishSession() {
             const sets = sessionData[ex] || [];
             let best1RM = 0; let bestStr = "";
             sets.forEach(set => {
-                const w = parseFloat(set.w); const r = parseFloat(set.r);
-                if(w && r) {
+                // Ensure we don't crash on "BW"
+                const w = parseFloat(set.w); 
+                const r = parseFloat(set.r);
+                if(!isNaN(w) && !isNaN(r)) {
                     const e1rm = w * (1 + (0.033 * r));
-                    if(e1rm > best1RM) { best1RM = e1rm; bestStr = `${w} lbs x ${r}`; }
+                    if(e1rm > best1RM) { best1RM = e1rm; bestStr = `${set.w} lbs x ${r}`; }
                     globalLog.push({ date: today, ex: ex, w: w, r: r, rm: Math.round(e1rm), type: set.type||'', side: set.side||'' });
+                    count++;
+                } else if (set.w === "BW" && r) {
+                    // Log bodyweight reps
+                    globalLog.push({ date: today, ex: ex, w: "BW", r: r, rm: 0, type: set.type||'', side: set.side||'' });
                     count++;
                 }
             });
@@ -489,6 +543,8 @@ function addPlate(w){ calcSideWeight+=w; updateCalcDisplay(); }
 function resetCalc(){ calcSideWeight=0; updateCalcDisplay(); }
 function updateCalcDisplay(){ document.getElementById('calc-total').innerText=((calcSideWeight*2)+calcBar)+" lbs"; }
 function applyCalc(){ if(calcTargetId){document.getElementById(calcTargetId).value=((calcSideWeight*2)+calcBar);document.getElementById(calcTargetId).dispatchEvent(new Event('change'));} document.getElementById('modal-plate-calc').style.display='none'; }
+function useBW() { if(calcTargetId){document.getElementById(calcTargetId).value="BW";document.getElementById(calcTargetId).dispatchEvent(new Event('change'));} document.getElementById('modal-plate-calc').style.display='none'; }
+
 function genProgram(){ const w=parseFloat(document.getElementById('w').value), r=parseFloat(document.getElementById('r').value); if(!w||!r)return; const rnd=n=>Math.round(n/5)*5, max=rnd(w*(1+(0.033*r))), rm5=rnd(max*0.87), rm3=rnd(max*0.93); const weeks=[{n:1,t:"BASE",b:rm5,m:.85,s:4,r:6},{n:2,t:"LOAD",b:rm5,m:.9,s:4,r:6},{n:3,t:"INTENSE",b:rm5,m:.95,s:4,r:6},{n:4,t:"PEAK",b:rm5,m:1.05,s:4,r:6},{n:5,t:"UNLOAD",b:rm5,m:.85,s:2,r:4,f:.9},{n:6,t:"SPEED",b:rm3,m:1,s:3,r:4,w:.75,f:.85},{n:7,t:"FORCE",b:rm3,m:1,s:3,r:4,w:.85,f:.9},{n:8,t:"MAX",b:rm3,m:1,s:3,r:4,w:.7,f:.85}]; let h=`<div style="text-align:center;margin-bottom:20px;color:var(--success);font-weight:bold;border:1px solid #333;padding:10px;border-radius:10px;">EST 1RM: ${max} LBS</div>`; weeks.forEach(k=>{let m=rnd(k.b*k.m), wL=rnd(m*(k.w||.85)), f=rnd(m*(k.f||.95)); if(k.n===4)wL=rnd(m*.8); h+=`<div class="week"><div class="week-head"><span>Week ${k.n}</span><span style="color:#ff4757">${k.t}</span></div><div class="day-row"><div><b>Mon</b></div><div>${m} lbs ${k.s}x${k.r} <span class="tag tag-h">H</span></div></div><div class="day-row"><div><b>Wed</b></div><div>${wL} lbs ${k.s}x${k.r} <span class="tag tag-l">L</span></div></div><div class="day-row"><div><b>Fri</b></div><div>${f} lbs ${k.s}x${k.r} <span class="tag tag-m">M</span></div></div></div>`;}); document.getElementById('schedule-area').innerHTML=h; }
 let timer; function startTimer(s){ clearInterval(timer); const end=Date.now()+s*1000; timer=setInterval(()=>{const r=Math.round((end-Date.now())/1000); if(r<0){clearInterval(timer);document.getElementById('t-disp').innerText="DONE";return;} const m=Math.floor(r/60), rs=r%60; document.getElementById('t-disp').innerText=`${m}:${rs<10?'0':''}${rs}`;},1000); }
 </script>
