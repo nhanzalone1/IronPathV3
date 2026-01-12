@@ -393,6 +393,7 @@ function renderCart() {
     const area = document.getElementById('active-workout-area'); area.innerHTML = "";
     if(activeCart.length===0) { area.innerHTML="<div style='text-align:center;padding:30px;color:#555;'>Empty Workout</div>"; return; }
     
+    // IMPORTANT: EX INDEX ADDED FOR ID GENERATION
     activeCart.forEach((ex, exIdx) => {
         const isCardio = appData.exTypes[ex] === 'cardio';
         const sets = sessionData[ex] || [];
@@ -441,13 +442,13 @@ function renderCart() {
                 } else { setCounter++; }
 
                 if (set.type === 'drop_parent' && nextSet && nextSet.type === 'drop_child') {
-                    rowsHtml += `<div class="set-group-box set-group-drop">${renderRow(ex, i, set, label)}${renderRow(ex, i+1, nextSet, "DROP")}</div>`; i += 2; 
+                    rowsHtml += `<div class="set-group-box set-group-drop">${renderRow(ex, exIdx, i, set, label)}${renderRow(ex, exIdx, i+1, nextSet, "DROP")}</div>`; i += 2; 
                 } else if (set.type === 'super_parent' && nextSet && nextSet.type === 'super_child') {
-                    rowsHtml += `<div class="set-group-box set-group-super">${renderRow(ex, i, set, label)}${renderRow(ex, i+1, nextSet, "SUPER")}</div>`; i += 2;
+                    rowsHtml += `<div class="set-group-box set-group-super">${renderRow(ex, exIdx, i, set, label)}${renderRow(ex, exIdx, i+1, nextSet, "SUPER")}</div>`; i += 2;
                 } else if (set.type === 'assist_parent' && nextSet && nextSet.type === 'assist_child') {
-                    rowsHtml += `<div class="set-group-box set-group-assist">${renderRow(ex, i, set, label)}${renderRow(ex, i+1, nextSet, "ASST")}</div>`; i += 2;
+                    rowsHtml += `<div class="set-group-box set-group-assist">${renderRow(ex, exIdx, i, set, label)}${renderRow(ex, exIdx, i+1, nextSet, "ASST")}</div>`; i += 2;
                 } else {
-                    rowsHtml += `<div class="set-container">${renderRow(ex, i, set, label)}</div>`; i++;
+                    rowsHtml += `<div class="set-container">${renderRow(ex, exIdx, i, set, label)}</div>`; i++;
                 }
             }
         }
@@ -461,17 +462,20 @@ function renderCart() {
     });
 }
 
-function renderRow(ex, idx, set, label) {
-    const inputId = `w-${ex}-${idx}`;
+function renderRow(ex, exIdx, setIdx, set, label) {
+    // GENERATE UNIQUE SAFE ID
+    const inputId = `input-${exIdx}-${setIdx}`;
+    // ESCAPE EXERCISE NAME FOR JS CALLS
     const safeEx = ex.replace(/'/g, "\\'");
+    
     return `
     <div class="set-row">
         <div style="display:flex;flex-direction:column;align-items:center;"><span class="set-num">${label}</span></div>
-        <div class="input-wrapper"><input type="text" inputmode="decimal" id="${inputId}" value="${set.w}" onchange="updateSet('${safeEx}', ${idx}, 'w', this.value)"><span class="input-unit">LBS</span></div>
-        <button class="calc-btn" onclick="openCalc('${safeEx}', ${idx})">🧮</button>
-        <div class="input-wrapper"><input type="text" inputmode="decimal" value="${set.r}" onchange="updateSet('${safeEx}', ${idx}, 'r', this.value)"><span class="input-unit">REPS</span></div>
-        <button class="menu-btn" onclick="openSetOpt('${safeEx}', ${idx})">...</button>
-        <button class="del-btn" onclick="removeSet('${safeEx}', ${idx})">✕</button>
+        <div class="input-wrapper"><input type="text" inputmode="decimal" id="${inputId}" value="${set.w}" onchange="updateSet('${safeEx}', ${setIdx}, 'w', this.value)"><span class="input-unit">LBS</span></div>
+        <button class="calc-btn" onclick="openCalc(${exIdx}, ${setIdx})">🧮</button>
+        <div class="input-wrapper"><input type="text" inputmode="decimal" value="${set.r}" onchange="updateSet('${safeEx}', ${setIdx}, 'r', this.value)"><span class="input-unit">REPS</span></div>
+        <button class="menu-btn" onclick="openSetOpt('${safeEx}', ${setIdx})">...</button>
+        <button class="del-btn" onclick="removeSet('${safeEx}', ${setIdx})">✕</button>
     </div>`;
 }
 
@@ -593,11 +597,14 @@ function exportCSV() { if(globalLog.length===0){showToast("No data");return;} le
 let calcTarget = null; // Object {ex: name, idx: index} or null for tool
 let calcSideWeight=0, calcBar=45, calcMode='bar';
 
-function openCalc(ex, idx){ 
-    if(idx !== undefined) {
-        calcTarget = { ex: ex, idx: idx }; // Log mode
+function openCalc(exIdx, setIdx){ 
+    if(exIdx !== undefined && setIdx !== undefined) {
+        // Log mode: resolve exercise name from activeCart
+        const exName = activeCart[exIdx];
+        calcTarget = { ex: exName, idx: setIdx };
     } else {
-        calcTarget = null; // Tool mode
+        // Tool mode
+        calcTarget = null; 
     }
     calcSideWeight=0; 
     setCalcMode('bar'); 
