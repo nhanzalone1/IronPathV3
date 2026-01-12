@@ -45,16 +45,13 @@
   @keyframes fade { from{opacity:0; transform:translateY(5px)} to{opacity:1; transform:translateY(0)} }
 
   /* --- 4. COMPONENTS --- */
-  /* GYM HEADER */
   .gym-selector-header { background: #222; border: 1px solid #333; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; }
   .gym-label { font-size: 10px; color: #888; text-transform: uppercase; }
   .gym-name { font-weight: bold; font-size: 14px; color: var(--accent); }
 
-  /* FOLDERS */
   .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #333; transition: 0.1s; }
   .icon-btn { background: #222; border: 1px solid #444; color: #ccc; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
 
-  /* SESSION EXERCISE CARD */
   .ex-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; }
   .ex-top { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: center; }
   .ex-name { font-weight: bold; font-size: 16px; }
@@ -77,7 +74,10 @@
   
   .set-num { color: #666; font-size: 12px; font-weight: bold; text-align: center; }
 
-  .calc-btn { background: #222; border: 1px solid #444; color: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; height: 42px; }
+  /* BUTTON FIXES */
+  .calc-btn { background: #222; border: 1px solid #444; color: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; height: 42px; transition: 0.1s; }
+  .calc-btn:active { background: var(--accent); color: black; transform: scale(0.95); }
+  
   .menu-btn { background: none; border: 1px solid #333; color: #888; border-radius: 6px; cursor: pointer; height: 42px; display: flex; align-items: center; justify-content: center; font-weight: bold; padding-bottom: 5px; }
   .del-btn { background: none; border: none; color: #555; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; height: 42px; }
 
@@ -98,7 +98,9 @@
   
   /* PLATE CALC */
   .plate-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-  .p-btn { background: #222; border: 1px solid #444; color: white; padding: 15px 0; border-radius: 8px; font-weight: bold; cursor: pointer; }
+  .p-btn { background: #222; border: 1px solid #444; color: white; padding: 15px 0; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.1s; }
+  .p-btn:active { background: #444; transform: scale(0.95); }
+  
   .calc-input { text-align: center; font-size: 24px; font-weight: bold; color: var(--success); margin-bottom: 15px; padding: 10px; background: #111; border-radius: 8px; border: 1px solid #333; width: 100%; }
   .import-textarea { width: 100%; background: #111; color: #0f0; font-family: monospace; border: 1px solid #333; border-radius: 5px; padding: 10px; font-size: 10px; height: 60px; margin-bottom: 10px; }
 
@@ -115,9 +117,6 @@
   .chk { width: 22px; height: 22px; border: 2px solid #555; border-radius: 50%; margin-right: 12px; display: inline-block; }
   .completed .chk { background: var(--success); border-color: var(--success); }
   .completed { text-decoration: line-through; opacity: 0.5; color: var(--success); }
-  .warmup-box { background: #151515; border-top: 1px solid #333; padding: 10px 15px; display: none; }
-  .wu-row { display: flex; justify-content: space-between; font-size: 12px; color: #aaa; margin-bottom: 5px; }
-  .wu-title { color: #ffa502; font-size: 10px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: block; }
 </style>
 </head>
 <body>
@@ -125,17 +124,15 @@
 <div id="modal-bridge" class="modal-overlay">
   <div class="modal-box" style="text-align:center;">
     <h3 class="modal-title" style="color:var(--success)">WORKOUT RECEIVED</h3>
-    <p style="color:#ccc; font-size:13px; margin-bottom:20px;">Tap below to copy, then open the NetGains App and paste it.</p>
-    <button class="btn btn-main" onclick="copyBridgeCode()">📋 COPY WORKOUT CODE</button>
+    <button class="btn btn-main" onclick="copyBridgeCode()">📋 COPY CODE</button>
     <button class="btn btn-sec" style="margin-top:10px" onclick="document.getElementById('modal-bridge').style.display='none'">CLOSE</button>
   </div>
 </div>
 
 <div id="modal-manual-import" class="modal-overlay">
   <div class="modal-box">
-    <h3 class="modal-title">Import Workout</h3>
-    <p style="color:#666; font-size:12px;">Paste the code from your friend or the website below.</p>
-    <textarea id="import-area" class="import-textarea" placeholder="Paste gibberish code here..."></textarea>
+    <h3 class="modal-title">Import</h3>
+    <textarea id="import-area" class="import-textarea" placeholder="Paste code..."></textarea>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
       <button class="btn btn-sec" onclick="document.getElementById('modal-manual-import').style.display='none'">CANCEL</button>
       <button class="btn btn-main" onclick="runManualImport()">IMPORT</button>
@@ -146,7 +143,7 @@
 <div id="modal-new-ex" class="modal-overlay">
   <div class="modal-box">
     <h3 class="modal-title">New Exercise</h3>
-    <input type="text" id="new-ex-name" placeholder="Exercise Name (e.g. Bench)">
+    <input type="text" id="new-ex-name" placeholder="Exercise Name">
     <div style="margin-top:15px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
         <button class="btn btn-main" onclick="confirmNewEx('str')">STRENGTH</button>
         <button class="btn btn-sec" style="border-color:var(--cardio); color:var(--cardio);" onclick="confirmNewEx('cardio')">CARDIO</button>
@@ -157,23 +154,20 @@
 
 <div id="modal-share" class="modal-overlay">
   <div class="modal-box">
-    <h3 class="modal-title" style="text-align:center">Share Routine</h3>
+    <h3 class="modal-title" style="text-align:center">Share</h3>
     <div id="qrcode"></div>
     <p style="font-size:10px; color:#666; text-align:center; margin-top:5px;">Scan to view bridge page</p>
-    <div style="margin-top:15px;">
-        <button class="btn btn-main" onclick="copyShareCode()">COPY CODE (FOR TEXTING)</button>
-        <button class="btn btn-sec" style="margin-top:5px" onclick="document.getElementById('modal-share').style.display='none'">CLOSE</button>
-    </div>
+    <button class="btn btn-main" style="margin-top:15px;" onclick="copyShareCode()">COPY CODE</button>
+    <button class="btn btn-sec" style="margin-top:5px" onclick="document.getElementById('modal-share').style.display='none'">CLOSE</button>
   </div>
 </div>
 
 <div id="modal-set-opt" class="modal-overlay">
   <div class="modal-box">
     <h3 class="modal-title">Link Set</h3>
-    <p style="color:#666; font-size:12px; margin-bottom:15px;">Add a linked set below the current one.</p>
-    <button class="btn btn-sec" style="border-color:var(--drop); color:var(--drop);" onclick="applySetType('drop')">💧 Add Drop Set</button>
-    <button class="btn btn-sec" style="border-color:var(--super); color:var(--super);" onclick="applySetType('super')">🔗 Add Superset</button>
-    <button class="btn btn-sec" style="border-color:var(--assist); color:var(--assist);" onclick="applySetType('assist')">🤝 Add Assisted</button>
+    <button class="btn btn-sec" style="border-color:var(--drop); color:var(--drop);" onclick="applySetType('drop')">💧 Drop Set</button>
+    <button class="btn btn-sec" style="border-color:var(--super); color:var(--super);" onclick="applySetType('super')">🔗 Superset</button>
+    <button class="btn btn-sec" style="border-color:var(--assist); color:var(--assist);" onclick="applySetType('assist')">🤝 Assisted</button>
     <button class="btn btn-sec" style="margin-top:20px" onclick="document.getElementById('modal-set-opt').style.display='none'">CANCEL</button>
   </div>
 </div>
@@ -183,11 +177,11 @@
 <div id="modal-plate-calc" class="modal-overlay">
   <div class="modal-box">
     <h3 class="modal-title">Plate Math</h3>
-    <input type="text" inputmode="decimal" id="calc-total" class="calc-input" value="45" onfocus="this.value=''" onchange="manualCalcUpdate(this.value)">
+    <input type="text" inputmode="decimal" id="calc-total" class="calc-input" value="45" onfocus="this.value=''" oninput="manualCalcUpdate(this.value)">
     
     <div style="display:flex; gap:10px; margin-bottom:15px;">
         <button id="mode-bar" class="btn btn-sm" style="background:var(--success); color:black;" onclick="setCalcMode('bar')">BARBELL (2x)</button>
-        <button id="mode-single" class="btn btn-sm" style="background:#333;" onclick="setCalcMode('single')">SINGLE/MACHINE (1x)</button>
+        <button id="mode-single" class="btn btn-sm" style="background:#333;" onclick="setCalcMode('single')">SINGLE (1x)</button>
     </div>
     
     <div class="plate-grid">
@@ -233,9 +227,7 @@
           <div><div class="gym-label">CURRENT LOCATION</div><div class="gym-name" id="current-gym-display">Main Gym</div></div>
           <div style="color:#666">▼</div>
       </div>
-
       <button class="btn btn-sec" style="border:1px solid var(--accent); color:var(--accent); margin-bottom:20px;" onclick="openManualImport()">📥 IMPORT CODE</button>
-
       <div id="my-split-list"></div>
       <button class="btn btn-sec" style="border-style:dashed; color:#888;" onclick="promptAddDay()">+ NEW FOLDER</button>
   </div>
@@ -255,10 +247,8 @@
         </div>
         <button class="btn-ghost" onclick="clearCart()">START FRESH</button>
       </div>
-      
       <div id="active-workout-area"></div>
       <button class="btn btn-main" onclick="finishSession()">FINISH & SAVE LOG</button>
-      
       <div class="shelf-title">EXERCISE LIBRARY</div>
       <div id="tile-area" class="tile-grid"></div>
   </div>
@@ -299,395 +289,149 @@
 </div>
 
 <script>
-// --- CORE DATA ---
-let appData = JSON.parse(localStorage.getItem('netGainsData') || 'null');
-if (!appData) {
-    const oldDays = JSON.parse(localStorage.getItem('myDays') || '[]');
-    const oldLib = JSON.parse(localStorage.getItem('myLibrary') || '{}');
-    appData = { currentGym: 'Main Gym', gyms: { 'Main Gym': { folders: oldDays, library: oldLib } }, exTypes: {} };
-    localStorage.setItem('netGainsData', JSON.stringify(appData));
-}
-if(!appData.exTypes) appData.exTypes = {};
+let appData=JSON.parse(localStorage.getItem('netGainsData')||'null');if(!appData){const d=JSON.parse(localStorage.getItem('myDays')||'[]'),l=JSON.parse(localStorage.getItem('myLibrary')||'{}');appData={currentGym:'Main Gym',gyms:{'Main Gym':{folders:d,library:l}},exTypes:{}};localStorage.setItem('netGainsData',JSON.stringify(appData))}if(!appData.exTypes)appData.exTypes={};
+let activeCart=JSON.parse(localStorage.getItem('activeCart')||'[]'), sessionData=JSON.parse(localStorage.getItem('sessionData')||'{}'), history=JSON.parse(localStorage.getItem('liftHistory')||'{}'), globalLog=JSON.parse(localStorage.getItem('globalLog')||'[]');
 
-let activeCart = JSON.parse(localStorage.getItem('activeCart') || '[]'); 
-let sessionData = JSON.parse(localStorage.getItem('sessionData') || '{}'); 
-let history = JSON.parse(localStorage.getItem('liftHistory') || '{}'); 
-let globalLog = JSON.parse(localStorage.getItem('globalLog') || '[]');
+const urlParams=new URLSearchParams(window.location.search), importData=urlParams.get('import');
+if(importData){window.bridgeCode=importData;document.getElementById('modal-bridge').style.display='flex'}
+function copyBridgeCode(){navigator.clipboard.writeText(window.bridgeCode).then(()=>{showToast("Copied!");document.getElementById('modal-bridge').style.display='none';window.history.replaceState({},document.title,"/")})}
+function openManualImport(){document.getElementById('import-area').value="";document.getElementById('modal-manual-import').style.display='flex'}
+function runManualImport(){const r=document.getElementById('import-area').value;if(!r)return;try{const d=JSON.parse(atob(r)),g=getCurrentGymData();if(!g.folders.includes(d.name))g.folders.push(d.name);g.library[d.name]=d.exs;saveAppData();renderDays();document.getElementById('modal-manual-import').style.display='none';showToast("Imported!")}catch(e){showToast("Invalid")}}
+function shareFolder(n){const g=getCurrentGymData(),d={name:n,exs:g.library[n]||[]},s=btoa(JSON.stringify(d)),l=window.location.origin+window.location.pathname+"?import="+s;document.getElementById('qrcode').innerHTML="";new QRCode(document.getElementById("qrcode"),{text:l,width:128,height:128});window.shareCode=s;document.getElementById('modal-share').style.display='flex'}
+function copyShareCode(){navigator.clipboard.writeText(window.shareCode).then(()=>showToast("Copied!"))}
 
-// --- SHARING BRIDGE LOGIC ---
-const urlParams = new URLSearchParams(window.location.search);
-const importData = urlParams.get('import');
-if(importData) {
-    window.bridgeCode = importData;
-    document.getElementById('modal-bridge').style.display = 'flex';
-}
-
-function copyBridgeCode() {
-    navigator.clipboard.writeText(window.bridgeCode).then(() => {
-        showToast("Code Copied! Open App & Import.");
-        document.getElementById('modal-bridge').style.display = 'none';
-        window.history.replaceState({}, document.title, "/"); 
-    });
-}
-
-function openManualImport() {
-    document.getElementById('import-area').value = "";
-    document.getElementById('modal-manual-import').style.display = 'flex';
-}
-
-function runManualImport() {
-    const raw = document.getElementById('import-area').value;
-    if(!raw) return;
-    try {
-        const decoded = JSON.parse(atob(raw));
-        const gymData = getCurrentGymData();
-        const name = decoded.name;
-        if(!gymData.folders.includes(name)) gymData.folders.push(name);
-        gymData.library[name] = decoded.exs;
-        saveAppData();
-        renderDays();
-        document.getElementById('modal-manual-import').style.display = 'none';
-        showToast("Imported: " + name);
-    } catch(e) {
-        showToast("Invalid Code");
-    }
-}
-
-function shareFolder(name) {
-    const gymData = getCurrentGymData();
-    const data = { name: name, exs: gymData.library[name] || [] };
-    const str = btoa(JSON.stringify(data));
-    const link = window.location.origin + window.location.pathname + "?import=" + str;
-    document.getElementById('qrcode').innerHTML = "";
-    new QRCode(document.getElementById("qrcode"), { text: link, width: 128, height: 128 });
-    window.shareCode = str;
-    document.getElementById('modal-share').style.display = 'flex';
-}
-function copyShareCode() { navigator.clipboard.writeText(window.shareCode).then(() => showToast("Code Copied!")); }
-
-// --- APP INIT ---
 renderDays();
-function switchTab(id, btn) {
-    document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-    document.getElementById('view-'+id).classList.remove('hidden');
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-}
+function switchTab(id,b){document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));document.getElementById('view-'+id).classList.remove('hidden');document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active')}
+function getCurrentGymData(){if(!appData.gyms[appData.currentGym])appData.gyms[appData.currentGym]={folders:[],library:{}};return appData.gyms[appData.currentGym]}
+function showGymManager(){document.getElementById('split-manager').classList.add('hidden');document.getElementById('gym-manager').classList.remove('hidden');renderGymList()}
+function closeGymManager(){document.getElementById('gym-manager').classList.add('hidden');document.getElementById('split-manager').classList.remove('hidden')}
+function renderGymList(){const d=document.getElementById('gym-list');d.innerHTML="";Object.keys(appData.gyms).forEach(g=>{const a=g===appData.currentGym;d.innerHTML+=`<div class="day-card" style="${a?'border:1px solid var(--accent)':''}"><div style="flex-grow:1;cursor:pointer;" onclick="selectGym('${g}')"><b>${g}</b>${a?' <span style="font-size:9px;background:var(--accent);padding:2px 4px;border-radius:4px;">ACTIVE</span>':''}</div><div style="display:flex;gap:8px;"><button class="icon-btn" onclick="delGym('${g}')">✕</button></div></div>`})}
+function selectGym(n){appData.currentGym=n;saveAppData();renderDays();closeGymManager();showToast("Switched")}
+function promptAddGym(){openInputModal("New Gym","Name",v=>{if(v){appData.gyms[v]={folders:[],library:{}};selectGym(v)}})}
+function delGym(n){if(Object.keys(appData.gyms).length<=1)return;showConfirm("Delete?",()=>{delete appData.gyms[n];selectGym(Object.keys(appData.gyms)[0])})}
+function renderDays(){const g=getCurrentGymData();document.getElementById('current-gym-display').innerText=appData.currentGym;const l=document.getElementById('my-split-list');l.innerHTML="";g.folders.forEach(d=>{const c=(g.library[d]||[]).length;l.innerHTML+=`<div class="day-card"><div style="flex-grow:1;cursor:pointer;" onclick="openSession('${d}')"><b>${d}</b><br><span style="font-size:11px;color:#666;">${c} Ex</span></div><div style="display:flex;gap:5px;"><button class="icon-btn" onclick="shareFolder('${d}')">➦</button><button class="icon-btn" onclick="renameFolder('${d}')">✎</button><button class="icon-btn" onclick="delFolder('${d}')">✕</button></div></div>`})}
 
-// --- GYM LOGIC ---
-function getCurrentGymData() {
-    if(!appData.gyms[appData.currentGym]) appData.gyms[appData.currentGym] = { folders: [], library: {} };
-    return appData.gyms[appData.currentGym];
-}
-function showGymManager() { document.getElementById('split-manager').classList.add('hidden'); document.getElementById('gym-manager').classList.remove('hidden'); renderGymList(); }
-function closeGymManager() { document.getElementById('gym-manager').classList.add('hidden'); document.getElementById('split-manager').classList.remove('hidden'); }
-function renderGymList() {
-    const div = document.getElementById('gym-list'); div.innerHTML = "";
-    Object.keys(appData.gyms).forEach(gym => {
-        const isActive = (gym === appData.currentGym);
-        div.innerHTML += `<div class="day-card" style="${isActive?'border:1px solid var(--accent)':''}">
-            <div style="flex-grow:1; cursor:pointer;" onclick="selectGym('${gym}')"><b>${gym}</b>${isActive?' <span style="font-size:9px;background:var(--accent);padding:2px 4px;border-radius:4px;">ACTIVE</span>':''}</div>
-            <div style="display:flex; gap:8px;"><button class="icon-btn" onclick="delGym('${gym}')">✕</button></div></div>`;
-    });
-}
-function selectGym(name) { appData.currentGym = name; saveAppData(); renderDays(); closeGymManager(); showToast("Switched"); }
-function promptAddGym() { openInputModal("New Gym", "Name", (val) => { if(val){ appData.gyms[val]={folders:[],library:{}}; selectGym(val); } }); }
-function delGym(name) { if(Object.keys(appData.gyms).length<=1)return; showConfirm("Delete?",()=>{ delete appData.gyms[name]; selectGym(Object.keys(appData.gyms)[0]); }); }
+let currentFolder="";
+function openSession(d){currentFolder=d;document.getElementById('split-manager').classList.add('hidden');document.getElementById('session-logger').classList.remove('hidden');document.getElementById('session-title').innerText=d;renderCart();renderShelf()}
+function closeSession(){document.getElementById('session-logger').classList.add('hidden');document.getElementById('split-manager').classList.remove('hidden')}
+function clearCart(){showConfirm("Clear?",()=>{activeCart=[];sessionData={};saveSession();renderCart()})}
 
-// --- FOLDERS ---
-function renderDays() {
-    const gymData = getCurrentGymData();
-    document.getElementById('current-gym-display').innerText = appData.currentGym;
-    const list = document.getElementById('my-split-list'); list.innerHTML = "";
-    gymData.folders.forEach((day) => {
-        const count = (gymData.library[day]||[]).length;
-        list.innerHTML += `<div class="day-card">
-            <div style="flex-grow:1; cursor:pointer;" onclick="openSession('${day}')"><b>${day}</b><br><span style="font-size:11px; color:#666;">${count} Ex</span></div>
-            <div style="display:flex; gap:5px;">
-                <button class="icon-btn" onclick="shareFolder('${day}')">➦</button>
-                <button class="icon-btn" onclick="renameFolder('${day}')">✎</button>
-                <button class="icon-btn" onclick="delFolder('${day}')">✕</button>
-            </div></div>`;
-    });
-}
-
-// --- SESSION ---
-let currentFolder = "";
-function openSession(day) { currentFolder = day; document.getElementById('split-manager').classList.add('hidden'); document.getElementById('session-logger').classList.remove('hidden'); document.getElementById('session-title').innerText = day; renderCart(); renderShelf(); }
-function closeSession() { document.getElementById('session-logger').classList.add('hidden'); document.getElementById('split-manager').classList.remove('hidden'); }
-function clearCart() { showConfirm("Clear workout?", () => { activeCart=[]; sessionData={}; saveSession(); renderCart(); }); }
-
-function renderCart() {
-    const area = document.getElementById('active-workout-area'); area.innerHTML = "";
-    if(activeCart.length===0) { area.innerHTML="<div style='text-align:center;padding:30px;color:#555;'>Empty Workout</div>"; return; }
-    
-    // RENDER LOOP USING INDICES FOR SAFETY
-    activeCart.forEach((ex, exIdx) => {
-        const isCardio = appData.exTypes[ex] === 'cardio';
-        const sets = sessionData[ex] || [];
-        const isLR = sessionData[ex + '_LR'] === true; 
-        const best = history[ex] || 'No history';
-        
-        let toolsHtml = "";
-        if(!isCardio) {
-            toolsHtml = `<div class="toggle-lr ${isLR ? 'active' : ''}" onclick="toggleLR('${ex}')">L+R</div>`;
-        }
-        
-        let header = `
-        <div class="ex-top">
-            <div>
-                <span class="ex-name">${ex}</span>
-                <div class="ex-hist">BEST: ${best}</div>
-            </div>
-            <div class="ex-tools">
-                ${toolsHtml}
-                <button onclick="removeExFromCart('${ex}')" style="background:none;border:none;color:#555;">✕</button>
-            </div>
-        </div>`;
-
-        let rowsHtml = "";
-        if(isCardio) {
-            sets.forEach((set, idx) => {
-                rowsHtml += `
-                <div class="cardio-row">
-                    <span class="set-num">${idx+1}</span>
-                    <div class="input-wrapper"><input type="text" inputmode="decimal" value="${set.w}" onchange="updateSet('${ex}', ${idx}, 'w', this.value)"><span class="input-unit">MIN</span></div>
-                    <div class="input-wrapper"><input type="text" inputmode="decimal" value="${set.r}" onchange="updateSet('${ex}', ${idx}, 'r', this.value)"><span class="input-unit">MI</span></div>
-                    <div class="input-wrapper"><input type="text" inputmode="decimal" value="${set.hr || ''}" onchange="updateSet('${ex}', ${idx}, 'hr', this.value)"><span class="input-unit">BPM</span></div>
-                    <button class="del-btn" onclick="removeSet('${ex}', ${idx})">✕</button>
-                </div>`;
+function renderCart(){
+    const area=document.getElementById('active-workout-area');area.innerHTML="";
+    if(activeCart.length===0){area.innerHTML="<div style='text-align:center;padding:30px;color:#555;'>Empty Workout</div>";return}
+    activeCart.forEach((ex,exIdx)=>{
+        const isC=appData.exTypes[ex]==='cardio', sets=sessionData[ex]||[], isLR=sessionData[ex+'_LR']===true, best=history[ex]||'No history';
+        let h=`<div class="ex-top"><div><span class="ex-name">${ex}</span><div class="ex-hist">BEST: ${best}</div></div><div class="ex-tools">${!isC?`<div class="toggle-lr ${isLR?'active':''}" onclick="toggleLR('${ex}')">L+R</div>`:''}<button onclick="removeExFromCart('${ex}')" style="background:none;border:none;color:#555;">✕</button></div></div>`;
+        let r="";
+        if(isC){
+            sets.forEach((s,i)=>{
+                r+=`<div class="cardio-row"><span class="set-num">${i+1}</span><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.w}" onchange="updateSet('${ex}',${i},'w',this.value)"><span class="input-unit">MIN</span></div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.r}" onchange="updateSet('${ex}',${i},'r',this.value)"><span class="input-unit">MI</span></div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.hr||''}" onchange="updateSet('${ex}',${i},'hr',this.value)"><span class="input-unit">BPM</span></div><button class="del-btn" onclick="removeSet('${ex}',${i})">✕</button></div>`
             });
         } else {
-            let i = 0;
-            let setCounter = 1;
-            while(i < sets.length) {
-                const set = sets[i];
-                const nextSet = sets[i+1];
-                let label = setCounter;
-                if (set.side) {
-                    label = `${setCounter} ${set.side}`;
-                    if (set.side === 'R') setCounter++;
-                } else { setCounter++; }
-
-                // PASS EXERCISE INDEX AND SET INDEX TO RENDERROW
-                if (set.type === 'drop_parent' && nextSet && nextSet.type === 'drop_child') {
-                    rowsHtml += `<div class="set-group-box set-group-drop">${renderRow(ex, exIdx, i, set, label)}${renderRow(ex, exIdx, i+1, nextSet, "DROP")}</div>`; i += 2; 
-                } else if (set.type === 'super_parent' && nextSet && nextSet.type === 'super_child') {
-                    rowsHtml += `<div class="set-group-box set-group-super">${renderRow(ex, exIdx, i, set, label)}${renderRow(ex, exIdx, i+1, nextSet, "SUPER")}</div>`; i += 2;
-                } else if (set.type === 'assist_parent' && nextSet && nextSet.type === 'assist_child') {
-                    rowsHtml += `<div class="set-group-box set-group-assist">${renderRow(ex, exIdx, i, set, label)}${renderRow(ex, exIdx, i+1, nextSet, "ASST")}</div>`; i += 2;
+            let i=0,cnt=1;
+            while(i<sets.length){
+                let s=sets[i], ns=sets[i+1], lbl=cnt;
+                if(s.side){lbl=`${cnt} ${s.side}`;if(s.side==='R')cnt++;}else{cnt++}
+                if(s.type==='drop_parent'&&ns&&ns.type==='drop_child'){
+                    r+=`<div class="set-group-box set-group-drop">${rr(ex,exIdx,i,s,lbl)}${rr(ex,exIdx,i+1,ns,"DROP")}</div>`;i+=2;
+                } else if(s.type==='super_parent'&&ns&&ns.type==='super_child'){
+                    r+=`<div class="set-group-box set-group-super">${rr(ex,exIdx,i,s,lbl)}${rr(ex,exIdx,i+1,ns,"SUPER")}</div>`;i+=2;
+                } else if(s.type==='assist_parent'&&ns&&ns.type==='assist_child'){
+                    r+=`<div class="set-group-box set-group-assist">${rr(ex,exIdx,i,s,lbl)}${rr(ex,exIdx,i+1,ns,"ASST")}</div>`;i+=2;
                 } else {
-                    rowsHtml += `<div class="set-container">${renderRow(ex, exIdx, i, set, label)}</div>`; i++;
+                    r+=`<div class="set-container">${rr(ex,exIdx,i,s,lbl)}</div>`;i++;
                 }
             }
         }
-
-        area.innerHTML += `
-        <div class="ex-card">
-            ${header}
-            <div id="sets-${ex}">${rowsHtml}</div>
-            <button class="btn btn-sec btn-sm" onclick="addSet('${ex}')">+ ADD SET</button>
-        </div>`;
+        area.innerHTML+=`<div class="ex-card">${h}<div id="sets-${ex}">${r}</div><button class="btn btn-sec btn-sm" onclick="addSet('${ex}')">+ ADD SET</button></div>`
     });
 }
-
-function renderRow(ex, exIdx, setIdx, set, label) {
-    // PASS SAFE INDICES TO OPENCALC, NOT STRINGS
-    // Escaping only needed for updateSet which relies on sessionData keys
-    const safeEx = ex.replace(/'/g, "\\'");
-    return `
-    <div class="set-row">
-        <div style="display:flex;flex-direction:column;align-items:center;"><span class="set-num">${label}</span></div>
-        <div class="input-wrapper"><input type="text" inputmode="decimal" value="${set.w}" onchange="updateSet('${safeEx}', ${setIdx}, 'w', this.value)"><span class="input-unit">LBS</span></div>
-        <button class="calc-btn" onclick="openCalc(${exIdx}, ${setIdx})">🧮</button>
-        <div class="input-wrapper"><input type="text" inputmode="decimal" value="${set.r}" onchange="updateSet('${safeEx}', ${setIdx}, 'r', this.value)"><span class="input-unit">REPS</span></div>
-        <button class="menu-btn" onclick="openSetOpt('${safeEx}', ${setIdx})">...</button>
-        <button class="del-btn" onclick="removeSet('${safeEx}', ${setIdx})">✕</button>
-    </div>`;
+// Render Row Helper (rr) - Uses Direct ID link for calc
+function rr(ex,exIdx,i,s,lbl){
+    const uid=`input_${exIdx}_${i}`; const safeEx=ex.replace(/'/g,"\\'");
+    return `<div class="set-row"><div style="display:flex;flex-direction:column;align-items:center;"><span class="set-num">${lbl}</span></div><div class="input-wrapper"><input type="text" inputmode="decimal" id="${uid}" value="${s.w}" onchange="updateSet('${safeEx}',${i},'w',this.value)"><span class="input-unit">LBS</span></div><button class="calc-btn" onclick="openCalc('${uid}')">🧮</button><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.r}" onchange="updateSet('${safeEx}',${i},'r',this.value)"><span class="input-unit">REPS</span></div><button class="menu-btn" onclick="openSetOpt('${safeEx}',${i})">...</button><button class="del-btn" onclick="removeSet('${safeEx}',${i})">✕</button></div>`
 }
 
-// --- OPERATIONS ---
-let optTarget = null;
-function openSetOpt(ex, idx) { optTarget = {ex, idx}; document.getElementById('modal-set-opt').style.display = 'flex'; }
-function applySetType(type) {
-    if(optTarget) {
-        const {ex, idx} = optTarget;
-        const currentSet = sessionData[ex][idx];
-        let newWeight = currentSet.w;
-        if(type === 'drop') newWeight = ""; 
-        const newSet = {w: newWeight, r:'', type: type+'_child'};
-        sessionData[ex].splice(idx + 1, 0, newSet);
-        currentSet.type = type+'_parent';
-        saveSession(); renderCart();
-        document.getElementById('modal-set-opt').style.display = 'none';
-    }
-}
-function toggleLR(ex) {
-    const current = sessionData[ex + '_LR'] === true;
-    sessionData[ex + '_LR'] = !current;
-    saveSession(); renderCart();
-}
-function addSet(ex) {
-    if(!sessionData[ex]) sessionData[ex] = [];
-    if(sessionData[ex + '_LR'] === true) {
-        sessionData[ex].push({w:'', r:'', side:'L'});
-        sessionData[ex].push({w:'', r:'', side:'R'});
-    } else {
-        sessionData[ex].push({w:'', r:''});
-    }
-    saveSession(); renderCart();
-}
-function removeSet(ex, idx) { sessionData[ex].splice(idx, 1); saveSession(); renderCart(); }
-function updateSet(ex, idx, field, val) { 
-    if(!sessionData[ex][idx]) return;
-    sessionData[ex][idx][field] = val; 
-    saveSession(); 
-}
+let optTarget=null;
+function openSetOpt(ex,i){optTarget={ex,i};document.getElementById('modal-set-opt').style.display='flex'}
+function applySetType(t){if(optTarget){const{ex,i}=optTarget,s=sessionData[ex][i];let nw=s.w;if(t==='drop')nw="";const ns={w:nw,r:'',type:t+'_child'};sessionData[ex].splice(i+1,0,ns);s.type=t+'_parent';saveSession();renderCart();document.getElementById('modal-set-opt').style.display='none'}}
+function toggleLR(e){const c=sessionData[e+'_LR']===true;sessionData[e+'_LR']=!c;saveSession();renderCart()}
+function addSet(e){if(!sessionData[e])sessionData[e]=[];if(sessionData[e+'_LR']===true){sessionData[e].push({w:'',r:'',side:'L'});sessionData[e].push({w:'',r:'',side:'R'})}else{sessionData[e].push({w:'',r:''})}saveSession();renderCart()}
+function removeSet(e,i){sessionData[e].splice(i,1);saveSession();renderCart()}
+function updateSet(e,i,f,v){if(!sessionData[e][i])return;sessionData[e][i][f]=v;saveSession()}
 
-function renderShelf() {
-    const area = document.getElementById('tile-area'); area.innerHTML = "";
-    const gymData = getCurrentGymData();
-    const list = gymData.library[currentFolder] || [];
-    area.innerHTML += `<button class="tile tile-add" onclick="promptNewEx()">+ NEW</button>`;
-    list.forEach(ex => { area.innerHTML += `<div class="tile" onclick="addToCart('${ex}')">${ex}</div>`; });
-}
-function addToCart(ex) { if(!activeCart.includes(ex)) { activeCart.push(ex); if(!sessionData[ex]) sessionData[ex] = [{w:'', r:''}]; saveSession(); renderCart(); } }
-function removeExFromCart(ex) { activeCart = activeCart.filter(e => e !== ex); delete sessionData[ex]; saveSession(); renderCart(); }
+function renderShelf(){const a=document.getElementById('tile-area'),g=getCurrentGymData(),l=g.library[currentFolder]||[];a.innerHTML=`<button class="tile tile-add" onclick="promptNewEx()">+ NEW</button>`;l.forEach(e=>{a.innerHTML+=`<div class="tile" onclick="addToCart('${e}')">${e}</div>`})}
+function addToCart(e){if(!activeCart.includes(e)){activeCart.push(e);if(!sessionData[e])sessionData[e]=[{w:'',r:''}];saveSession();renderCart()}}
+function removeExFromCart(e){activeCart=activeCart.filter(x=>x!==e);delete sessionData[e];saveSession();renderCart()}
+function promptNewEx(){document.getElementById('new-ex-name').value="";document.getElementById('modal-new-ex').style.display='flex'}
+function confirmNewEx(t){const v=document.getElementById('new-ex-name').value;if(v){const g=getCurrentGymData();if(!g.library[currentFolder])g.library[currentFolder]=[];g.library[currentFolder].push(v);appData.exTypes[v]=t;saveAppData();renderShelf();addToCart(v)}document.getElementById('modal-new-ex').style.display='none'}
 
-function promptNewEx() { document.getElementById('new-ex-name').value = ""; document.getElementById('modal-new-ex').style.display = 'flex'; }
-function confirmNewEx(type) {
-    const val = document.getElementById('new-ex-name').value;
-    if(val) {
-        const gd = getCurrentGymData();
-        if(!gd.library[currentFolder]) gd.library[currentFolder]=[];
-        gd.library[currentFolder].push(val);
-        appData.exTypes[val] = type;
-        saveAppData(); renderShelf(); addToCart(val);
-    }
-    document.getElementById('modal-new-ex').style.display = 'none';
-}
+function saveSession(){localStorage.setItem('activeCart',JSON.stringify(activeCart));localStorage.setItem('sessionData',JSON.stringify(sessionData))}
+function saveAppData(){localStorage.setItem('netGainsData',JSON.stringify(appData))}
+function finishSession(){showConfirm("Save?",()=>{const t=new Date().toISOString().split('T')[0];activeCart.forEach(e=>{const c=appData.exTypes[e]==='cardio',s=sessionData[e]||[];if(c){s.forEach(x=>{const m=parseFloat(x.w),d=parseFloat(x.r);if(m&&d){const p=(m/d).toFixed(2);globalLog.push({date:t,ex:e,w:m,r:d,rm:p,hr:x.hr,type:'cardio'});history[e]=`${p} /mi`}})}else{let b=0,bs="";s.forEach(x=>{const w=parseFloat(x.w),r=parseFloat(x.r);if(!isNaN(w)&&!isNaN(r)){const e1=w*(1+(0.033*r));if(e1>b){b=e1;bs=`${x.w} lbs x ${r}`}globalLog.push({date:t,ex:e,w:w,r:r,rm:Math.round(e1),type:x.type||'',side:x.side||''})}else if(x.w==="BW"&&r){globalLog.push({date:t,ex:e,w:"BW",r:r,rm:0,type:x.type||'',side:x.side||''})}});if(bs)history[e]=bs}});localStorage.setItem('liftHistory',JSON.stringify(history));localStorage.setItem('globalLog',JSON.stringify(globalLog));activeCart=[];sessionData={};saveSession();closeSession();showToast("Saved")})}
 
-function saveSession() { localStorage.setItem('activeCart', JSON.stringify(activeCart)); localStorage.setItem('sessionData', JSON.stringify(sessionData)); }
-function saveAppData() { localStorage.setItem('netGainsData', JSON.stringify(appData)); }
-function finishSession() {
-    showConfirm("Save Log?", () => {
-        let count = 0; const today = new Date().toISOString().split('T')[0];
-        activeCart.forEach(ex => {
-            const isCardio = appData.exTypes[ex] === 'cardio';
-            const sets = sessionData[ex] || [];
-            
-            if(isCardio) {
-                sets.forEach(set => {
-                    const time = parseFloat(set.w); const dist = parseFloat(set.r);
-                    if(time && dist) {
-                        const pace = (time / dist).toFixed(2);
-                        globalLog.push({ date:today, ex:ex, w:time, r:dist, rm: pace, hr: set.hr, type:'cardio' });
-                        history[ex] = `${pace} /mi`;
-                        count++;
-                    }
-                });
-            } else {
-                let best1RM = 0; let bestStr = "";
-                sets.forEach(set => {
-                    const w = parseFloat(set.w); const r = parseFloat(set.r);
-                    if(!isNaN(w) && !isNaN(r)) {
-                        const e1rm = w * (1 + (0.033 * r));
-                        if(e1rm > best1RM) { best1RM = e1rm; bestStr = `${set.w} lbs x ${r}`; }
-                        globalLog.push({ date: today, ex: ex, w: w, r: r, rm: Math.round(e1rm), type: set.type||'', side: set.side||'' });
-                        count++;
-                    } else if (set.w === "BW" && r) {
-                        globalLog.push({ date: today, ex: ex, w: "BW", r: r, rm: 0, type: set.type||'', side: set.side||'' });
-                        count++;
-                    }
-                });
-                if(bestStr) history[ex] = bestStr;
-            }
-        });
-        localStorage.setItem('liftHistory', JSON.stringify(history)); localStorage.setItem('globalLog', JSON.stringify(globalLog));
-        if(count>0){ activeCart=[]; sessionData={}; saveSession(); closeSession(); showToast("Saved"); }
-    });
-}
-
-// --- HELPERS ---
-function promptAddDay() { openInputModal("New Folder", "Name", (val) => { if(val){ const gd=getCurrentGymData(); if(!gd.folders.includes(val)) gd.folders.push(val); saveAppData(); renderDays(); } }); }
-function renameFolder(old) { openInputModal("Rename", old, (val) => { if(val && val!==old){ const gd=getCurrentGymData(); const idx=gd.folders.indexOf(old); if(idx!==-1)gd.folders[idx]=val; if(gd.library[old]){gd.library[val]=gd.library[old];delete gd.library[old];} saveAppData(); renderDays(); } }); }
-function delFolder(name) { showConfirm("Delete?",()=>{ const gd=getCurrentGymData(); gd.folders=gd.folders.filter(d=>d!==name); delete gd.library[name]; saveAppData(); renderDays(); }); }
-function showToast(msg) { const t=document.getElementById('toast'); document.getElementById('toast-msg').innerText=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
-function openInputModal(t, p, cb) { const m=document.getElementById('modal-input-overlay'), i=document.getElementById('modal-input'), b=document.getElementById('modal-ok'); document.getElementById('modal-title').innerText=t; i.value=""; i.placeholder=p; m.style.display='flex'; i.focus(); let n=b.cloneNode(true); b.parentNode.replaceChild(n,b); n.addEventListener('click',()=>{m.style.display='none';cb(i.value)}); }
+function promptAddDay(){openInputModal("Folder","Name",v=>{if(v){const g=getCurrentGymData();if(!g.folders.includes(v))g.folders.push(v);saveAppData();renderDays()}})}
+function renameFolder(o){openInputModal("Rename",o,v=>{if(v&&v!==o){const g=getCurrentGymData(),i=g.folders.indexOf(o);if(i!==-1)g.folders[i]=v;if(g.library[o]){g.library[v]=g.library[o];delete g.library[o]}saveAppData();renderDays()}})}
+function delFolder(n){showConfirm("Delete?",()=>{const g=getCurrentGymData();g.folders=g.folders.filter(d=>d!==n);delete g.library[n];saveAppData();renderDays()})}
+function showToast(m){const t=document.getElementById('toast');document.getElementById('toast-msg').innerText=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+function openInputModal(t,p,c){const m=document.getElementById('modal-input-overlay'),i=document.getElementById('modal-input'),b=document.getElementById('modal-ok');document.getElementById('modal-title').innerText=t;i.value="";i.placeholder=p;m.style.display='flex';i.focus();let n=b.cloneNode(true);b.parentNode.replaceChild(n,b);n.addEventListener('click',()=>{m.style.display='none';c(i.value)})}
 function closeInputModal(){document.getElementById('modal-input-overlay').style.display='none'}
-function showConfirm(msg, cb) { const m=document.getElementById('modal-confirm-overlay'), b=document.getElementById('confirm-ok'); document.getElementById('confirm-desc').innerText=msg; m.style.display='flex'; let n=b.cloneNode(true); b.parentNode.replaceChild(n,b); n.addEventListener('click',()=>{m.style.display='none';cb()}); }
+function showConfirm(m,c){const d=document.getElementById('modal-confirm-overlay'),b=document.getElementById('confirm-ok');document.getElementById('confirm-desc').innerText=m;d.style.display='flex';let n=b.cloneNode(true);b.parentNode.replaceChild(n,b);n.addEventListener('click',()=>{d.style.display='none';c()})}
 function closeConfirmModal(){document.getElementById('modal-confirm-overlay').style.display='none'}
-function nuke() { showConfirm("DELETE ALL?", () => { localStorage.clear(); location.reload(); }); }
-function exportCSV() { if(globalLog.length===0){showToast("No data");return;} let c="Date,Exercise,Weight,Reps,Side,Type,HR\n"; globalLog.forEach(l=>{c+=`${l.date},${l.ex},${l.w},${l.r},${l.side||''},${l.type||''},${l.hr||''}\n`}); const b=document.createElement('a'); b.href=encodeURI("data:text/csv;charset=utf-8,"+c); b.download="netgains_data.csv"; document.body.appendChild(b); b.click(); }
+function nuke(){showConfirm("DELETE ALL?",()=>{localStorage.clear();location.reload()})}
+function exportCSV(){if(globalLog.length===0){showToast("No data");return}let c="Date,Exercise,Weight,Reps,Side,Type,HR\n";globalLog.forEach(l=>{c+=`${l.date},${l.ex},${l.w},${l.r},${l.side||''},${l.type||''},${l.hr||''}\n`});const b=document.createElement('a');b.href=encodeURI("data:text/csv;charset=utf-8,"+c);b.download="netgains_data.csv";document.body.appendChild(b);b.click()}
 
-// --- PLATE CALC ---
-let calcTarget = null; 
+// PLATE CALC LOGIC (FIXED)
+let targetInputId = null; // Store ID string here
 let calcSideWeight=0, calcBar=45, calcMode='bar';
 
-function openCalc(exIdx, setIdx){ 
-    if(exIdx !== undefined && setIdx !== undefined) {
-        // Log mode: resolve exercise name from activeCart using Index
-        const exName = activeCart[exIdx];
-        calcTarget = { ex: exName, idx: setIdx };
-    } else {
-        // Tool mode
-        calcTarget = null; 
-    }
+function openCalc(uid){
+    targetInputId = uid; // Save the ID of the input box
     calcSideWeight=0; 
     setCalcMode('bar'); 
     document.getElementById('modal-plate-calc').style.display='flex'; 
 }
-function calcPlates(){ openCalc(); } 
+function calcPlates(){ targetInputId=null; calcSideWeight=0; setCalcMode('bar'); document.getElementById('modal-plate-calc').style.display='flex'; }
 
-function setCalcMode(m) {
-    calcMode = m;
-    calcBar = (m==='bar') ? 45 : 0;
-    document.getElementById('mode-bar').style.background = (m==='bar') ? 'var(--success)' : '#333';
-    document.getElementById('mode-bar').style.color = (m==='bar') ? 'black' : 'white';
-    document.getElementById('mode-single').style.background = (m==='single') ? 'var(--success)' : '#333';
-    document.getElementById('mode-single').style.color = (m==='single') ? 'black' : 'white';
+function setCalcMode(m){
+    calcMode=m; calcBar=(m==='bar')?45:0;
+    document.getElementById('mode-bar').style.background=(m==='bar')?'var(--success)':'#333';
+    document.getElementById('mode-bar').style.color=(m==='bar')?'black':'white';
+    document.getElementById('mode-single').style.background=(m==='single')?'var(--success)':'#333';
+    document.getElementById('mode-single').style.color=(m==='single')?'black':'white';
     updateCalcDisplay();
 }
-function addPlate(w){ calcSideWeight+=w; updateCalcDisplay(); }
-function resetCalc(){ calcSideWeight=0; updateCalcDisplay(); }
-function updateCalcDisplay(){ 
-    let total = 0;
-    if(calcMode === 'bar') total = (calcSideWeight*2)+calcBar;
-    else total = calcSideWeight;
-    document.getElementById('calc-total').value = total; 
+function addPlate(w){calcSideWeight+=w;updateCalcDisplay()}
+function resetCalc(){calcSideWeight=0;updateCalcDisplay()}
+function updateCalcDisplay(){
+    let t=0; if(calcMode==='bar')t=(calcSideWeight*2)+calcBar; else t=calcSideWeight;
+    document.getElementById('calc-total').value=t;
 }
-function manualCalcUpdate(val) {
-    val = parseFloat(val);
-    if(!isNaN(val)) {
-        if(calcMode === 'bar') { calcSideWeight = (val - calcBar) / 2; } 
-        else { calcSideWeight = val; }
+function manualCalcUpdate(v){const n=parseFloat(v);if(!isNaN(n)){if(calcMode==='bar'){calcSideWeight=(n-calcBar)/2}else{calcSideWeight=n}}}
+
+function applyCalc(){
+    if(targetInputId){
+        const el = document.getElementById(targetInputId);
+        if(el){
+            el.value = document.getElementById('calc-total').value;
+            el.dispatchEvent(new Event('change')); // Trigger save
+        }
     }
+    document.getElementById('modal-plate-calc').style.display='none';
+}
+function useBW(){
+    if(targetInputId){
+        const el = document.getElementById(targetInputId);
+        if(el){
+            el.value = "BW";
+            el.dispatchEvent(new Event('change'));
+        }
+    }
+    document.getElementById('modal-plate-calc').style.display='none';
 }
 
-function applyCalc(){ 
-    if(calcTarget){
-        const val = document.getElementById('calc-total').value;
-        if(sessionData[calcTarget.ex] && sessionData[calcTarget.ex][calcTarget.idx]) {
-            sessionData[calcTarget.ex][calcTarget.idx].w = val;
-            saveSession();
-            renderCart();
-        }
-    } 
-    document.getElementById('modal-plate-calc').style.display='none'; 
-}
-function useBW() { 
-    if(calcTarget){
-        if(sessionData[calcTarget.ex] && sessionData[calcTarget.ex][calcTarget.idx]) {
-            sessionData[calcTarget.ex][calcTarget.idx].w = "BW";
-            saveSession();
-            renderCart();
-        }
-    } 
-    document.getElementById('modal-plate-calc').style.display='none'; 
-}
-
-function genProgram(){ const w=parseFloat(document.getElementById('w').value), r=parseFloat(document.getElementById('r').value); if(!w||!r)return; const rnd=n=>Math.round(n/5)*5, max=rnd(w*(1+(0.033*r))), rm5=rnd(max*0.87), rm3=rnd(max*0.93); const weeks=[{n:1,t:"BASE",b:rm5,m:.85,s:4,r:6},{n:2,t:"LOAD",b:rm5,m:.9,s:4,r:6},{n:3,t:"INTENSE",b:rm5,m:.95,s:4,r:6},{n:4,t:"PEAK",b:rm5,m:1.05,s:4,r:6},{n:5,t:"UNLOAD",b:rm5,m:.85,s:2,r:4,f:.9},{n:6,t:"SPEED",b:rm3,m:1,s:3,r:4,w:.75,f:.85},{n:7,t:"FORCE",b:rm3,m:1,s:3,r:4,w:.85,f:.9},{n:8,t:"MAX",b:rm3,m:1,s:3,r:4,w:.7,f:.85}]; let h=`<div style="text-align:center;margin-bottom:20px;color:var(--success);font-weight:bold;border:1px solid #333;padding:10px;border-radius:10px;">EST 1RM: ${max} LBS</div>`; weeks.forEach(k=>{let m=rnd(k.b*k.m), wL=rnd(m*(k.w||.85)), f=rnd(m*(k.f||.95)); if(k.n===4)wL=rnd(m*.8); h+=`<div class="week"><div class="week-head"><span>Week ${k.n}</span><span style="color:#ff4757">${k.t}</span></div><div class="day-row"><div><b>Mon</b></div><div>${m} lbs ${k.s}x${k.r} <span class="tag tag-h">H</span></div></div><div class="day-row"><div><b>Wed</b></div><div>${wL} lbs ${k.s}x${k.r} <span class="tag tag-l">L</span></div></div><div class="day-row"><div><b>Fri</b></div><div>${f} lbs ${k.s}x${k.r} <span class="tag tag-m">M</span></div></div></div>`;}); document.getElementById('schedule-area').innerHTML=h; }
-let timer; function startTimer(s){ clearInterval(timer); const end=Date.now()+s*1000; timer=setInterval(()=>{const r=Math.round((end-Date.now())/1000); if(r<0){clearInterval(timer);document.getElementById('t-disp').innerText="DONE";return;} const m=Math.floor(r/60), rs=r%60; document.getElementById('t-disp').innerText=`${m}:${rs<10?'0':''}${rs}`;},1000); }
+function genProgram(){const w=parseFloat(document.getElementById('w').value),r=parseFloat(document.getElementById('r').value);if(!w||!r)return;const rnd=n=>Math.round(n/5)*5,max=rnd(w*(1+(0.033*r))),rm5=rnd(max*0.87),rm3=rnd(max*0.93);const weeks=[{n:1,t:"BASE",b:rm5,m:.85,s:4,r:6},{n:2,t:"LOAD",b:rm5,m:.9,s:4,r:6},{n:3,t:"INTENSE",b:rm5,m:.95,s:4,r:6},{n:4,t:"PEAK",b:rm5,m:1.05,s:4,r:6},{n:5,t:"UNLOAD",b:rm5,m:.85,s:2,r:4,f:.9},{n:6,t:"SPEED",b:rm3,m:1,s:3,r:4,w:.75,f:.85},{n:7,t:"FORCE",b:rm3,m:1,s:3,r:4,w:.85,f:.9},{n:8,t:"MAX",b:rm3,m:1,s:3,r:4,w:.7,f:.85}];let h=`<div style="text-align:center;margin-bottom:20px;color:var(--success);font-weight:bold;border:1px solid #333;padding:10px;border-radius:10px;">EST 1RM: ${max} LBS</div>`;weeks.forEach(k=>{let m=rnd(k.b*k.m),wL=rnd(m*(k.w||.85)),f=rnd(m*(k.f||.95));if(k.n===4)wL=rnd(m*.8);h+=`<div class="week"><div class="week-head"><span>Week ${k.n}</span><span style="color:#ff4757">${k.t}</span></div><div class="day-row"><div><b>Mon</b></div><div>${m} lbs ${k.s}x${k.r} <span class="tag tag-h">H</span></div></div><div class="day-row"><div><b>Wed</b></div><div>${wL} lbs ${k.s}x${k.r} <span class="tag tag-l">L</span></div></div><div class="day-row"><div><b>Fri</b></div><div>${f} lbs ${k.s}x${k.r} <span class="tag tag-m">M</span></div></div></div>`});document.getElementById('schedule-area').innerHTML=h}
+let timer;function startTimer(s){clearInterval(timer);const end=Date.now()+s*1000;timer=setInterval(()=>{const r=Math.round((end-Date.now())/1000);if(r<0){clearInterval(timer);document.getElementById('t-disp').innerText="DONE";return}const m=Math.floor(r/60),rs=r%60;document.getElementById('t-disp').innerText=`${m}:${rs<10?'0':''}${rs}`},1000)}
 </script>
 </body>
 </html>
