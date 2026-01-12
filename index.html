@@ -27,12 +27,14 @@
   .brand-span { color: var(--accent); }
   .sub { text-align: center; color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; }
   
-  /* NUMERIC INPUTS */
+  /* INPUTS */
   input { background: var(--input-bg); border: 1px solid #333; color: white; padding: 12px; border-radius: 8px; width: 100%; font-size: 16px; margin-bottom: 5px; }
   input:focus { outline:none; border-color: var(--accent); }
-  /* Remove spinners */
-  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  input[type=number] { -moz-appearance: textfield; }
+  
+  /* UNIT LABELS */
+  .input-wrapper { position: relative; width: 100%; }
+  .input-wrapper input { padding-right: 40px; text-align: center; } 
+  .input-unit { position: absolute; right: 10px; top: 42%; transform: translateY(-50%); color: #666; font-size: 10px; pointer-events: none; font-weight: bold; text-transform: uppercase; }
 
   /* --- 3. LAYOUT --- */
   .view { padding: 20px; max-width: 600px; margin: 0 auto; animation: fade 0.3s; }
@@ -51,8 +53,6 @@
   .ex-top { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: center; }
   .ex-name { font-weight: bold; font-size: 16px; }
   .ex-tools { display: flex; gap: 10px; align-items: center; }
-  
-  /* RESTORED "BEST" DISPLAY */
   .ex-hist { font-size: 11px; color: var(--success); font-weight: bold; margin-bottom: 12px; opacity: 0.8; }
   
   .toggle-lr { font-size: 10px; background: #222; color: #666; padding: 5px 10px; border-radius: 4px; border: 1px solid #444; cursor: pointer; font-weight: bold; }
@@ -60,8 +60,7 @@
 
   /* SET ROWS */
   .set-row { display: grid; grid-template-columns: 35px 1fr 40px 1fr 30px 30px; gap: 8px; align-items: center; margin-bottom: 8px; }
-  /* CARDIO ROWS */
-  .cardio-row { display: grid; grid-template-columns: 35px 1fr 1fr 1fr 30px; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .cardio-row { display: grid; grid-template-columns: 30px 1fr 1fr 1fr 30px; gap: 6px; align-items: center; margin-bottom: 8px; }
 
   /* SET GROUPS */
   .set-group-box { border: 1px solid #444; border-left-width: 4px; padding: 8px; border-radius: 8px; background: rgba(255,255,255,0.03); margin-bottom: 8px; }
@@ -94,7 +93,7 @@
   /* PLATE CALC */
   .plate-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
   .p-btn { background: #222; border: 1px solid #444; color: white; padding: 15px 0; border-radius: 8px; font-weight: bold; cursor: pointer; }
-  .calc-display { text-align: center; font-size: 24px; font-weight: bold; color: var(--success); margin-bottom: 15px; padding: 10px; background: #111; border-radius: 8px; }
+  .calc-input { text-align: center; font-size: 24px; font-weight: bold; color: var(--success); margin-bottom: 15px; padding: 10px; background: #111; border-radius: 8px; border: 1px solid #333; width: 100%; }
   .import-textarea { width: 100%; background: #111; color: #0f0; font-family: monospace; border: 1px solid #333; border-radius: 5px; padding: 10px; font-size: 10px; height: 60px; margin-bottom: 10px; }
 
   .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: #181818; border-top: 1px solid #333; display: grid; grid-template-columns: 1fr 1fr 1fr; z-index: 1000; padding-bottom: 20px; }
@@ -174,7 +173,8 @@
 </div>
 
 <div id="modal-input-overlay" class="modal-overlay"><div class="modal-box"><h3 id="modal-title" class="modal-title">Input</h3><input type="text" id="modal-input"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;"><button class="btn btn-sec" onclick="closeInputModal()">CANCEL</button><button class="btn btn-main" id="modal-ok">SAVE</button></div></div></div>
-<div id="modal-plate-calc" class="modal-overlay"><div class="modal-box"><h3 class="modal-title">Plate Math</h3><div class="calc-display" id="calc-total">45 lbs</div>
+<div id="modal-plate-calc" class="modal-overlay"><div class="modal-box"><h3 class="modal-title">Plate Math</h3>
+<input type="number" id="calc-total" class="calc-input" value="45">
 <div style="display:flex; gap:10px; margin-bottom:15px;">
     <button id="mode-bar" class="btn btn-sm" style="background:var(--success); color:black;" onclick="setCalcMode('bar')">BARBELL (2x)</button>
     <button id="mode-single" class="btn btn-sm" style="background:#333;" onclick="setCalcMode('single')">SINGLE/MACHINE (1x)</button>
@@ -279,7 +279,6 @@ if (!appData) {
     appData = { currentGym: 'Main Gym', gyms: { 'Main Gym': { folders: oldDays, library: oldLib } }, exTypes: {} };
     localStorage.setItem('netGainsData', JSON.stringify(appData));
 }
-// Ensure exTypes exists (migration)
 if(!appData.exTypes) appData.exTypes = {};
 
 let activeCart = JSON.parse(localStorage.getItem('activeCart') || '[]'); 
@@ -420,54 +419,36 @@ function renderCart() {
 
         let rowsHtml = "";
         if(isCardio) {
-            // CARDIO RENDER
             sets.forEach((set, idx) => {
                 rowsHtml += `
                 <div class="cardio-row">
                     <span class="set-num">${idx+1}</span>
-                    <input type="number" placeholder="Min" value="${set.w}" onchange="updateSet('${ex}', ${idx}, 'w', this.value)">
-                    <input type="number" placeholder="Dist" value="${set.r}" onchange="updateSet('${ex}', ${idx}, 'r', this.value)">
-                    <input type="number" placeholder="HR" value="${set.hr || ''}" onchange="updateSet('${ex}', ${idx}, 'hr', this.value)">
+                    <div class="input-wrapper"><input type="text" inputmode="decimal" value="${set.w}" onchange="updateSet('${ex}', ${idx}, 'w', this.value)"><span class="input-unit">MIN</span></div>
+                    <div class="input-wrapper"><input type="text" inputmode="decimal" value="${set.r}" onchange="updateSet('${ex}', ${idx}, 'r', this.value)"><span class="input-unit">MI</span></div>
+                    <div class="input-wrapper"><input type="text" inputmode="decimal" value="${set.hr || ''}" onchange="updateSet('${ex}', ${idx}, 'hr', this.value)"><span class="input-unit">BPM</span></div>
                     <button class="del-btn" onclick="removeSet('${ex}', ${idx})">✕</button>
                 </div>`;
             });
         } else {
-            // STRENGTH RENDER
             let i = 0;
             let setCounter = 1;
             while(i < sets.length) {
                 const set = sets[i];
                 const nextSet = sets[i+1];
-                
                 let label = setCounter;
                 if (set.side) {
                     label = `${setCounter} ${set.side}`;
                     if (set.side === 'R') setCounter++;
-                } else {
-                    setCounter++;
-                }
+                } else { setCounter++; }
 
                 if (set.type === 'drop_parent' && nextSet && nextSet.type === 'drop_child') {
-                    rowsHtml += `<div class="set-group-box set-group-drop">
-                                ${renderRow(ex, i, set, label)}
-                                ${renderRow(ex, i+1, nextSet, "DROP")}
-                             </div>`;
-                    i += 2; 
+                    rowsHtml += `<div class="set-group-box set-group-drop">${renderRow(ex, i, set, label)}${renderRow(ex, i+1, nextSet, "DROP")}</div>`; i += 2; 
                 } else if (set.type === 'super_parent' && nextSet && nextSet.type === 'super_child') {
-                    rowsHtml += `<div class="set-group-box set-group-super">
-                                ${renderRow(ex, i, set, label)}
-                                ${renderRow(ex, i+1, nextSet, "SUPER")}
-                             </div>`;
-                    i += 2;
+                    rowsHtml += `<div class="set-group-box set-group-super">${renderRow(ex, i, set, label)}${renderRow(ex, i+1, nextSet, "SUPER")}</div>`; i += 2;
                 } else if (set.type === 'assist_parent' && nextSet && nextSet.type === 'assist_child') {
-                    rowsHtml += `<div class="set-group-box set-group-assist">
-                                ${renderRow(ex, i, set, label)}
-                                ${renderRow(ex, i+1, nextSet, "ASST")}
-                             </div>`;
-                    i += 2;
+                    rowsHtml += `<div class="set-group-box set-group-assist">${renderRow(ex, i, set, label)}${renderRow(ex, i+1, nextSet, "ASST")}</div>`; i += 2;
                 } else {
-                    rowsHtml += `<div class="set-container">${renderRow(ex, i, set, label)}</div>`;
-                    i++;
+                    rowsHtml += `<div class="set-container">${renderRow(ex, i, set, label)}</div>`; i++;
                 }
             }
         }
@@ -485,12 +466,10 @@ function renderRow(ex, idx, set, label) {
     const inputId = `w-${ex}-${idx}`;
     return `
     <div class="set-row">
-        <div style="display:flex;flex-direction:column;align-items:center;">
-             <span class="set-num">${label}</span>
-        </div>
-        <input type="text" id="${inputId}" placeholder="Lbs" value="${set.w}" onchange="updateSet('${ex}', ${idx}, 'w', this.value)">
+        <div style="display:flex;flex-direction:column;align-items:center;"><span class="set-num">${label}</span></div>
+        <input type="text" inputmode="decimal" id="${inputId}" placeholder="Lbs" value="${set.w}" onchange="updateSet('${ex}', ${idx}, 'w', this.value)">
         <button class="calc-btn" onclick="openCalc('${inputId}')">🧮</button>
-        <input type="number" placeholder="Reps" value="${set.r}" onchange="updateSet('${ex}', ${idx}, 'r', this.value)">
+        <input type="text" inputmode="decimal" placeholder="Reps" value="${set.r}" onchange="updateSet('${ex}', ${idx}, 'r', this.value)">
         <button class="menu-btn" onclick="openSetOpt('${ex}', ${idx})">...</button>
         <button class="del-btn" onclick="removeSet('${ex}', ${idx})">✕</button>
     </div>`;
@@ -567,10 +546,8 @@ function finishSession() {
             const sets = sessionData[ex] || [];
             
             if(isCardio) {
-                // Cardio Log
                 sets.forEach(set => {
-                    const time = parseFloat(set.w); // Time in w slot
-                    const dist = parseFloat(set.r); // Dist in r slot
+                    const time = parseFloat(set.w); const dist = parseFloat(set.r);
                     if(time && dist) {
                         const pace = (time / dist).toFixed(2);
                         globalLog.push({ date:today, ex:ex, w:time, r:dist, rm: pace, hr: set.hr, type:'cardio' });
@@ -579,11 +556,9 @@ function finishSession() {
                     }
                 });
             } else {
-                // Strength Log
                 let best1RM = 0; let bestStr = "";
                 sets.forEach(set => {
-                    const w = parseFloat(set.w); 
-                    const r = parseFloat(set.r);
+                    const w = parseFloat(set.w); const r = parseFloat(set.r);
                     if(!isNaN(w) && !isNaN(r)) {
                         const e1rm = w * (1 + (0.033 * r));
                         if(e1rm > best1RM) { best1RM = e1rm; bestStr = `${set.w} lbs x ${r}`; }
@@ -615,7 +590,7 @@ function nuke() { showConfirm("DELETE ALL?", () => { localStorage.clear(); locat
 function exportCSV() { if(globalLog.length===0){showToast("No data");return;} let c="Date,Exercise,Weight,Reps,Side,Type,HR\n"; globalLog.forEach(l=>{c+=`${l.date},${l.ex},${l.w},${l.r},${l.side||''},${l.type||''},${l.hr||''}\n`}); const b=document.createElement('a'); b.href=encodeURI("data:text/csv;charset=utf-8,"+c); b.download="netgains_data.csv"; document.body.appendChild(b); b.click(); }
 
 // --- PLATE CALC ---
-let calcTargetId=null, calcSideWeight=0, calcBar=45, calcMode='bar';
+let calcTargetId=null, calcSideWeight=0, calcBar=45;
 function openCalc(id){ calcTargetId=id; calcSideWeight=0; setCalcMode('bar'); document.getElementById('modal-plate-calc').style.display='flex'; }
 function setCalcMode(m) {
     calcMode = m;
@@ -635,9 +610,18 @@ function updateCalcDisplay(){
     let total = 0;
     if(calcMode === 'bar') total = (calcSideWeight*2)+calcBar;
     else total = calcSideWeight;
-    document.getElementById('calc-total').innerText=total+" lbs"; 
+    document.getElementById('calc-total').value = total; 
 }
-function applyCalc(){ if(calcTargetId){document.getElementById(calcTargetId).value=document.getElementById('calc-total').innerText.replace(' lbs','');document.getElementById(calcTargetId).dispatchEvent(new Event('change'));} document.getElementById('modal-plate-calc').style.display='none'; }
+// Listener for Manual Calc Input
+document.getElementById('calc-total').addEventListener('change', function(e) {
+    let val = parseFloat(e.target.value);
+    if(!isNaN(val)) {
+        if(calcMode === 'bar') { calcSideWeight = (val - calcBar) / 2; } 
+        else { calcSideWeight = val; }
+    }
+});
+
+function applyCalc(){ if(calcTargetId){document.getElementById(calcTargetId).value=document.getElementById('calc-total').value;document.getElementById(calcTargetId).dispatchEvent(new Event('change'));} document.getElementById('modal-plate-calc').style.display='none'; }
 function useBW() { if(calcTargetId){document.getElementById(calcTargetId).value="BW";document.getElementById(calcTargetId).dispatchEvent(new Event('change'));} document.getElementById('modal-plate-calc').style.display='none'; }
 
 function genProgram(){ const w=parseFloat(document.getElementById('w').value), r=parseFloat(document.getElementById('r').value); if(!w||!r)return; const rnd=n=>Math.round(n/5)*5, max=rnd(w*(1+(0.033*r))), rm5=rnd(max*0.87), rm3=rnd(max*0.93); const weeks=[{n:1,t:"BASE",b:rm5,m:.85,s:4,r:6},{n:2,t:"LOAD",b:rm5,m:.9,s:4,r:6},{n:3,t:"INTENSE",b:rm5,m:.95,s:4,r:6},{n:4,t:"PEAK",b:rm5,m:1.05,s:4,r:6},{n:5,t:"UNLOAD",b:rm5,m:.85,s:2,r:4,f:.9},{n:6,t:"SPEED",b:rm3,m:1,s:3,r:4,w:.75,f:.85},{n:7,t:"FORCE",b:rm3,m:1,s:3,r:4,w:.85,f:.9},{n:8,t:"MAX",b:rm3,m:1,s:3,r:4,w:.7,f:.85}]; let h=`<div style="text-align:center;margin-bottom:20px;color:var(--success);font-weight:bold;border:1px solid #333;padding:10px;border-radius:10px;">EST 1RM: ${max} LBS</div>`; weeks.forEach(k=>{let m=rnd(k.b*k.m), wL=rnd(m*(k.w||.85)), f=rnd(m*(k.f||.95)); if(k.n===4)wL=rnd(m*.8); h+=`<div class="week"><div class="week-head"><span>Week ${k.n}</span><span style="color:#ff4757">${k.t}</span></div><div class="day-row"><div><b>Mon</b></div><div>${m} lbs ${k.s}x${k.r} <span class="tag tag-h">H</span></div></div><div class="day-row"><div><b>Wed</b></div><div>${wL} lbs ${k.s}x${k.r} <span class="tag tag-l">L</span></div></div><div class="day-row"><div><b>Fri</b></div><div>${f} lbs ${k.s}x${k.r} <span class="tag tag-m">M</span></div></div></div>`;}); document.getElementById('schedule-area').innerHTML=h; }
