@@ -10,7 +10,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   /* --- 1. VARIABLES & RESET --- */
-  :root { --bg: #0f0f13; --card: #1a1a24; --text: #ffffff; --accent: #ff4757; --success: #2ed573; --drop: #ff6b81; --super: #a29bfe; --assist: #00d2d3; --input-bg: #121212; }
+  :root { --bg: #0f0f13; --card: #1a1a24; --text: #ffffff; --accent: #ff4757; --success: #2ed573; --drop: #ff6b81; --super: #a29bfe; --assist: #00d2d3; --cardio: #ffa502; --input-bg: #121212; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; padding: 0; background-color: var(--bg); color: var(--text); font-family: -apple-system, system-ui, sans-serif; overflow-x: hidden; padding-bottom: 90px; }
 
@@ -26,8 +26,13 @@
   h1 { text-align: center; margin: 25px 0 5px; font-size: 26px; letter-spacing: -1px; font-weight: 900; color: white; }
   .brand-span { color: var(--accent); }
   .sub { text-align: center; color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; }
+  
+  /* NUMERIC INPUTS */
   input { background: var(--input-bg); border: 1px solid #333; color: white; padding: 12px; border-radius: 8px; width: 100%; font-size: 16px; margin-bottom: 5px; }
   input:focus { outline:none; border-color: var(--accent); }
+  /* Remove spinners */
+  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; }
 
   /* --- 3. LAYOUT --- */
   .view { padding: 20px; max-width: 600px; margin: 0 auto; animation: fade 0.3s; }
@@ -43,14 +48,21 @@
 
   /* SESSION EXERCISE CARD */
   .ex-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; }
-  .ex-top { display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center; }
+  .ex-top { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: center; }
   .ex-name { font-weight: bold; font-size: 16px; }
   .ex-tools { display: flex; gap: 10px; align-items: center; }
+  
+  /* RESTORED "BEST" DISPLAY */
+  .ex-hist { font-size: 11px; color: var(--success); font-weight: bold; margin-bottom: 12px; opacity: 0.8; }
+  
   .toggle-lr { font-size: 10px; background: #222; color: #666; padding: 5px 10px; border-radius: 4px; border: 1px solid #444; cursor: pointer; font-weight: bold; }
   .toggle-lr.active { background: var(--accent); color: white; border-color: var(--accent); }
 
   /* SET ROWS */
   .set-row { display: grid; grid-template-columns: 35px 1fr 40px 1fr 30px 30px; gap: 8px; align-items: center; margin-bottom: 8px; }
+  /* CARDIO ROWS */
+  .cardio-row { display: grid; grid-template-columns: 35px 1fr 1fr 1fr 30px; gap: 8px; align-items: center; margin-bottom: 8px; }
+
   /* SET GROUPS */
   .set-group-box { border: 1px solid #444; border-left-width: 4px; padding: 8px; border-radius: 8px; background: rgba(255,255,255,0.03); margin-bottom: 8px; }
   .set-group-drop { border-left-color: var(--drop); }
@@ -79,7 +91,7 @@
   #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #222; border: 1px solid #333; color: white; padding: 12px 24px; border-radius: 30px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: 0.3s; z-index: 3000; }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
   
-  /* PLATE CALC & BRIDGE */
+  /* PLATE CALC */
   .plate-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
   .p-btn { background: #222; border: 1px solid #444; color: white; padding: 15px 0; border-radius: 8px; font-weight: bold; cursor: pointer; }
   .calc-display { text-align: center; font-size: 24px; font-weight: bold; color: var(--success); margin-bottom: 15px; padding: 10px; background: #111; border-radius: 8px; }
@@ -126,6 +138,18 @@
   </div>
 </div>
 
+<div id="modal-new-ex" class="modal-overlay">
+  <div class="modal-box">
+    <h3 class="modal-title">New Exercise</h3>
+    <input type="text" id="new-ex-name" placeholder="Exercise Name (e.g. Bench)">
+    <div style="margin-top:15px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <button class="btn btn-main" onclick="confirmNewEx('str')">STRENGTH</button>
+        <button class="btn btn-sec" style="border-color:var(--cardio); color:var(--cardio);" onclick="confirmNewEx('cardio')">CARDIO</button>
+    </div>
+    <button class="btn btn-ghost" style="margin-top:10px; width:100%; border:none;" onclick="document.getElementById('modal-new-ex').style.display='none'">CANCEL</button>
+  </div>
+</div>
+
 <div id="modal-share" class="modal-overlay">
   <div class="modal-box">
     <h3 class="modal-title" style="text-align:center">Share Routine</h3>
@@ -150,7 +174,12 @@
 </div>
 
 <div id="modal-input-overlay" class="modal-overlay"><div class="modal-box"><h3 id="modal-title" class="modal-title">Input</h3><input type="text" id="modal-input"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;"><button class="btn btn-sec" onclick="closeInputModal()">CANCEL</button><button class="btn btn-main" id="modal-ok">SAVE</button></div></div></div>
-<div id="modal-plate-calc" class="modal-overlay"><div class="modal-box"><h3 class="modal-title">Plate Math</h3><div class="calc-display" id="calc-total">45 lbs</div><div class="bar-toggle" onclick="toggleBar()" style="display:flex;justify-content:space-between;background:#222;padding:10px;border-radius:6px;margin-bottom:15px;font-size:12px;"><span>Bar (45lbs)</span><span id="bar-status" style="color:var(--success)">ON</span></div><div class="plate-grid"><button class="p-btn" onclick="addPlate(45)">45</button><button class="p-btn" onclick="addPlate(35)">35</button><button class="p-btn" onclick="addPlate(25)">25</button><button class="p-btn" onclick="addPlate(10)">10</button><button class="p-btn" onclick="addPlate(5)">5</button><button class="p-btn" onclick="addPlate(2.5)">2.5</button></div><button class="btn btn-sec" style="border-style:dashed; margin-bottom:10px;" onclick="useBW()">USE BODYWEIGHT (BW)</button><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button class="btn btn-sec" onclick="resetCalc()">RESET</button><button class="btn btn-main" onclick="applyCalc()">USE</button></div></div></div>
+<div id="modal-plate-calc" class="modal-overlay"><div class="modal-box"><h3 class="modal-title">Plate Math</h3><div class="calc-display" id="calc-total">45 lbs</div>
+<div style="display:flex; gap:10px; margin-bottom:15px;">
+    <button id="mode-bar" class="btn btn-sm" style="background:var(--success); color:black;" onclick="setCalcMode('bar')">BARBELL (2x)</button>
+    <button id="mode-single" class="btn btn-sm" style="background:#333;" onclick="setCalcMode('single')">SINGLE/MACHINE (1x)</button>
+</div>
+<div class="plate-grid"><button class="p-btn" onclick="addPlate(45)">45</button><button class="p-btn" onclick="addPlate(35)">35</button><button class="p-btn" onclick="addPlate(25)">25</button><button class="p-btn" onclick="addPlate(10)">10</button><button class="p-btn" onclick="addPlate(5)">5</button><button class="p-btn" onclick="addPlate(2.5)">2.5</button></div><button class="btn btn-sec" style="border-style:dashed; margin-bottom:10px;" onclick="useBW()">USE BODYWEIGHT (BW)</button><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button class="btn btn-sec" onclick="resetCalc()">RESET</button><button class="btn btn-main" onclick="applyCalc()">USE</button></div></div></div>
 <div id="modal-confirm-overlay" class="modal-overlay"><div class="modal-box"><h3 class="modal-title">Confirm</h3><p id="confirm-desc" class="modal-desc">Sure?</p><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button class="btn btn-sec" onclick="closeConfirmModal()">CANCEL</button><button class="btn btn-main" id="confirm-ok" style="background:#333">YES</button></div></div></div>
 <div id="toast"><span class="toast-icon">✓</span> <span id="toast-msg">Saved</span></div>
 
@@ -247,9 +276,12 @@ let appData = JSON.parse(localStorage.getItem('netGainsData') || 'null');
 if (!appData) {
     const oldDays = JSON.parse(localStorage.getItem('myDays') || '[]');
     const oldLib = JSON.parse(localStorage.getItem('myLibrary') || '{}');
-    appData = { currentGym: 'Main Gym', gyms: { 'Main Gym': { folders: oldDays, library: oldLib } } };
+    appData = { currentGym: 'Main Gym', gyms: { 'Main Gym': { folders: oldDays, library: oldLib } }, exTypes: {} };
     localStorage.setItem('netGainsData', JSON.stringify(appData));
 }
+// Ensure exTypes exists (migration)
+if(!appData.exTypes) appData.exTypes = {};
+
 let activeCart = JSON.parse(localStorage.getItem('activeCart') || '[]'); 
 let sessionData = JSON.parse(localStorage.getItem('sessionData') || '{}'); 
 let history = JSON.parse(localStorage.getItem('liftHistory') || '{}'); 
@@ -259,7 +291,6 @@ let globalLog = JSON.parse(localStorage.getItem('globalLog') || '[]');
 const urlParams = new URLSearchParams(window.location.search);
 const importData = urlParams.get('import');
 if(importData) {
-    // Show Bridge Modal
     window.bridgeCode = importData;
     document.getElementById('modal-bridge').style.display = 'flex';
 }
@@ -299,20 +330,13 @@ function shareFolder(name) {
     const gymData = getCurrentGymData();
     const data = { name: name, exs: gymData.library[name] || [] };
     const str = btoa(JSON.stringify(data));
-    // The link takes them to the bridge page
     const link = window.location.origin + window.location.pathname + "?import=" + str;
-    
     document.getElementById('qrcode').innerHTML = "";
     new QRCode(document.getElementById("qrcode"), { text: link, width: 128, height: 128 });
-    
-    // We store just the CODE for copy, not the whole URL, so they can paste easily
     window.shareCode = str;
     document.getElementById('modal-share').style.display = 'flex';
 }
-
-function copyShareCode() {
-    navigator.clipboard.writeText(window.shareCode).then(() => showToast("Code Copied!"));
-}
+function copyShareCode() { navigator.clipboard.writeText(window.shareCode).then(() => showToast("Code Copied!")); }
 
 // --- APP INIT ---
 renderDays();
@@ -371,60 +395,87 @@ function renderCart() {
     if(activeCart.length===0) { area.innerHTML="<div style='text-align:center;padding:30px;color:#555;'>Empty Workout</div>"; return; }
     
     activeCart.forEach((ex) => {
+        const isCardio = appData.exTypes[ex] === 'cardio';
         const sets = sessionData[ex] || [];
         const isLR = sessionData[ex + '_LR'] === true; 
+        const best = history[ex] || 'No history';
         
-        let html = "";
-        let i = 0;
-        let setCounter = 1;
+        // Render Header
+        let toolsHtml = "";
+        if(!isCardio) {
+            toolsHtml = `<div class="toggle-lr ${isLR ? 'active' : ''}" onclick="toggleLR('${ex}')">L+R</div>`;
+        }
+        
+        let header = `
+        <div class="ex-top">
+            <div>
+                <span class="ex-name">${ex}</span>
+                <div class="ex-hist">BEST: ${best}</div>
+            </div>
+            <div class="ex-tools">
+                ${toolsHtml}
+                <button onclick="removeExFromCart('${ex}')" style="background:none;border:none;color:#555;">✕</button>
+            </div>
+        </div>`;
 
-        while(i < sets.length) {
-            const set = sets[i];
-            const nextSet = sets[i+1];
-            
-            // Generate Label
-            let label = setCounter;
-            if (set.side) {
-                label = `${setCounter} ${set.side}`;
-                if (set.side === 'R') setCounter++;
-            } else {
-                setCounter++;
-            }
+        let rowsHtml = "";
+        if(isCardio) {
+            // CARDIO RENDER
+            sets.forEach((set, idx) => {
+                rowsHtml += `
+                <div class="cardio-row">
+                    <span class="set-num">${idx+1}</span>
+                    <input type="number" placeholder="Min" value="${set.w}" onchange="updateSet('${ex}', ${idx}, 'w', this.value)">
+                    <input type="number" placeholder="Dist" value="${set.r}" onchange="updateSet('${ex}', ${idx}, 'r', this.value)">
+                    <input type="number" placeholder="HR" value="${set.hr || ''}" onchange="updateSet('${ex}', ${idx}, 'hr', this.value)">
+                    <button class="del-btn" onclick="removeSet('${ex}', ${idx})">✕</button>
+                </div>`;
+            });
+        } else {
+            // STRENGTH RENDER
+            let i = 0;
+            let setCounter = 1;
+            while(i < sets.length) {
+                const set = sets[i];
+                const nextSet = sets[i+1];
+                
+                let label = setCounter;
+                if (set.side) {
+                    label = `${setCounter} ${set.side}`;
+                    if (set.side === 'R') setCounter++;
+                } else {
+                    setCounter++;
+                }
 
-            if (set.type === 'drop_parent' && nextSet && nextSet.type === 'drop_child') {
-                html += `<div class="set-group-box set-group-drop">
-                            ${renderRow(ex, i, set, label)}
-                            ${renderRow(ex, i+1, nextSet, "DROP")}
-                         </div>`;
-                i += 2; 
-            } else if (set.type === 'super_parent' && nextSet && nextSet.type === 'super_child') {
-                html += `<div class="set-group-box set-group-super">
-                            ${renderRow(ex, i, set, label)}
-                            ${renderRow(ex, i+1, nextSet, "SUPER")}
-                         </div>`;
-                i += 2;
-            } else if (set.type === 'assist_parent' && nextSet && nextSet.type === 'assist_child') {
-                html += `<div class="set-group-box set-group-assist">
-                            ${renderRow(ex, i, set, label)}
-                            ${renderRow(ex, i+1, nextSet, "ASST")}
-                         </div>`;
-                i += 2;
-            } else {
-                html += `<div class="set-container">${renderRow(ex, i, set, label)}</div>`;
-                i++;
+                if (set.type === 'drop_parent' && nextSet && nextSet.type === 'drop_child') {
+                    rowsHtml += `<div class="set-group-box set-group-drop">
+                                ${renderRow(ex, i, set, label)}
+                                ${renderRow(ex, i+1, nextSet, "DROP")}
+                             </div>`;
+                    i += 2; 
+                } else if (set.type === 'super_parent' && nextSet && nextSet.type === 'super_child') {
+                    rowsHtml += `<div class="set-group-box set-group-super">
+                                ${renderRow(ex, i, set, label)}
+                                ${renderRow(ex, i+1, nextSet, "SUPER")}
+                             </div>`;
+                    i += 2;
+                } else if (set.type === 'assist_parent' && nextSet && nextSet.type === 'assist_child') {
+                    rowsHtml += `<div class="set-group-box set-group-assist">
+                                ${renderRow(ex, i, set, label)}
+                                ${renderRow(ex, i+1, nextSet, "ASST")}
+                             </div>`;
+                    i += 2;
+                } else {
+                    rowsHtml += `<div class="set-container">${renderRow(ex, i, set, label)}</div>`;
+                    i++;
+                }
             }
         }
 
         area.innerHTML += `
         <div class="ex-card">
-            <div class="ex-top">
-                <span class="ex-name">${ex}</span>
-                <div class="ex-tools">
-                   <div class="toggle-lr ${isLR ? 'active' : ''}" onclick="toggleLR('${ex}')">L+R</div>
-                   <button onclick="removeExFromCart('${ex}')" style="background:none;border:none;color:#555;">✕</button>
-                </div>
-            </div>
-            <div id="sets-${ex}">${html}</div>
+            ${header}
+            <div id="sets-${ex}">${rowsHtml}</div>
             <button class="btn btn-sec btn-sm" onclick="addSet('${ex}')">+ ADD SET</button>
         </div>`;
     });
@@ -445,18 +496,15 @@ function renderRow(ex, idx, set, label) {
     </div>`;
 }
 
-// --- SET OPERATIONS ---
+// --- OPERATIONS ---
 let optTarget = null;
 function openSetOpt(ex, idx) { optTarget = {ex, idx}; document.getElementById('modal-set-opt').style.display = 'flex'; }
 function applySetType(type) {
     if(optTarget) {
         const {ex, idx} = optTarget;
         const currentSet = sessionData[ex][idx];
-        
-        // Smart Weight Logic
         let newWeight = currentSet.w;
-        if(type === 'drop') newWeight = ""; // Clear for dropset
-        
+        if(type === 'drop') newWeight = ""; 
         const newSet = {w: newWeight, r:'', type: type+'_child'};
         sessionData[ex].splice(idx + 1, 0, newSet);
         currentSet.type = type+'_parent';
@@ -480,7 +528,11 @@ function addSet(ex) {
     saveSession(); renderCart();
 }
 function removeSet(ex, idx) { sessionData[ex].splice(idx, 1); saveSession(); renderCart(); }
-function updateSet(ex, idx, field, val) { sessionData[ex][idx][field] = val; saveSession(); }
+function updateSet(ex, idx, field, val) { 
+    if(!sessionData[ex][idx]) return;
+    sessionData[ex][idx][field] = val; 
+    saveSession(); 
+}
 
 function renderShelf() {
     const area = document.getElementById('tile-area'); area.innerHTML = "";
@@ -491,7 +543,19 @@ function renderShelf() {
 }
 function addToCart(ex) { if(!activeCart.includes(ex)) { activeCart.push(ex); if(!sessionData[ex]) sessionData[ex] = [{w:'', r:''}]; saveSession(); renderCart(); } }
 function removeExFromCart(ex) { activeCart = activeCart.filter(e => e !== ex); delete sessionData[ex]; saveSession(); renderCart(); }
-function promptNewEx() { openInputModal("New Exercise", "Name", (val) => { if(val){ const gd=getCurrentGymData(); if(!gd.library[currentFolder])gd.library[currentFolder]=[]; gd.library[currentFolder].push(val); saveAppData(); renderShelf(); addToCart(val); } }); }
+
+function promptNewEx() { document.getElementById('new-ex-name').value = ""; document.getElementById('modal-new-ex').style.display = 'flex'; }
+function confirmNewEx(type) {
+    const val = document.getElementById('new-ex-name').value;
+    if(val) {
+        const gd = getCurrentGymData();
+        if(!gd.library[currentFolder]) gd.library[currentFolder]=[];
+        gd.library[currentFolder].push(val);
+        appData.exTypes[val] = type;
+        saveAppData(); renderShelf(); addToCart(val);
+    }
+    document.getElementById('modal-new-ex').style.display = 'none';
+}
 
 function saveSession() { localStorage.setItem('activeCart', JSON.stringify(activeCart)); localStorage.setItem('sessionData', JSON.stringify(sessionData)); }
 function saveAppData() { localStorage.setItem('netGainsData', JSON.stringify(appData)); }
@@ -499,24 +563,39 @@ function finishSession() {
     showConfirm("Save Log?", () => {
         let count = 0; const today = new Date().toISOString().split('T')[0];
         activeCart.forEach(ex => {
+            const isCardio = appData.exTypes[ex] === 'cardio';
             const sets = sessionData[ex] || [];
-            let best1RM = 0; let bestStr = "";
-            sets.forEach(set => {
-                // Ensure we don't crash on "BW"
-                const w = parseFloat(set.w); 
-                const r = parseFloat(set.r);
-                if(!isNaN(w) && !isNaN(r)) {
-                    const e1rm = w * (1 + (0.033 * r));
-                    if(e1rm > best1RM) { best1RM = e1rm; bestStr = `${set.w} lbs x ${r}`; }
-                    globalLog.push({ date: today, ex: ex, w: w, r: r, rm: Math.round(e1rm), type: set.type||'', side: set.side||'' });
-                    count++;
-                } else if (set.w === "BW" && r) {
-                    // Log bodyweight reps
-                    globalLog.push({ date: today, ex: ex, w: "BW", r: r, rm: 0, type: set.type||'', side: set.side||'' });
-                    count++;
-                }
-            });
-            if(bestStr) history[ex] = bestStr;
+            
+            if(isCardio) {
+                // Cardio Log
+                sets.forEach(set => {
+                    const time = parseFloat(set.w); // Time in w slot
+                    const dist = parseFloat(set.r); // Dist in r slot
+                    if(time && dist) {
+                        const pace = (time / dist).toFixed(2);
+                        globalLog.push({ date:today, ex:ex, w:time, r:dist, rm: pace, hr: set.hr, type:'cardio' });
+                        history[ex] = `${pace} /mi`;
+                        count++;
+                    }
+                });
+            } else {
+                // Strength Log
+                let best1RM = 0; let bestStr = "";
+                sets.forEach(set => {
+                    const w = parseFloat(set.w); 
+                    const r = parseFloat(set.r);
+                    if(!isNaN(w) && !isNaN(r)) {
+                        const e1rm = w * (1 + (0.033 * r));
+                        if(e1rm > best1RM) { best1RM = e1rm; bestStr = `${set.w} lbs x ${r}`; }
+                        globalLog.push({ date: today, ex: ex, w: w, r: r, rm: Math.round(e1rm), type: set.type||'', side: set.side||'' });
+                        count++;
+                    } else if (set.w === "BW" && r) {
+                        globalLog.push({ date: today, ex: ex, w: "BW", r: r, rm: 0, type: set.type||'', side: set.side||'' });
+                        count++;
+                    }
+                });
+                if(bestStr) history[ex] = bestStr;
+            }
         });
         localStorage.setItem('liftHistory', JSON.stringify(history)); localStorage.setItem('globalLog', JSON.stringify(globalLog));
         if(count>0){ activeCart=[]; sessionData={}; saveSession(); closeSession(); showToast("Saved"); }
@@ -533,16 +612,32 @@ function closeInputModal(){document.getElementById('modal-input-overlay').style.
 function showConfirm(msg, cb) { const m=document.getElementById('modal-confirm-overlay'), b=document.getElementById('confirm-ok'); document.getElementById('confirm-desc').innerText=msg; m.style.display='flex'; let n=b.cloneNode(true); b.parentNode.replaceChild(n,b); n.addEventListener('click',()=>{m.style.display='none';cb()}); }
 function closeConfirmModal(){document.getElementById('modal-confirm-overlay').style.display='none'}
 function nuke() { showConfirm("DELETE ALL?", () => { localStorage.clear(); location.reload(); }); }
-function exportCSV() { if(globalLog.length===0){showToast("No data");return;} let c="Date,Exercise,Weight,Reps,Side,Type\n"; globalLog.forEach(l=>{c+=`${l.date},${l.ex},${l.w},${l.r},${l.side||''},${l.type||''}\n`}); const b=document.createElement('a'); b.href=encodeURI("data:text/csv;charset=utf-8,"+c); b.download="netgains_data.csv"; document.body.appendChild(b); b.click(); }
+function exportCSV() { if(globalLog.length===0){showToast("No data");return;} let c="Date,Exercise,Weight,Reps,Side,Type,HR\n"; globalLog.forEach(l=>{c+=`${l.date},${l.ex},${l.w},${l.r},${l.side||''},${l.type||''},${l.hr||''}\n`}); const b=document.createElement('a'); b.href=encodeURI("data:text/csv;charset=utf-8,"+c); b.download="netgains_data.csv"; document.body.appendChild(b); b.click(); }
 
 // --- PLATE CALC ---
-let calcTargetId=null, calcSideWeight=0, calcBar=45;
-function openCalc(id){ calcTargetId=id; calcSideWeight=0; calcBar=45; updateCalcDisplay(); document.getElementById('modal-plate-calc').style.display='flex'; }
-function toggleBar(){ calcBar=calcBar===45?0:45; document.getElementById('bar-status').innerText=calcBar===45?"ON":"OFF"; document.getElementById('bar-status').style.color=calcBar===45?"var(--success)":"#555"; updateCalcDisplay(); }
+let calcTargetId=null, calcSideWeight=0, calcBar=45, calcMode='bar';
+function openCalc(id){ calcTargetId=id; calcSideWeight=0; setCalcMode('bar'); document.getElementById('modal-plate-calc').style.display='flex'; }
+function setCalcMode(m) {
+    calcMode = m;
+    calcBar = (m==='bar') ? 45 : 0;
+    document.getElementById('mode-bar').style.background = (m==='bar') ? 'var(--success)' : '#333';
+    document.getElementById('mode-bar').style.color = (m==='bar') ? 'black' : 'white';
+    document.getElementById('mode-single').style.background = (m==='single') ? 'var(--success)' : '#333';
+    document.getElementById('mode-single').style.color = (m==='single') ? 'black' : 'white';
+    document.getElementById('bar-status').innerText = (m==='bar') ? 'ON' : 'OFF';
+    document.getElementById('bar-status').style.color = (m==='bar') ? 'var(--success)' : '#555';
+    updateCalcDisplay();
+}
+function toggleBar(){ if(calcMode==='bar') { calcBar=calcBar===45?0:45; document.getElementById('bar-status').innerText=calcBar===45?"ON":"OFF"; document.getElementById('bar-status').style.color=calcBar===45?"var(--success)":"#555"; updateCalcDisplay(); } }
 function addPlate(w){ calcSideWeight+=w; updateCalcDisplay(); }
 function resetCalc(){ calcSideWeight=0; updateCalcDisplay(); }
-function updateCalcDisplay(){ document.getElementById('calc-total').innerText=((calcSideWeight*2)+calcBar)+" lbs"; }
-function applyCalc(){ if(calcTargetId){document.getElementById(calcTargetId).value=((calcSideWeight*2)+calcBar);document.getElementById(calcTargetId).dispatchEvent(new Event('change'));} document.getElementById('modal-plate-calc').style.display='none'; }
+function updateCalcDisplay(){ 
+    let total = 0;
+    if(calcMode === 'bar') total = (calcSideWeight*2)+calcBar;
+    else total = calcSideWeight;
+    document.getElementById('calc-total').innerText=total+" lbs"; 
+}
+function applyCalc(){ if(calcTargetId){document.getElementById(calcTargetId).value=document.getElementById('calc-total').innerText.replace(' lbs','');document.getElementById(calcTargetId).dispatchEvent(new Event('change'));} document.getElementById('modal-plate-calc').style.display='none'; }
 function useBW() { if(calcTargetId){document.getElementById(calcTargetId).value="BW";document.getElementById(calcTargetId).dispatchEvent(new Event('change'));} document.getElementById('modal-plate-calc').style.display='none'; }
 
 function genProgram(){ const w=parseFloat(document.getElementById('w').value), r=parseFloat(document.getElementById('r').value); if(!w||!r)return; const rnd=n=>Math.round(n/5)*5, max=rnd(w*(1+(0.033*r))), rm5=rnd(max*0.87), rm3=rnd(max*0.93); const weeks=[{n:1,t:"BASE",b:rm5,m:.85,s:4,r:6},{n:2,t:"LOAD",b:rm5,m:.9,s:4,r:6},{n:3,t:"INTENSE",b:rm5,m:.95,s:4,r:6},{n:4,t:"PEAK",b:rm5,m:1.05,s:4,r:6},{n:5,t:"UNLOAD",b:rm5,m:.85,s:2,r:4,f:.9},{n:6,t:"SPEED",b:rm3,m:1,s:3,r:4,w:.75,f:.85},{n:7,t:"FORCE",b:rm3,m:1,s:3,r:4,w:.85,f:.9},{n:8,t:"MAX",b:rm3,m:1,s:3,r:4,w:.7,f:.85}]; let h=`<div style="text-align:center;margin-bottom:20px;color:var(--success);font-weight:bold;border:1px solid #333;padding:10px;border-radius:10px;">EST 1RM: ${max} LBS</div>`; weeks.forEach(k=>{let m=rnd(k.b*k.m), wL=rnd(m*(k.w||.85)), f=rnd(m*(k.f||.95)); if(k.n===4)wL=rnd(m*.8); h+=`<div class="week"><div class="week-head"><span>Week ${k.n}</span><span style="color:#ff4757">${k.t}</span></div><div class="day-row"><div><b>Mon</b></div><div>${m} lbs ${k.s}x${k.r} <span class="tag tag-h">H</span></div></div><div class="day-row"><div><b>Wed</b></div><div>${wL} lbs ${k.s}x${k.r} <span class="tag tag-l">L</span></div></div><div class="day-row"><div><b>Fri</b></div><div>${f} lbs ${k.s}x${k.r} <span class="tag tag-m">M</span></div></div></div>`;}); document.getElementById('schedule-area').innerHTML=h; }
