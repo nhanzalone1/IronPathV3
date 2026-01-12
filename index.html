@@ -174,7 +174,7 @@
 
 <div id="modal-input-overlay" class="modal-overlay"><div class="modal-box"><h3 id="modal-title" class="modal-title">Input</h3><input type="text" id="modal-input"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;"><button class="btn btn-sec" onclick="closeInputModal()">CANCEL</button><button class="btn btn-main" id="modal-ok">SAVE</button></div></div></div>
 <div id="modal-plate-calc" class="modal-overlay"><div class="modal-box"><h3 class="modal-title">Plate Math</h3>
-<input type="number" id="calc-total" class="calc-input" value="45">
+<input type="text" inputmode="decimal" id="calc-total" class="calc-input" value="45" onfocus="this.value=''">
 <div style="display:flex; gap:10px; margin-bottom:15px;">
     <button id="mode-bar" class="btn btn-sm" style="background:var(--success); color:black;" onclick="setCalcMode('bar')">BARBELL (2x)</button>
     <button id="mode-single" class="btn btn-sm" style="background:#333;" onclick="setCalcMode('single')">SINGLE/MACHINE (1x)</button>
@@ -592,6 +592,7 @@ function exportCSV() { if(globalLog.length===0){showToast("No data");return;} le
 // --- PLATE CALC ---
 let calcTargetId=null, calcSideWeight=0, calcBar=45;
 function openCalc(id){ calcTargetId=id; calcSideWeight=0; setCalcMode('bar'); document.getElementById('modal-plate-calc').style.display='flex'; }
+function calcPlates(){ calcTargetId=null; calcSideWeight=0; setCalcMode('bar'); document.getElementById('modal-plate-calc').style.display='flex'; }
 function setCalcMode(m) {
     calcMode = m;
     calcBar = (m==='bar') ? 45 : 0;
@@ -612,7 +613,6 @@ function updateCalcDisplay(){
     else total = calcSideWeight;
     document.getElementById('calc-total').value = total; 
 }
-// Listener for Manual Calc Input
 document.getElementById('calc-total').addEventListener('change', function(e) {
     let val = parseFloat(e.target.value);
     if(!isNaN(val)) {
