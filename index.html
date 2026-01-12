@@ -33,8 +33,8 @@
   
   /* UNIT LABELS */
   .input-wrapper { position: relative; width: 100%; }
-  .input-wrapper input { padding-right: 40px; text-align: center; } 
-  .input-unit { position: absolute; right: 10px; top: 42%; transform: translateY(-50%); color: #666; font-size: 10px; pointer-events: none; font-weight: bold; text-transform: uppercase; }
+  .input-wrapper input { padding-right: 35px; text-align: center; } 
+  .input-unit { position: absolute; right: 8px; top: 42%; transform: translateY(-50%); color: #555; font-size: 9px; pointer-events: none; font-weight: 800; text-transform: uppercase; }
 
   /* --- 3. LAYOUT --- */
   .view { padding: 20px; max-width: 600px; margin: 0 auto; animation: fade 0.3s; }
@@ -59,7 +59,7 @@
   .toggle-lr.active { background: var(--accent); color: white; border-color: var(--accent); }
 
   /* SET ROWS */
-  .set-row { display: grid; grid-template-columns: 35px 1fr 40px 1fr 30px 30px; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .set-row { display: grid; grid-template-columns: 35px 1fr 40px 1fr 30px 30px; gap: 6px; align-items: center; margin-bottom: 8px; }
   .cardio-row { display: grid; grid-template-columns: 30px 1fr 1fr 1fr 30px; gap: 6px; align-items: center; margin-bottom: 8px; }
 
   /* SET GROUPS */
@@ -464,14 +464,17 @@ function renderCart() {
 
 function renderRow(ex, idx, set, label) {
     const inputId = `w-${ex}-${idx}`;
+    // ESCAPE SINGLE QUOTES FOR SAFE ONCLICK
+    const safeEx = ex.replace(/'/g, "\\'");
+    
     return `
     <div class="set-row">
         <div style="display:flex;flex-direction:column;align-items:center;"><span class="set-num">${label}</span></div>
-        <input type="text" inputmode="decimal" id="${inputId}" placeholder="Lbs" value="${set.w}" onchange="updateSet('${ex}', ${idx}, 'w', this.value)">
-        <button class="calc-btn" onclick="openCalc('${inputId}')">🧮</button>
-        <input type="text" inputmode="decimal" placeholder="Reps" value="${set.r}" onchange="updateSet('${ex}', ${idx}, 'r', this.value)">
-        <button class="menu-btn" onclick="openSetOpt('${ex}', ${idx})">...</button>
-        <button class="del-btn" onclick="removeSet('${ex}', ${idx})">✕</button>
+        <div class="input-wrapper"><input type="text" inputmode="decimal" id="${inputId}" value="${set.w}" onchange="updateSet('${safeEx}', ${idx}, 'w', this.value)"><span class="input-unit">LBS</span></div>
+        <button class="calc-btn" onclick="openCalc('${safeEx}', ${idx})">🧮</button>
+        <div class="input-wrapper"><input type="text" inputmode="decimal" value="${set.r}" onchange="updateSet('${safeEx}', ${idx}, 'r', this.value)"><span class="input-unit">REPS</span></div>
+        <button class="menu-btn" onclick="openSetOpt('${safeEx}', ${idx})">...</button>
+        <button class="del-btn" onclick="removeSet('${safeEx}', ${idx})">✕</button>
     </div>`;
 }
 
@@ -591,8 +594,21 @@ function exportCSV() { if(globalLog.length===0){showToast("No data");return;} le
 
 // --- PLATE CALC ---
 let calcTargetId=null, calcSideWeight=0, calcBar=45;
-function openCalc(id){ calcTargetId=id; calcSideWeight=0; setCalcMode('bar'); document.getElementById('modal-plate-calc').style.display='flex'; }
-function calcPlates(){ calcTargetId=null; calcSideWeight=0; setCalcMode('bar'); document.getElementById('modal-plate-calc').style.display='flex'; }
+// openCalc uses exercise name and index to build ID internally
+function openCalc(ex, idx){ 
+    if(idx !== undefined) {
+        // Called from Row
+        calcTargetId = `w-${ex}-${idx}`;
+    } else {
+        // Called from Tools (no args)
+        calcTargetId = null;
+    }
+    calcSideWeight=0; 
+    setCalcMode('bar'); 
+    document.getElementById('modal-plate-calc').style.display='flex'; 
+}
+function calcPlates(){ openCalc(); } // Wrapper for tools
+
 function setCalcMode(m) {
     calcMode = m;
     calcBar = (m==='bar') ? 45 : 0;
@@ -621,8 +637,27 @@ document.getElementById('calc-total').addEventListener('change', function(e) {
     }
 });
 
-function applyCalc(){ if(calcTargetId){document.getElementById(calcTargetId).value=document.getElementById('calc-total').value;document.getElementById(calcTargetId).dispatchEvent(new Event('change'));} document.getElementById('modal-plate-calc').style.display='none'; }
-function useBW() { if(calcTargetId){document.getElementById(calcTargetId).value="BW";document.getElementById(calcTargetId).dispatchEvent(new Event('change'));} document.getElementById('modal-plate-calc').style.display='none'; }
+function applyCalc(){ 
+    if(calcTargetId){
+        // We found the input by ID (even with spaces)
+        let el = document.getElementById(calcTargetId);
+        if(el) {
+            el.value = document.getElementById('calc-total').value;
+            el.dispatchEvent(new Event('change'));
+        }
+    } 
+    document.getElementById('modal-plate-calc').style.display='none'; 
+}
+function useBW() { 
+    if(calcTargetId){
+        let el = document.getElementById(calcTargetId);
+        if(el) {
+            el.value = "BW";
+            el.dispatchEvent(new Event('change'));
+        }
+    } 
+    document.getElementById('modal-plate-calc').style.display='none'; 
+}
 
 function genProgram(){ const w=parseFloat(document.getElementById('w').value), r=parseFloat(document.getElementById('r').value); if(!w||!r)return; const rnd=n=>Math.round(n/5)*5, max=rnd(w*(1+(0.033*r))), rm5=rnd(max*0.87), rm3=rnd(max*0.93); const weeks=[{n:1,t:"BASE",b:rm5,m:.85,s:4,r:6},{n:2,t:"LOAD",b:rm5,m:.9,s:4,r:6},{n:3,t:"INTENSE",b:rm5,m:.95,s:4,r:6},{n:4,t:"PEAK",b:rm5,m:1.05,s:4,r:6},{n:5,t:"UNLOAD",b:rm5,m:.85,s:2,r:4,f:.9},{n:6,t:"SPEED",b:rm3,m:1,s:3,r:4,w:.75,f:.85},{n:7,t:"FORCE",b:rm3,m:1,s:3,r:4,w:.85,f:.9},{n:8,t:"MAX",b:rm3,m:1,s:3,r:4,w:.7,f:.85}]; let h=`<div style="text-align:center;margin-bottom:20px;color:var(--success);font-weight:bold;border:1px solid #333;padding:10px;border-radius:10px;">EST 1RM: ${max} LBS</div>`; weeks.forEach(k=>{let m=rnd(k.b*k.m), wL=rnd(m*(k.w||.85)), f=rnd(m*(k.f||.95)); if(k.n===4)wL=rnd(m*.8); h+=`<div class="week"><div class="week-head"><span>Week ${k.n}</span><span style="color:#ff4757">${k.t}</span></div><div class="day-row"><div><b>Mon</b></div><div>${m} lbs ${k.s}x${k.r} <span class="tag tag-h">H</span></div></div><div class="day-row"><div><b>Wed</b></div><div>${wL} lbs ${k.s}x${k.r} <span class="tag tag-l">L</span></div></div><div class="day-row"><div><b>Fri</b></div><div>${f} lbs ${k.s}x${k.r} <span class="tag tag-m">M</span></div></div></div>`;}); document.getElementById('schedule-area').innerHTML=h; }
 let timer; function startTimer(s){ clearInterval(timer); const end=Date.now()+s*1000; timer=setInterval(()=>{const r=Math.round((end-Date.now())/1000); if(r<0){clearInterval(timer);document.getElementById('t-disp').innerText="DONE";return;} const m=Math.floor(r/60), rs=r%60; document.getElementById('t-disp').innerText=`${m}:${rs<10?'0':''}${rs}`;},1000); }
