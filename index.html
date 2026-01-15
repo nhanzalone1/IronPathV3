@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V16.3</title>
+<title>NetGains V16.4</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -45,6 +45,11 @@
   .btn-super { background: var(--super); color: white; border: none; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
   .btn-assist { background: var(--assist); color: black; border: none; font-weight: 800; }
   
+  /* SET LABELS */
+  .label-drop { color: var(--drop); font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
+  .label-super { color: var(--super); font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
+  .label-assist { color: var(--assist); font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
+
   h1 { text-align: center; margin: 25px 0 5px; font-size: 26px; letter-spacing: -1px; font-weight: 900; color: white; }
   .brand-span { color: var(--accent); }
   .sub { text-align: center; color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; }
@@ -243,6 +248,7 @@
     <button class="btn btn-sec" style="margin-top:10px" onclick="document.getElementById('modal-bridge').style.display='none'">CLOSE</button>
   </div>
 </div>
+
 <div id="modal-manual-import" class="modal-overlay">
   <div class="modal-box">
     <h3 class="modal-title">Import</h3>
@@ -253,6 +259,7 @@
     </div>
   </div>
 </div>
+
 <div id="modal-new-ex" class="modal-overlay">
   <div class="modal-box">
     <div class="close-x" onclick="document.getElementById('modal-new-ex').style.display='none'">✕</div>
@@ -265,6 +272,7 @@
     </div>
   </div>
 </div>
+
 <div id="modal-share" class="modal-overlay">
   <div class="modal-box">
     <h3 class="modal-title" style="text-align:center">Share</h3>
@@ -274,6 +282,7 @@
     <button class="btn btn-sec" style="margin-top:5px" onclick="document.getElementById('modal-share').style.display='none'">CLOSE</button>
   </div>
 </div>
+
 <div id="modal-set-opt" class="modal-overlay">
   <div class="modal-box">
     <h3 class="modal-title">Link Set</h3>
@@ -283,12 +292,13 @@
     <button class="btn btn-sec" style="margin-top:20px" onclick="document.getElementById('modal-set-opt').style.display='none'">CANCEL</button>
   </div>
 </div>
+
 <div id="modal-input-overlay" class="modal-overlay"><div class="modal-box"><h3 id="modal-title" class="modal-title">Input</h3><input type="text" id="modal-input"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;"><button class="btn btn-sec" onclick="closeInputModal()">CANCEL</button><button class="btn btn-main" id="modal-ok">SAVE</button></div></div></div>
 <div id="modal-confirm-overlay" class="modal-overlay"><div class="modal-box"><h3 class="modal-title">Confirm</h3><p id="confirm-desc" class="modal-desc">Sure?</p><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button class="btn btn-sec" onclick="closeConfirmModal()">CANCEL</button><button class="btn btn-main" id="confirm-ok" style="background:#333">YES</button></div></div></div>
 <div id="toast"><span id="toast-msg">Saved</span></div>
 
 <div id="view-program" class="view">
-  <h1>NETGAINS <span class="brand-span">V16.2</span></h1>
+  <h1>NETGAINS <span class="brand-span">V16.3</span></h1>
   <p class="sub">BAECHLE HLM</p>
   <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
@@ -377,6 +387,7 @@
 // --- CORE: SELF-HEALING INIT ---
 let appData, activeCart, sessionData, history, globalLog;
 
+// 1. Initialize function to run at end
 function initApp(){
     try {
         appData = JSON.parse(localStorage.getItem('netGainsData') || 'null');
@@ -386,7 +397,8 @@ function initApp(){
             appData = {currentGym:'Main Gym', gyms:{'Main Gym':{folders:d,library:l}}, exTypes:{}, programState:{}, programInputs:{}, unit:'lbs', customTags:[]};
             localStorage.setItem('netGainsData',JSON.stringify(appData));
         }
-        // SELF-HEAL: Ensure all props exist
+        
+        // SELF-HEAL: Fill missing properties to prevent crash
         if(!appData.programState) appData.programState = {};
         if(!appData.programInputs) appData.programInputs = {}; 
         if(!appData.customTags) appData.customTags = [];
@@ -397,6 +409,9 @@ function initApp(){
         history = JSON.parse(localStorage.getItem('liftHistory') || '{}');
         globalLog = JSON.parse(localStorage.getItem('globalLog') || '[]');
         
+        // SAVE FIXED DATA
+        saveAppData();
+
         // START UI
         updateUnitUI(); 
         renderDays();
@@ -404,7 +419,7 @@ function initApp(){
         loadProgramInputs();
         
     } catch (e) {
-        alert("Data Corruption Detected. Resetting App.");
+        console.log("Resetting corrupted data");
         localStorage.clear();
         location.reload();
     }
@@ -462,7 +477,7 @@ function selectGym(n){
 function promptAddGym(){openInputModal("New Gym","Name",v=>{if(v){appData.gyms[v]={folders:[],library:{}};selectGym(v)}})}
 function delGym(n){if(Object.keys(appData.gyms).length<=1)return;showConfirm("Delete?",()=>{delete appData.gyms[n];selectGym(Object.keys(appData.gyms)[0])})}
 
-// --- PROGRAM LOGIC ---
+// --- PROGRAM ENGINE ---
 let pendingLog = null; 
 
 function saveProgramInputs(){
@@ -515,8 +530,11 @@ function openProgramLogModal(sW, bW, dW, sR, bR, dR, dayKey, event){
     document.getElementById('log-s-w').value = sW; document.getElementById('log-s-r').value = sR;
     document.getElementById('log-b-w').value = bW; document.getElementById('log-b-r').value = bR;
     document.getElementById('log-d-w').value = dW; document.getElementById('log-d-r').value = dR;
+    
+    // Update labels in modal
     const u = appData.unit.toUpperCase();
     document.querySelectorAll('.lbl-unit').forEach(e => e.innerText = u);
+    
     document.getElementById('modal-program-log').style.display = 'flex';
 }
 
