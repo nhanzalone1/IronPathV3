@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V13.3</title>
+<title>NetGains V13.4</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   /* --- 1. VARIABLES & RESET --- */
@@ -17,7 +17,9 @@
     --input-bg: #121212; --border: #333;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body { margin: 0; padding: 0; background-color: var(--bg); color: var(--text); font-family: -apple-system, system-ui, sans-serif; overflow-x: hidden; padding-bottom: 90px; }
+  /* MASTER FONT FIX: Forces all buttons/inputs to use system font */
+  body, button, input, select, textarea { margin: 0; padding: 0; font-family: -apple-system, system-ui, sans-serif; }
+  body { background-color: var(--bg); color: var(--text); overflow-x: hidden; padding-bottom: 90px; }
 
   /* --- 2. UTILS --- */
   .hidden { display: none !important; }
@@ -65,6 +67,21 @@
   .del-btn { background: none; border: none; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .menu-btn { background: none; border: 1px solid #333; color: #888; border-radius: 6px; cursor: pointer; height: 42px; display: flex; align-items: center; justify-content: center; padding-bottom: 5px; }
 
+  /* REAL BUTTON STYLE FOR L+R */
+  .toggle-lr { font-size: 11px; background: #222; color: #888; padding: 6px 12px; border-radius: 6px; border: 1px solid #444; cursor: pointer; font-weight: 800; display: inline-block; transition: 0.1s; }
+  .toggle-lr.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  /* SHELF & EDIT MODE */
+  .shelf-header { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; border-top: 1px solid #333; padding-top: 20px; margin-bottom: 10px; }
+  .shelf-title { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+  .edit-btn { font-size: 10px; font-weight: bold; color: var(--accent); background: none; border: none; cursor: pointer; padding: 5px; }
+  
+  .tile-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tile { display: inline-flex; align-items: center; justify-content: center; background: #222; border: 1px solid #444; color: #ccc; padding: 12px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500; transition: 0.1s; }
+  .tile:active { background: var(--accent); color: black; border-color: var(--accent); }
+  .tile.deleting { border-color: var(--danger); color: var(--danger); background: rgba(255, 71, 87, 0.1); }
+  .tile-add { border: 1px dashed #666; color: #888; background: transparent; }
+
   /* STATS GRAPH */
   .graph-box { background: #111; border: 1px solid #333; border-radius: 12px; padding: 15px; height: 250px; position: relative; margin-top: 15px; display: flex; align-items: flex-end; justify-content: space-between; }
   .bar { width: 10px; background: var(--success); border-radius: 4px 4px 0 0; opacity: 0.7; transition: 0.3s; position: relative; }
@@ -77,6 +94,7 @@
   .tag-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
   .chip { padding: 6px 12px; background: #222; border: 1px solid #444; border-radius: 20px; font-size: 11px; color: #ccc; cursor: pointer; }
   .chip:active { background: var(--accent); color: white; }
+  .chip-add { border-style: dashed; color: #888; }
 
   /* MODALS */
   .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
@@ -90,24 +108,19 @@
   .calc-input { text-align: center; font-size: 24px; font-weight: bold; color: var(--success); margin-bottom: 15px; padding: 10px; background: #111; border-radius: 8px; border: 1px solid #333; width: 100%; }
   .import-textarea { width: 100%; background: #111; color: #0f0; font-family: monospace; border: 1px solid #333; border-radius: 5px; padding: 10px; font-size: 10px; height: 60px; margin-bottom: 10px; }
 
-  /* PROGRAM CSS FIXED */
+  /* PROGRAM CSS */
   .week { background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; overflow: hidden; transition: 0.3s; }
   .week-head { display: flex; justify-content: space-between; padding: 15px; background: #222; border-bottom: 1px solid #333; font-weight: bold; }
   .day-row { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; }
   .day-main { display: flex; justify-content: space-between; align-items: center; }
-  
   .tag { font-size: 9px; padding: 3px 6px; border-radius: 4px; color: black; font-weight: 800; margin-left: 8px; text-transform: uppercase; }
   .tag-h { background: #ff4757; color: white; } 
   .tag-l { background: #2ed573; color: black; } 
   .tag-m { background: #ffa502; color: black; }
-  
   .chk-box { width: 24px; height: 24px; border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
   .chk-box.checked { background: var(--success); border-color: var(--success); }
   .chk-box.checked::after { content: '✓'; color: black; font-weight: bold; font-size: 14px; }
-  
   .warmup-line { font-size: 10px; color: #666; margin-top: 6px; display: block; font-family: monospace; letter-spacing: -0.5px; }
-  
-  /* CROSSED OUT STATE */
   .week-content { transition: 0.3s; }
   .week-content.dimmed { opacity: 0.3; pointer-events: none; filter: grayscale(100%); text-decoration: line-through; }
 
@@ -117,8 +130,6 @@
   
   #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #222; border: 1px solid #333; color: white; padding: 12px 24px; border-radius: 30px; font-size: 13px; font-weight: bold; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 3000; }
   #toast.show { opacity: 1; transform: translateY(-10px); }
-  .tile { display: inline-flex; align-items: center; justify-content: center; background: #222; border: 1px solid #444; color: #ccc; padding: 12px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500; transition: 0.1s; margin: 3px;}
-  .tile-add { border: 1px dashed #666; color: #888; background: transparent; }
 </style>
 </head>
 <body>
@@ -174,6 +185,7 @@
         <div class="chip" onclick="appendTag(' (Cable)')">Cable</div>
         <div class="chip" onclick="appendTag(' (Machine)')">Machine</div>
         <div class="chip" onclick="appendTag(' (Smith)')">Smith</div>
+        <div class="chip chip-add" onclick="promptCustomTag()">+</div>
     </div>
     <div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
         <button class="btn btn-main" onclick="confirmNewEx('str')">STRENGTH</button>
@@ -192,13 +204,22 @@
   </div>
 </div>
 
-<div id="modal-set-opt" class="modal-overlay"><div class="modal-box"><h3 class="modal-title">Link Set</h3><button class="btn btn-sec" style="border-color:var(--drop); color:var(--drop);" onclick="applySetType('drop')">💧 Drop Set</button><button class="btn btn-sec" style="border-color:var(--super); color:var(--super);" onclick="applySetType('super')">🔗 Superset</button><button class="btn btn-sec" style="border-color:var(--assist); color:var(--assist);" onclick="applySetType('assist')">🤝 Assisted</button><button class="btn btn-sec" style="margin-top:20px" onclick="document.getElementById('modal-set-opt').style.display='none'">CANCEL</button></div></div>
+<div id="modal-set-opt" class="modal-overlay">
+  <div class="modal-box">
+    <h3 class="modal-title">Link Set</h3>
+    <button class="btn btn-sec" style="border-color:var(--drop); color:var(--drop); font-weight:bold;" onclick="applySetType('drop')">💧 Drop Set</button>
+    <button class="btn btn-sec" style="border-color:var(--super); color:var(--super); font-weight:bold;" onclick="applySetType('super')">🔗 Superset</button>
+    <button class="btn btn-sec" style="border-color:var(--assist); color:var(--assist); font-weight:bold;" onclick="applySetType('assist')">🤝 Assisted</button>
+    <button class="btn btn-sec" style="margin-top:20px" onclick="document.getElementById('modal-set-opt').style.display='none'">CANCEL</button>
+  </div>
+</div>
+
 <div id="modal-input-overlay" class="modal-overlay"><div class="modal-box"><h3 id="modal-title" class="modal-title">Input</h3><input type="text" id="modal-input"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;"><button class="btn btn-sec" onclick="closeInputModal()">CANCEL</button><button class="btn btn-main" id="modal-ok">SAVE</button></div></div></div>
 <div id="modal-confirm-overlay" class="modal-overlay"><div class="modal-box"><h3 class="modal-title">Confirm</h3><p id="confirm-desc" class="modal-desc">Sure?</p><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button class="btn btn-sec" onclick="closeConfirmModal()">CANCEL</button><button class="btn btn-main" id="confirm-ok" style="background:#333">YES</button></div></div></div>
 <div id="toast"><span id="toast-msg">Saved</span></div>
 
 <div id="view-program" class="view">
-  <h1>NETGAINS <span class="brand-span">V13.3</span></h1>
+  <h1>NETGAINS <span class="brand-span">V13.4</span></h1>
   <p class="sub">ENGINE</p>
   <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
@@ -241,7 +262,11 @@
       </div>
       <div id="active-workout-area"></div>
       <button class="btn btn-main" onclick="finishSession()">FINISH & SAVE LOG</button>
-      <div class="shelf-title">EXERCISE LIBRARY</div>
+      
+      <div class="shelf-header">
+          <span class="shelf-title">EXERCISE LIBRARY</span>
+          <button id="edit-lib-btn" class="edit-btn" onclick="toggleEditMode()">✎ EDIT</button>
+      </div>
       <div id="tile-area" class="tile-grid"></div>
   </div>
 </div>
@@ -333,19 +358,13 @@ function genProgram(){
     ];
     let h=`<div style="text-align:center;margin-bottom:20px;color:var(--success);font-weight:bold;border:1px solid #333;padding:10px;border-radius:10px;">EST 1RM: ${max} LBS</div>`;
     
-    // NEW: Scientific Warmup (Ramping + Potentiation)
+    // Warmup Ramping
     const getWarmup = (target) => {
-        if(target < 65) return "Warmup: Bar (45lbs) x 10"; // Just bar
-        if(target < 135) return `Warmup: 45x10, ${rnd(target*0.6)}x5`; // Two steps
-        
-        // Full Ramping Protocol (NSCA Style)
-        // 1. Bar x 12 (General)
-        // 2. ~50% x 5 (Specific)
-        // 3. ~70% x 3 (Ramp)
-        // 4. ~85-90% x 1 (Potentiation/Primer)
+        if(target < 65) return "Warmup: Bar (45lbs) x 10";
+        if(target < 135) return `Warmup: 45x10, ${rnd(target*0.6)}x5`;
         const s2 = rnd(target * 0.5); 
         const s3 = rnd(target * 0.7);
-        const s4 = rnd(target * 0.85); // Heavy single
+        const s4 = rnd(target * 0.85);
         return `Warmup: 45x12, ${s2}x5, ${s3}x3, ${s4}x1 (Prime)`;
     };
 
@@ -462,6 +481,7 @@ function finishSession(){
 // --- STANDARD FUNCTIONS ---
 function promptNewEx(){ document.getElementById('new-ex-name').value=""; document.getElementById('modal-new-ex').style.display='flex'; }
 function appendTag(t){ document.getElementById('new-ex-name').value += t; }
+function promptCustomTag(){ openInputModal("Custom Tag", "E.g. (Hoist)", (val) => { if(val) appendTag(` (${val})`); }); }
 function confirmNewEx(t){ const v=document.getElementById('new-ex-name').value; if(v){ const g=getCurrentGymData(); if(!g.library[currentFolder]) g.library[currentFolder]=[]; g.library[currentFolder].push(v); appData.exTypes[v]=t; saveAppData(); renderShelf(); addToCart(v); } document.getElementById('modal-new-ex').style.display='none'; }
 function renderDays(){const g=getCurrentGymData();document.getElementById('current-gym-display').innerText=appData.currentGym;const l=document.getElementById('my-split-list');l.innerHTML="";g.folders.forEach(d=>{const c=(g.library[d]||[]).length;l.innerHTML+=`<div class="day-card"><div style="flex-grow:1;cursor:pointer;" onclick="openSession('${d}')"><b>${d}</b><br><span style="font-size:11px;color:#666;">${c} Ex</span></div><div style="display:flex;gap:5px;"><button class="icon-btn" onclick="shareFolder('${d}')">➦</button><button class="icon-btn" onclick="renameFolder('${d}')">✎</button><button class="icon-btn" onclick="delFolder('${d}')">✕</button></div></div>`})}
 function openSession(d){currentFolder=d;document.getElementById('split-manager').classList.add('hidden');document.getElementById('session-logger').classList.remove('hidden');document.getElementById('session-title').innerText=d;renderCart();renderShelf()}
@@ -532,7 +552,33 @@ function removeSet(e,i){sessionData[e].splice(i,1);saveSession();renderCart()}
 function updateSet(e,i,f,v){if(!sessionData[e][i])return;sessionData[e][i][f]=v;saveSession()}
 function saveSession(){localStorage.setItem('activeCart',JSON.stringify(activeCart));localStorage.setItem('sessionData',JSON.stringify(sessionData))}
 function saveAppData(){localStorage.setItem('netGainsData',JSON.stringify(appData))}
-function renderShelf(){const a=document.getElementById('tile-area'),g=getCurrentGymData(),l=g.library[currentFolder]||[];a.innerHTML=`<button class="tile tile-add" onclick="promptNewEx()">+ NEW</button>`;l.forEach(e=>{a.innerHTML+=`<div class="tile" onclick="addToCart('${e}')">${e}</div>`})}
+
+// --- LIBRARY & EDIT MODE ---
+let isEditing = false;
+function renderShelf(){
+    const a=document.getElementById('tile-area'),g=getCurrentGymData(),l=g.library[currentFolder]||[];
+    a.innerHTML=`<button class="tile tile-add" onclick="promptNewEx()">+ NEW</button>`;
+    l.forEach(e=>{
+        const cls = isEditing ? 'tile deleting' : 'tile';
+        const action = isEditing ? `deleteLibItem('${e}')` : `addToCart('${e}')`;
+        const content = isEditing ? `✕ ${e}` : e;
+        a.innerHTML+=`<div class="${cls}" onclick="${action}">${content}</div>`;
+    });
+}
+function toggleEditMode(){
+    isEditing = !isEditing;
+    const btn = document.getElementById('edit-lib-btn');
+    btn.style.color = isEditing ? 'var(--danger)' : 'var(--accent)';
+    btn.innerText = isEditing ? 'DONE' : '✎ EDIT';
+    renderShelf();
+}
+function deleteLibItem(e){
+    if(confirm(`Delete "${e}" from this folder?`)){
+        const g=getCurrentGymData();
+        g.library[currentFolder] = g.library[currentFolder].filter(x => x !== e);
+        saveAppData(); renderShelf();
+    }
+}
 function addToCart(e){if(!activeCart.includes(e)){activeCart.push(e);if(!sessionData[e])sessionData[e]=[{w:'',r:''}];saveSession();renderCart()}}
 function removeExFromCart(e){activeCart=activeCart.filter(x=>x!==e);delete sessionData[e];saveSession();renderCart()}
 let optTarget=null;
