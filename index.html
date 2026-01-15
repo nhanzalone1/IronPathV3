@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V13.5</title>
+<title>NetGains V13.6</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   /* --- 1. VARIABLES & RESET --- */
@@ -34,10 +34,10 @@
   .btn-ghost { background: transparent; border: 1px dashed #444; color: #666; font-size: 10px; padding: 6px 10px; width: auto; display: inline-block; cursor: pointer; border-radius: 6px; }
   .btn-sm { padding: 8px; font-size: 11px; width: auto; display: inline-block; margin: 0; }
   
-  /* SET TYPE BUTTONS (VIVID COLORS) */
-  .btn-drop { border: 2px solid var(--drop); color: var(--drop); background: transparent; font-weight: 900; }
-  .btn-super { border: 2px solid var(--super); color: var(--super); background: transparent; font-weight: 900; }
-  .btn-assist { border: 2px solid var(--assist); color: var(--assist); background: transparent; font-weight: 900; }
+  /* SET TYPE BUTTONS (SOLID COLOR FIX) */
+  .btn-drop { background: var(--drop); color: white; border: none; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+  .btn-super { background: var(--super); color: white; border: none; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+  .btn-assist { background: var(--assist); color: black; border: none; font-weight: 800; }
   
   h1 { text-align: center; margin: 25px 0 5px; font-size: 26px; letter-spacing: -1px; font-weight: 900; color: white; }
   .brand-span { color: var(--accent); }
@@ -220,9 +220,9 @@
 <div id="modal-set-opt" class="modal-overlay">
   <div class="modal-box">
     <h3 class="modal-title">Link Set</h3>
-    <button class="btn btn-drop" onclick="applySetType('drop')">💧 Drop Set</button>
-    <button class="btn btn-super" onclick="applySetType('super')">🔗 Superset</button>
-    <button class="btn btn-assist" onclick="applySetType('assist')">🤝 Assisted</button>
+    <button class="btn btn-drop" style="width:100%; margin-bottom:10px; padding:12px; border-radius:8px;" onclick="applySetType('drop')">💧 Drop Set</button>
+    <button class="btn btn-super" style="width:100%; margin-bottom:10px; padding:12px; border-radius:8px;" onclick="applySetType('super')">🔗 Superset</button>
+    <button class="btn btn-assist" style="width:100%; margin-bottom:10px; padding:12px; border-radius:8px;" onclick="applySetType('assist')">🤝 Assisted</button>
     <button class="btn btn-sec" style="margin-top:20px" onclick="document.getElementById('modal-set-opt').style.display='none'">CANCEL</button>
   </div>
 </div>
@@ -232,7 +232,7 @@
 <div id="toast"><span id="toast-msg">Saved</span></div>
 
 <div id="view-program" class="view">
-  <h1>NETGAINS <span class="brand-span">V13.5</span></h1>
+  <h1>NETGAINS <span class="brand-span">V13.6</span></h1>
   <p class="sub">ENGINE</p>
   <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
