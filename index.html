@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V15.1</title>
+<title>NetGains V15.2</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -205,14 +205,8 @@
     <div class="close-x" onclick="document.getElementById('modal-new-ex').style.display='none'">✕</div>
     <h3 class="modal-title">New Exercise</h3>
     <input type="text" id="new-ex-name" placeholder="E.g. Chest Press">
-    <div class="tag-grid">
-        <div class="chip" onclick="appendTag(' (Barbell)')">Barbell</div>
-        <div class="chip" onclick="appendTag(' (Dumbbell)')">Dumbbell</div>
-        <div class="chip" onclick="appendTag(' (Cable)')">Cable</div>
-        <div class="chip" onclick="appendTag(' (Machine)')">Machine</div>
-        <div class="chip" onclick="appendTag(' (Smith)')">Smith</div>
-        <div class="chip chip-add" onclick="promptCustomTag()">+</div>
-    </div>
+    <div id="tag-area" class="tag-grid">
+        </div>
     <div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
         <button class="btn btn-main" onclick="confirmNewEx('str')">STRENGTH</button>
         <button class="btn btn-sec" style="border-color:var(--cardio); color:var(--cardio);" onclick="confirmNewEx('cardio')">CARDIO</button>
@@ -245,7 +239,7 @@
 <div id="toast"><span id="toast-msg">Saved</span></div>
 
 <div id="view-program" class="view">
-  <h1>NETGAINS <span class="brand-span">V15.1</span></h1>
+  <h1>NETGAINS <span class="brand-span">V15.2</span></h1>
   <p class="sub">BAECHLE HLM</p>
   <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
@@ -348,6 +342,7 @@ if(!appData){
     localStorage.setItem('netGainsData',JSON.stringify(appData));
 }
 if(!appData.programState) appData.programState = {};
+if(!appData.customTags) appData.customTags = []; // V15.2: Initialize Custom Tags
 
 let activeCart=JSON.parse(localStorage.getItem('activeCart')||'[]'), 
     sessionData=JSON.parse(localStorage.getItem('sessionData')||'{}'), 
@@ -383,11 +378,8 @@ function delGym(n){if(Object.keys(appData.gyms).length<=1)return;showConfirm("De
 
 // --- PROGRAM ENGINE (V15.1: DROPDOWN WARMUP) ---
 function toggleWarmup(el){
-    // Toggle the .open class on the sibling .warmup-drop
     const drop = el.querySelector('.warmup-drop');
-    if(drop) {
-        drop.classList.toggle('open');
-    }
+    if(drop) { drop.classList.toggle('open'); }
 }
 
 function genProgram(){
@@ -398,10 +390,7 @@ function genProgram(){
     if(!sMax || !bMax || !dMax) { showToast("Enter all 3 Maxes"); return; }
     
     const rnd=n=>Math.round(n/5)*5;
-    
-    const s5RM = rnd(sMax * 0.87);
-    const b5RM = rnd(bMax * 0.87);
-    const d5RM = rnd(dMax * 0.87);
+    const s5RM = rnd(sMax * 0.87); const b5RM = rnd(bMax * 0.87); const d5RM = rnd(dMax * 0.87);
 
     const weeks=[
         {n:1, t:"STRENGTH", m:.85, s:3, r:"5-6", base:"5RM"},
@@ -414,7 +403,6 @@ function genProgram(){
         {n:8, t:"POWER", m:.95, s:3, r:"2-3", base:"1RM", l_drop:.70, m_drop:.85}  
     ];
     
-    // Ramp Logic: Start at 45 (bar), even steps
     const calcRamp = (target) => {
         if(target < 135) return `45x10, ${rnd((target-45)*0.6 + 45)}x5`;
         const s2 = rnd((target - 45) * 0.4 + 45); 
@@ -432,13 +420,10 @@ function genProgram(){
         if(k.base === "5RM"){ sH = rnd(s5RM * k.m); bH = rnd(b5RM * k.m); dH = rnd(d5RM * k.m); } 
         else { sH = rnd(sMax * k.m); bH = rnd(bMax * k.m); dH = rnd(dMax * k.m); }
         
-        let l_mult = k.l_drop || 0.85;
-        let m_mult = k.m_drop || 0.95;
-        
+        let l_mult = k.l_drop || 0.85; let m_mult = k.m_drop || 0.95;
         const sL = rnd(sH * l_mult); bL = rnd(bH * l_mult); dL = rnd(dH * l_mult);
         const sM = rnd(sH * m_mult); bM = rnd(bH * m_mult); dM = rnd(dH * m_mult);
 
-        // Helper to build a day row with embedded hidden warmup dropdown
         const buildDay = (dayName, typeLabel, typeClass, s, b, d) => {
             return `
             <div class="day-row" onclick="toggleWarmup(this)">
@@ -449,7 +434,6 @@ function genProgram(){
                 <div class="lift-row"><span class="lift-name">SQ</span> <span class="lift-nums">${s} lbs (${k.s}x${k.r})</span></div>
                 <div class="lift-row"><span class="lift-name">BP</span> <span class="lift-nums">${b} lbs (${k.s}x${k.r})</span></div>
                 <div class="lift-row" style="border:none"><span class="lift-name">DL</span> <span class="lift-nums">${d} lbs (${k.s}x${k.r})</span></div>
-                
                 <div class="warmup-drop">
                     <div class="warmup-header">WARMUP SETS (START WITH BAR)</div>
                     <div class="warmup-line">SQ: ${calcRamp(s)}</div>
@@ -500,28 +484,20 @@ function renderGraph(){
     const ex = document.getElementById('stat-select').value;
     const ctx = document.getElementById('perfChart').getContext('2d');
     const det = document.getElementById('stat-details');
-    
     if(myChart) myChart.destroy();
     if(!ex) return;
-
     let data = globalLog.filter(l => l.ex === ex);
     if(graphMode === 'local') data = data.filter(l => l.gym === appData.currentGym);
-    
     data.sort((a,b) => new Date(a.date) - new Date(b.date));
-    
     if(data.length === 0) { det.innerText = "No data available for this view."; return; }
-
     const labels = data.map(d => d.date.substring(5)); 
     const values = data.map(d => d.rm);
     const best = Math.max(...values);
     const last = values[values.length-1];
-    
     det.innerHTML = `ALL TIME BEST: <b>${best}</b> | LATEST: <b>${last}</b>`;
-
     let gradient = ctx.createLinearGradient(0, 0, 0, 400);
     gradient.addColorStop(0, 'rgba(46, 213, 115, 0.5)'); 
     gradient.addColorStop(1, 'rgba(46, 213, 115, 0.0)'); 
-
     myChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -588,10 +564,36 @@ function finishSession(){
     });
 }
 
-// --- STANDARD FUNCTIONS ---
-function promptNewEx(){ document.getElementById('new-ex-name').value=""; document.getElementById('modal-new-ex').style.display='flex'; }
+// --- STANDARD FUNCTIONS (V15.2: TAGS) ---
+function promptNewEx(){ 
+    document.getElementById('new-ex-name').value=""; 
+    renderTagGrid(); // Dynamic Render
+    document.getElementById('modal-new-ex').style.display='flex'; 
+}
+function renderTagGrid(){
+    const area = document.getElementById('tag-area');
+    const defaults = ['Barbell', 'Dumbbell', 'Cable', 'Machine', 'Smith'];
+    const all = [...defaults, ...appData.customTags];
+    let h = '';
+    all.forEach(t => {
+        h += `<div class="chip" onclick="appendTag(' (${t})')">${t}</div>`;
+    });
+    h += `<div class="chip chip-add" onclick="promptCustomTag()">+</div>`;
+    area.innerHTML = h;
+}
 function appendTag(t){ document.getElementById('new-ex-name').value += t; }
-function promptCustomTag(){ openInputModal("Custom Tag", "E.g. (Hoist)", (val) => { if(val) appendTag(` (${val})`); }); }
+function promptCustomTag(){ 
+    openInputModal("Custom Tag", "E.g. Hoist", (val) => { 
+        if(val){
+            appendTag(` (${val})`);
+            if(!appData.customTags.includes(val)){
+                appData.customTags.push(val);
+                saveAppData();
+                renderTagGrid();
+            }
+        }
+    }); 
+}
 function confirmNewEx(t){ const v=document.getElementById('new-ex-name').value; if(v){ const g=getCurrentGymData(); if(!g.library[currentFolder]) g.library[currentFolder]=[]; g.library[currentFolder].push(v); appData.exTypes[v]=t; saveAppData(); renderShelf(); addToCart(v); } document.getElementById('modal-new-ex').style.display='none'; }
 function renderDays(){const g=getCurrentGymData();document.getElementById('current-gym-display').innerText=appData.currentGym;const l=document.getElementById('my-split-list');l.innerHTML="";g.folders.forEach(d=>{const c=(g.library[d]||[]).length;l.innerHTML+=`<div class="day-card"><div style="flex-grow:1;cursor:pointer;" onclick="openSession('${d}')"><b>${d}</b><br><span style="font-size:11px;color:#666;">${c} Ex</span></div><div style="display:flex;gap:5px;"><button class="icon-btn" onclick="shareFolder('${d}')">➦</button><button class="icon-btn" onclick="renameFolder('${d}')">✎</button><button class="icon-btn" onclick="delFolder('${d}')">✕</button></div></div>`})}
 function openSession(d){currentFolder=d;document.getElementById('split-manager').classList.add('hidden');document.getElementById('session-logger').classList.remove('hidden');document.getElementById('session-title').innerText=d;renderCart();renderShelf()}
@@ -688,7 +690,6 @@ function toggleEditMode(){
     btn.innerText = isEditing ? 'DONE' : '✎ EDIT';
     renderShelf();
 }
-// NEW: Custom Modal for Deletion
 function deleteLibItem(e){
     showConfirm(`Delete "${e}"?`, () => {
         const g=getCurrentGymData();
