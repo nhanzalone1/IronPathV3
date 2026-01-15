@@ -6,15 +6,15 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains AI</title>
+<title>NetGains V13</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   /* --- 1. VARIABLES & RESET --- */
   :root { 
     --bg: #0f0f13; --card: #1a1a24; --text: #ffffff; 
-    --accent: #ff4757; --success: #2ed573; 
+    --accent: #ff4757; --success: #2ed573; --danger: #ff4757;
     --drop: #ff6b81; --super: #a29bfe; --assist: #00d2d3; --cardio: #ffa502; 
-    --input-bg: #121212; 
+    --input-bg: #121212; --border: #333;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; padding: 0; background-color: var(--bg); color: var(--text); font-family: -apple-system, system-ui, sans-serif; overflow-x: hidden; padding-bottom: 90px; }
@@ -32,10 +32,9 @@
   .brand-span { color: var(--accent); }
   .sub { text-align: center; color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; }
   
-  /* INPUTS & LABELS */
-  input { background: var(--input-bg); border: 1px solid #333; color: white; padding: 12px; border-radius: 8px; width: 100%; font-size: 16px; margin-bottom: 5px; }
+  /* INPUTS */
+  input { background: var(--input-bg); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 8px; width: 100%; font-size: 16px; margin-bottom: 5px; }
   input:focus { outline:none; border-color: var(--accent); }
-  
   .input-wrapper { position: relative; width: 100%; }
   .input-wrapper input { padding-right: 35px; text-align: center; } 
   .input-unit { position: absolute; right: 8px; top: 42%; transform: translateY(-50%); color: #555; font-size: 9px; pointer-events: none; font-weight: 800; text-transform: uppercase; }
@@ -45,156 +44,87 @@
   @keyframes fade { from{opacity:0; transform:translateY(5px)} to{opacity:1; transform:translateY(0)} }
 
   /* --- 4. COMPONENTS --- */
-  .gym-selector-header { background: #222; border: 1px solid #333; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; }
+  .gym-selector-header { background: #222; border: 1px solid var(--border); padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; }
   .gym-label { font-size: 10px; color: #888; text-transform: uppercase; }
   .gym-name { font-weight: bold; font-size: 14px; color: var(--accent); }
 
-  .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #333; transition: 0.1s; }
+  .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); }
   .icon-btn { background: #222; border: 1px solid #444; color: #ccc; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
 
-  .ex-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; }
+  /* WORKOUT ROWS */
+  .ex-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border); }
   .ex-top { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: center; }
   .ex-name { font-weight: bold; font-size: 16px; }
-  .ex-tools { display: flex; gap: 10px; align-items: center; }
-  .ex-hist { font-size: 11px; color: var(--success); font-weight: bold; margin-bottom: 12px; opacity: 0.8; }
+  .ex-hist { font-size: 10px; color: var(--success); margin-bottom: 10px; display: flex; gap: 10px; }
+  .hist-badge { background: rgba(46, 213, 115, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(46, 213, 115, 0.3); }
   
-  .toggle-lr { font-size: 10px; background: #222; color: #666; padding: 5px 10px; border-radius: 4px; border: 1px solid #444; cursor: pointer; font-weight: bold; }
-  .toggle-lr.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-  /* SET ROWS */
-  .set-row { display: grid; grid-template-columns: 35px 1fr 40px 1fr 30px 30px; gap: 6px; align-items: center; margin-bottom: 8px; }
+  .set-row { display: grid; grid-template-columns: 30px 1fr 40px 1fr 30px 30px; gap: 6px; align-items: center; margin-bottom: 8px; }
   .cardio-row { display: grid; grid-template-columns: 30px 1fr 1fr 1fr 30px; gap: 6px; align-items: center; margin-bottom: 8px; }
-
-  /* SET GROUPS */
-  .set-group-box { border: 1px solid #444; border-left-width: 4px; padding: 8px; border-radius: 8px; background: rgba(255,255,255,0.03); margin-bottom: 8px; }
-  .set-group-drop { border-left-color: var(--drop); }
-  .set-group-super { border-left-color: var(--super); }
-  .set-group-assist { border-left-color: var(--assist); }
-  .set-container { margin-bottom: 4px; }
   
-  .set-num { color: #666; font-size: 12px; font-weight: bold; text-align: center; }
+  .calc-btn { background: #222; border: 1px solid #444; color: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; height: 42px; font-size: 14px; }
+  .del-btn { background: none; border: none; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .menu-btn { background: none; border: 1px solid #333; color: #888; border-radius: 6px; cursor: pointer; height: 42px; display: flex; align-items: center; justify-content: center; padding-bottom: 5px; }
 
-  /* BUTTON FIXES */
-  .calc-btn { background: #222; border: 1px solid #444; color: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; height: 42px; transition: 0.1s; }
-  .calc-btn:active { background: var(--accent); color: black; transform: scale(0.95); }
-  
-  .menu-btn { background: none; border: 1px solid #333; color: #888; border-radius: 6px; cursor: pointer; height: 42px; display: flex; align-items: center; justify-content: center; font-weight: bold; padding-bottom: 5px; }
-  .del-btn { background: none; border: none; color: #555; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; height: 42px; }
+  /* STATS GRAPH */
+  .graph-box { background: #111; border: 1px solid #333; border-radius: 12px; padding: 15px; height: 250px; position: relative; margin-top: 15px; display: flex; align-items: flex-end; justify-content: space-between; }
+  .bar { width: 10px; background: var(--success); border-radius: 4px 4px 0 0; opacity: 0.7; transition: 0.3s; position: relative; }
+  .bar:hover { opacity: 1; transform: scaleY(1.05); }
+  .trend-line { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; }
+  .stat-toggle { display: flex; gap: 10px; margin-bottom: 10px; }
+  .st-btn { flex: 1; padding: 8px; background: #222; border: 1px solid #333; color: #666; font-size: 11px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+  .st-btn.active { background: var(--success); color: black; border-color: var(--success); }
 
-  /* SHELF */
-  .shelf-title { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; border-top: 1px solid #333; padding-top: 20px; margin-top: 20px; }
-  .tile-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-  .tile { display: inline-flex; align-items: center; justify-content: center; background: #222; border: 1px solid #444; color: #ccc; padding: 12px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500; transition: 0.1s; }
-  .tile:active { background: var(--accent); color: black; border-color: var(--accent); }
-  .tile-add { border: 1px dashed #666; color: #888; background: transparent; }
+  /* TAGS & CHIPS */
+  .tag-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .chip { padding: 6px 12px; background: #222; border: 1px solid #444; border-radius: 20px; font-size: 11px; color: #ccc; cursor: pointer; }
+  .chip:active { background: var(--accent); color: white; }
 
-  /* MODALS */
+  /* MODALS & ALERTS */
   .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-  .modal-box { background: #1e1e1e; padding: 25px; border-radius: 15px; width: 85%; max-width: 350px; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-  
-  #qrcode { background: white; padding: 10px; border-radius: 10px; margin: 20px auto; width: fit-content; }
-  #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #222; border: 1px solid #333; color: white; padding: 12px 24px; border-radius: 30px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: 0.3s; z-index: 3000; }
-  #toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
+  .modal-box { background: #1e1e1e; padding: 25px; border-radius: 15px; width: 85%; max-width: 350px; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
+  .close-x { position: absolute; top: 15px; right: 15px; color: #666; font-size: 20px; cursor: pointer; font-weight: bold; }
   
   /* PLATE CALC */
   .plate-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-  .p-btn { background: #222; border: 1px solid #444; color: white; padding: 15px 0; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.1s; }
-  .p-btn:active { background: #444; transform: scale(0.95); }
-  
+  .p-btn { background: #222; border: 1px solid #444; color: white; padding: 15px 0; border-radius: 8px; font-weight: bold; cursor: pointer; }
+  .p-btn:active { background: #444; }
   .calc-input { text-align: center; font-size: 24px; font-weight: bold; color: var(--success); margin-bottom: 15px; padding: 10px; background: #111; border-radius: 8px; border: 1px solid #333; width: 100%; }
-  .import-textarea { width: 100%; background: #111; color: #0f0; font-family: monospace; border: 1px solid #333; border-radius: 5px; padding: 10px; font-size: 10px; height: 60px; margin-bottom: 10px; }
+
+  /* PROGRAM */
+  .week { background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; overflow: hidden; }
+  .week-head { display: flex; justify-content: space-between; padding: 15px; background: #222; border-bottom: 1px solid #333; font-weight: bold; }
+  .day-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #222; align-items: center; cursor: pointer; }
+  .chk-box { width: 24px; height: 24px; border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+  .chk-box.checked { background: var(--success); border-color: var(--success); }
+  .chk-box.checked::after { content: '✓'; color: black; font-weight: bold; font-size: 14px; }
+  .warmup-text { font-size: 10px; color: #888; margin-top: 5px; display: block; line-height: 1.4; }
 
   .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: #181818; border-top: 1px solid #333; display: grid; grid-template-columns: 1fr 1fr 1fr; z-index: 1000; padding-bottom: 20px; }
   .nav-btn { background: none; border: none; color: #666; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
   .nav-btn.active { color: var(--accent); }
-
-  /* PROGRAM STYLES */
-  .week { background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; overflow: hidden; }
-  .week-head { display: flex; justify-content: space-between; padding: 15px; background: #222; border-bottom: 1px solid #333; font-weight: bold; }
-  .day-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #222; align-items: center; cursor: pointer; }
-  .tag { font-size: 9px; padding: 3px 6px; border-radius: 4px; color: black; font-weight: 800; margin-left: 8px; text-transform: uppercase; }
-  .tag-h { background: #ff4757; } .tag-l { background: #2ed573; } .tag-m { background: #ffa502; }
-  .chk { width: 22px; height: 22px; border: 2px solid #555; border-radius: 50%; margin-right: 12px; display: inline-block; }
-  .completed .chk { background: var(--success); border-color: var(--success); }
-  .completed { text-decoration: line-through; opacity: 0.5; color: var(--success); }
+  
+  #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #222; border: 1px solid #333; color: white; padding: 12px 24px; border-radius: 30px; font-size: 13px; font-weight: bold; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 3000; }
+  #toast.show { opacity: 1; transform: translateY(-10px); }
+  .tile { display: inline-flex; align-items: center; justify-content: center; background: #222; border: 1px solid #444; color: #ccc; padding: 12px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500; transition: 0.1s; margin: 3px;}
+  .tile-add { border: 1px dashed #666; color: #888; background: transparent; }
 </style>
 </head>
 <body>
 
-<div id="modal-bridge" class="modal-overlay">
-  <div class="modal-box" style="text-align:center;">
-    <h3 class="modal-title" style="color:var(--success)">WORKOUT RECEIVED</h3>
-    <button class="btn btn-main" onclick="copyBridgeCode()">📋 COPY CODE</button>
-    <button class="btn btn-sec" style="margin-top:10px" onclick="document.getElementById('modal-bridge').style.display='none'">CLOSE</button>
-  </div>
-</div>
-
-<div id="modal-manual-import" class="modal-overlay">
-  <div class="modal-box">
-    <h3 class="modal-title">Import</h3>
-    <textarea id="import-area" class="import-textarea" placeholder="Paste code..."></textarea>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-      <button class="btn btn-sec" onclick="document.getElementById('modal-manual-import').style.display='none'">CANCEL</button>
-      <button class="btn btn-main" onclick="runManualImport()">IMPORT</button>
-    </div>
-  </div>
-</div>
-
-<div id="modal-new-ex" class="modal-overlay">
-  <div class="modal-box">
-    <h3 class="modal-title">New Exercise</h3>
-    <input type="text" id="new-ex-name" placeholder="Exercise Name">
-    <div style="margin-top:15px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-        <button class="btn btn-main" onclick="confirmNewEx('str')">STRENGTH</button>
-        <button class="btn btn-sec" style="border-color:var(--cardio); color:var(--cardio);" onclick="confirmNewEx('cardio')">CARDIO</button>
-    </div>
-    <button class="btn btn-ghost" style="margin-top:10px; width:100%; border:none;" onclick="document.getElementById('modal-new-ex').style.display='none'">CANCEL</button>
-  </div>
-</div>
-
-<div id="modal-share" class="modal-overlay">
-  <div class="modal-box">
-    <h3 class="modal-title" style="text-align:center">Share</h3>
-    <div id="qrcode"></div>
-    <p style="font-size:10px; color:#666; text-align:center; margin-top:5px;">Scan to view bridge page</p>
-    <button class="btn btn-main" style="margin-top:15px;" onclick="copyShareCode()">COPY CODE</button>
-    <button class="btn btn-sec" style="margin-top:5px" onclick="document.getElementById('modal-share').style.display='none'">CLOSE</button>
-  </div>
-</div>
-
-<div id="modal-set-opt" class="modal-overlay">
-  <div class="modal-box">
-    <h3 class="modal-title">Link Set</h3>
-    <button class="btn btn-sec" style="border-color:var(--drop); color:var(--drop);" onclick="applySetType('drop')">💧 Drop Set</button>
-    <button class="btn btn-sec" style="border-color:var(--super); color:var(--super);" onclick="applySetType('super')">🔗 Superset</button>
-    <button class="btn btn-sec" style="border-color:var(--assist); color:var(--assist);" onclick="applySetType('assist')">🤝 Assisted</button>
-    <button class="btn btn-sec" style="margin-top:20px" onclick="document.getElementById('modal-set-opt').style.display='none'">CANCEL</button>
-  </div>
-</div>
-
-<div id="modal-input-overlay" class="modal-overlay"><div class="modal-box"><h3 id="modal-title" class="modal-title">Input</h3><input type="text" id="modal-input"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;"><button class="btn btn-sec" onclick="closeInputModal()">CANCEL</button><button class="btn btn-main" id="modal-ok">SAVE</button></div></div></div>
-
 <div id="modal-plate-calc" class="modal-overlay">
   <div class="modal-box">
+    <div class="close-x" onclick="closeCalc()">✕</div>
     <h3 class="modal-title">Plate Math</h3>
     <input type="text" inputmode="decimal" id="calc-total" class="calc-input" value="45" onfocus="this.value=''" oninput="manualCalcUpdate(this.value)">
-    
     <div style="display:flex; gap:10px; margin-bottom:15px;">
         <button id="mode-bar" class="btn btn-sm" style="background:var(--success); color:black;" onclick="setCalcMode('bar')">BARBELL (2x)</button>
         <button id="mode-single" class="btn btn-sm" style="background:#333;" onclick="setCalcMode('single')">SINGLE (1x)</button>
     </div>
-    
     <div class="plate-grid">
-      <button class="p-btn" onclick="addPlate(45)">45</button>
-      <button class="p-btn" onclick="addPlate(35)">35</button>
-      <button class="p-btn" onclick="addPlate(25)">25</button>
-      <button class="p-btn" onclick="addPlate(10)">10</button>
-      <button class="p-btn" onclick="addPlate(5)">5</button>
-      <button class="p-btn" onclick="addPlate(2.5)">2.5</button>
+      <button class="p-btn" onclick="addPlate(45)">45</button><button class="p-btn" onclick="addPlate(35)">35</button><button class="p-btn" onclick="addPlate(25)">25</button>
+      <button class="p-btn" onclick="addPlate(10)">10</button><button class="p-btn" onclick="addPlate(5)">5</button><button class="p-btn" onclick="addPlate(2.5)">2.5</button>
     </div>
-    
     <button class="btn btn-sec" style="border-style:dashed; margin-bottom:10px;" onclick="useBW()">USE BODYWEIGHT (BW)</button>
-    
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
       <button class="btn btn-sec" onclick="resetCalc()">RESET</button>
       <button class="btn btn-main" onclick="applyCalc()">USE</button>
@@ -202,18 +132,39 @@
   </div>
 </div>
 
+<div id="modal-new-ex" class="modal-overlay">
+  <div class="modal-box">
+    <div class="close-x" onclick="document.getElementById('modal-new-ex').style.display='none'">✕</div>
+    <h3 class="modal-title">New Exercise</h3>
+    <input type="text" id="new-ex-name" placeholder="E.g. Chest Press">
+    <div class="tag-grid">
+        <div class="chip" onclick="appendTag(' (Barbell)')">Barbell</div>
+        <div class="chip" onclick="appendTag(' (Dumbbell)')">Dumbbell</div>
+        <div class="chip" onclick="appendTag(' (Cable)')">Cable</div>
+        <div class="chip" onclick="appendTag(' (Machine)')">Machine</div>
+        <div class="chip" onclick="appendTag(' (Smith)')">Smith</div>
+    </div>
+    <div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <button class="btn btn-main" onclick="confirmNewEx('str')">STRENGTH</button>
+        <button class="btn btn-sec" style="border-color:var(--cardio); color:var(--cardio);" onclick="confirmNewEx('cardio')">CARDIO</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-input-overlay" class="modal-overlay"><div class="modal-box"><h3 id="modal-title" class="modal-title">Input</h3><input type="text" id="modal-input"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;"><button class="btn btn-sec" onclick="closeInputModal()">CANCEL</button><button class="btn btn-main" id="modal-ok">SAVE</button></div></div></div>
 <div id="modal-confirm-overlay" class="modal-overlay"><div class="modal-box"><h3 class="modal-title">Confirm</h3><p id="confirm-desc" class="modal-desc">Sure?</p><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><button class="btn btn-sec" onclick="closeConfirmModal()">CANCEL</button><button class="btn btn-main" id="confirm-ok" style="background:#333">YES</button></div></div></div>
-<div id="toast"><span class="toast-icon">✓</span> <span id="toast-msg">Saved</span></div>
+<div id="modal-set-opt" class="modal-overlay"><div class="modal-box"><h3 class="modal-title">Link Set</h3><button class="btn btn-sec" style="border-color:var(--drop); color:var(--drop);" onclick="applySetType('drop')">💧 Drop Set</button><button class="btn btn-sec" style="border-color:var(--super); color:var(--super);" onclick="applySetType('super')">🔗 Superset</button><button class="btn btn-sec" style="border-color:var(--assist); color:var(--assist);" onclick="applySetType('assist')">🤝 Assisted</button><button class="btn btn-sec" style="margin-top:20px" onclick="document.getElementById('modal-set-opt').style.display='none'">CANCEL</button></div></div>
+<div id="toast"><span id="toast-msg">Saved</span></div>
 
 <div id="view-program" class="view">
-  <h1>NETGAINS <span class="brand-span">AI</span></h1>
+  <h1>NETGAINS <span class="brand-span">V13</span></h1>
   <p class="sub">ENGINE</p>
   <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-        <input type="number" id="w" placeholder="Weight (lbs)">
-        <input type="number" id="r" placeholder="Reps">
+        <input type="number" id="prog-w" placeholder="Working Weight (lbs)">
+        <input type="number" id="prog-r" placeholder="Reps Achieved">
     </div>
-    <button class="btn btn-main" onclick="genProgram()">Generate 8-Week Cycle</button>
+    <button class="btn btn-main" onclick="genProgram()">Generate Cycle</button>
   </div>
   <div id="schedule-area"></div>
 </div>
@@ -221,13 +172,12 @@
 <div id="view-log" class="view hidden">
   <h1>TRAINING LOG</h1>
   <p class="sub">TRACKER</p>
-
+  
   <div id="split-manager">
       <div class="gym-selector-header" onclick="showGymManager()">
           <div><div class="gym-label">CURRENT LOCATION</div><div class="gym-name" id="current-gym-display">Main Gym</div></div>
           <div style="color:#666">▼</div>
       </div>
-      <button class="btn btn-sec" style="border:1px solid var(--accent); color:var(--accent); margin-bottom:20px;" onclick="openManualImport()">📥 IMPORT CODE</button>
       <div id="my-split-list"></div>
       <button class="btn btn-sec" style="border-style:dashed; color:#888;" onclick="promptAddDay()">+ NEW FOLDER</button>
   </div>
@@ -245,7 +195,7 @@
             <button class="btn btn-sec" onclick="closeSession()" style="width:auto; margin:0; padding:10px 15px;">←</button>
             <h2 id="session-title" style="margin:0 0 0 15px; color:var(--accent); font-size:20px;"></h2>
         </div>
-        <button class="btn-ghost" onclick="clearCart()">START FRESH</button>
+        <button class="btn-ghost" onclick="clearCart()">CLEAR</button>
       </div>
       <div id="active-workout-area"></div>
       <button class="btn btn-main" onclick="finishSession()">FINISH & SAVE LOG</button>
@@ -254,144 +204,214 @@
   </div>
 </div>
 
-<div id="view-tools" class="view hidden">
-  <h1>TOOLS</h1>
-  <p class="sub">UTILITIES</p>
-  <div class="tool-box" style="background:#1a1a24; padding:20px; border-radius:15px; border:1px solid #333; text-align:center; margin-bottom:15px;">
-      <h3 style="margin:0 0 15px 0; color:var(--accent)">DATA</h3>
-      <button class="btn btn-sec" onclick="exportCSV()">DOWNLOAD CSV</button>
-  </div>
-  <div class="tool-box" style="background:#1a1a24; padding:20px; border-radius:15px; border:1px solid #333; text-align:center; margin-bottom:15px;">
-      <h3 style="margin:0 0 15px 0; color:var(--accent)">REST TIMER</h3>
-      <div style="font-size:45px; font-weight:900; margin:15px 0;" id="t-disp">00:00</div>
-      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px;">
-          <button class="btn btn-sec" onclick="startTimer(90)">90s</button>
-          <button class="btn btn-sec" onclick="startTimer(180)">3m</button>
-          <button class="btn btn-sec" onclick="startTimer(300)">5m</button>
+<div id="view-stats" class="view hidden">
+  <h1>ANALYTICS</h1>
+  <p class="sub">PERFORMANCE</p>
+  
+  <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #333;">
+      <select id="stat-select" onchange="renderGraph()" style="width:100%; padding:12px; background:#111; color:white; border:1px solid #333; border-radius:8px; font-size:16px; margin-bottom:15px;">
+          <option value="">Select Exercise...</option>
+      </select>
+      
+      <div class="stat-toggle">
+          <button id="toggle-global" class="st-btn active" onclick="setGraphMode('global')">🌍 GLOBAL (All Gyms)</button>
+          <button id="toggle-local" class="st-btn" onclick="setGraphMode('local')">📍 LOCAL (This Gym)</button>
       </div>
-      <button class="btn btn-main" style="margin-top:10px; background:#333;" onclick="clearInterval(timer);document.getElementById('t-disp').innerText='00:00'">STOP</button>
+      
+      <div id="graph-container" class="graph-box">
+          <div style="color:#666; font-size:12px; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);">Select an exercise</div>
+      </div>
+      <div id="stat-details" style="margin-top:15px; font-size:12px; color:#888; text-align:center;"></div>
   </div>
-  <div class="tool-box" style="background:#1a1a24; padding:20px; border-radius:15px; border:1px solid #333; text-align:center; margin-bottom:15px;">
-      <h3 style="margin:0 0 15px 0; color:var(--accent)">PLATE CALC</h3>
-      <input type="number" id="pIn" placeholder="Weight (lbs)">
-      <button class="btn btn-main" style="background:var(--success); color:black;" onclick="calcPlates()">CALCULATE</button>
-      <div id="pOut" style="margin-top:15px;"></div>
-  </div>
-  <div class="tool-box" style="padding:20px; text-align:center;">
-      <button class="btn btn-danger" onclick="nuke()">FACTORY RESET APP</button>
+  
+  <div style="margin-top:30px; text-align:center;">
+      <button class="btn btn-sec" onclick="exportCSV()">DOWNLOAD DATA (CSV)</button>
+      <button class="btn btn-sec" style="margin-top:10px; color:#ff4757; border-color:#ff4757;" onclick="nuke()">FACTORY RESET</button>
   </div>
 </div>
 
 <div class="nav">
     <button class="nav-btn active" onclick="switchTab('program', this)"><span>📊</span> PROGRAM</button>
     <button class="nav-btn" onclick="switchTab('log', this)"><span>📝</span> LOG</button>
-    <button class="nav-btn" onclick="switchTab('tools', this)"><span>⚒</span> TOOLS</button>
+    <button class="nav-btn" onclick="switchTab('stats', this)"><span>📈</span> STATS</button>
 </div>
 
 <script>
-let appData=JSON.parse(localStorage.getItem('netGainsData')||'null');if(!appData){const d=JSON.parse(localStorage.getItem('myDays')||'[]'),l=JSON.parse(localStorage.getItem('myLibrary')||'{}');appData={currentGym:'Main Gym',gyms:{'Main Gym':{folders:d,library:l}},exTypes:{}};localStorage.setItem('netGainsData',JSON.stringify(appData))}if(!appData.exTypes)appData.exTypes={};
-let activeCart=JSON.parse(localStorage.getItem('activeCart')||'[]'), sessionData=JSON.parse(localStorage.getItem('sessionData')||'{}'), history=JSON.parse(localStorage.getItem('liftHistory')||'{}'), globalLog=JSON.parse(localStorage.getItem('globalLog')||'[]');
+// --- CORE DATA ---
+let appData=JSON.parse(localStorage.getItem('netGainsData')||'null');
+if(!appData){
+    const d=JSON.parse(localStorage.getItem('myDays')||'[]'),l=JSON.parse(localStorage.getItem('myLibrary')||'{}');
+    appData={currentGym:'Main Gym', gyms:{'Main Gym':{folders:d,library:l}}, exTypes:{}, programState:{}};
+    localStorage.setItem('netGainsData',JSON.stringify(appData));
+}
+if(!appData.programState) appData.programState = {}; // Fix missing program state
 
-const urlParams=new URLSearchParams(window.location.search), importData=urlParams.get('import');
-if(importData){window.bridgeCode=importData;document.getElementById('modal-bridge').style.display='flex'}
-function copyBridgeCode(){navigator.clipboard.writeText(window.bridgeCode).then(()=>{showToast("Copied!");document.getElementById('modal-bridge').style.display='none';window.history.replaceState({},document.title,"/")})}
-function openManualImport(){document.getElementById('import-area').value="";document.getElementById('modal-manual-import').style.display='flex'}
-function runManualImport(){const r=document.getElementById('import-area').value;if(!r)return;try{const d=JSON.parse(atob(r)),g=getCurrentGymData();if(!g.folders.includes(d.name))g.folders.push(d.name);g.library[d.name]=d.exs;saveAppData();renderDays();document.getElementById('modal-manual-import').style.display='none';showToast("Imported!")}catch(e){showToast("Invalid")}}
-function shareFolder(n){const g=getCurrentGymData(),d={name:n,exs:g.library[n]||[]},s=btoa(JSON.stringify(d)),l=window.location.origin+window.location.pathname+"?import="+s;document.getElementById('qrcode').innerHTML="";new QRCode(document.getElementById("qrcode"),{text:l,width:128,height:128});window.shareCode=s;document.getElementById('modal-share').style.display='flex'}
-function copyShareCode(){navigator.clipboard.writeText(window.shareCode).then(()=>showToast("Copied!"))}
+let activeCart=JSON.parse(localStorage.getItem('activeCart')||'[]'), 
+    sessionData=JSON.parse(localStorage.getItem('sessionData')||'{}'), 
+    history=JSON.parse(localStorage.getItem('liftHistory')||'{}'), 
+    globalLog=JSON.parse(localStorage.getItem('globalLog')||'[]');
 
+// --- APP INIT ---
 renderDays();
-function switchTab(id,b){document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));document.getElementById('view-'+id).classList.remove('hidden');document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active')}
-function getCurrentGymData(){if(!appData.gyms[appData.currentGym])appData.gyms[appData.currentGym]={folders:[],library:{}};return appData.gyms[appData.currentGym]}
-function showGymManager(){document.getElementById('split-manager').classList.add('hidden');document.getElementById('gym-manager').classList.remove('hidden');renderGymList()}
-function closeGymManager(){document.getElementById('gym-manager').classList.add('hidden');document.getElementById('split-manager').classList.remove('hidden')}
-function renderGymList(){const d=document.getElementById('gym-list');d.innerHTML="";Object.keys(appData.gyms).forEach(g=>{const a=g===appData.currentGym;d.innerHTML+=`<div class="day-card" style="${a?'border:1px solid var(--accent)':''}"><div style="flex-grow:1;cursor:pointer;" onclick="selectGym('${g}')"><b>${g}</b>${a?' <span style="font-size:9px;background:var(--accent);padding:2px 4px;border-radius:4px;">ACTIVE</span>':''}</div><div style="display:flex;gap:8px;"><button class="icon-btn" onclick="delGym('${g}')">✕</button></div></div>`})}
-function selectGym(n){appData.currentGym=n;saveAppData();renderDays();closeGymManager();showToast("Switched")}
-function promptAddGym(){openInputModal("New Gym","Name",v=>{if(v){appData.gyms[v]={folders:[],library:{}};selectGym(v)}})}
-function delGym(n){if(Object.keys(appData.gyms).length<=1)return;showConfirm("Delete?",()=>{delete appData.gyms[n];selectGym(Object.keys(appData.gyms)[0])})}
-function renderDays(){const g=getCurrentGymData();document.getElementById('current-gym-display').innerText=appData.currentGym;const l=document.getElementById('my-split-list');l.innerHTML="";g.folders.forEach(d=>{const c=(g.library[d]||[]).length;l.innerHTML+=`<div class="day-card"><div style="flex-grow:1;cursor:pointer;" onclick="openSession('${d}')"><b>${d}</b><br><span style="font-size:11px;color:#666;">${c} Ex</span></div><div style="display:flex;gap:5px;"><button class="icon-btn" onclick="shareFolder('${d}')">➦</button><button class="icon-btn" onclick="renameFolder('${d}')">✎</button><button class="icon-btn" onclick="delFolder('${d}')">✕</button></div></div>`})}
+populateStatDropdown();
 
-let currentFolder="";
-function openSession(d){currentFolder=d;document.getElementById('split-manager').classList.add('hidden');document.getElementById('session-logger').classList.remove('hidden');document.getElementById('session-title').innerText=d;renderCart();renderShelf()}
-function closeSession(){document.getElementById('session-logger').classList.add('hidden');document.getElementById('split-manager').classList.remove('hidden')}
-function clearCart(){showConfirm("Clear?",()=>{activeCart=[];sessionData={};saveSession();renderCart()})}
+function switchTab(id,b){
+    document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
+    document.getElementById('view-'+id).classList.remove('hidden');
+    document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    if(id==='stats') populateStatDropdown();
+}
 
-function renderCart(){
-    const area=document.getElementById('active-workout-area');area.innerHTML="";
-    if(activeCart.length===0){area.innerHTML="<div style='text-align:center;padding:30px;color:#555;'>Empty Workout</div>";return}
-    activeCart.forEach((ex,exIdx)=>{
-        const isC=appData.exTypes[ex]==='cardio', sets=sessionData[ex]||[], isLR=sessionData[ex+'_LR']===true, best=history[ex]||'No history';
-        let h=`<div class="ex-top"><div><span class="ex-name">${ex}</span><div class="ex-hist">BEST: ${best}</div></div><div class="ex-tools">${!isC?`<div class="toggle-lr ${isLR?'active':''}" onclick="toggleLR('${ex}')">L+R</div>`:''}<button onclick="removeExFromCart('${ex}')" style="background:none;border:none;color:#555;">✕</button></div></div>`;
-        let r="";
-        if(isC){
-            sets.forEach((s,i)=>{
-                r+=`<div class="cardio-row"><span class="set-num">${i+1}</span><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.w}" onchange="updateSet('${ex}',${i},'w',this.value)"><span class="input-unit">MIN</span></div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.r}" onchange="updateSet('${ex}',${i},'r',this.value)"><span class="input-unit">MI</span></div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.hr||''}" onchange="updateSet('${ex}',${i},'hr',this.value)"><span class="input-unit">BPM</span></div><button class="del-btn" onclick="removeSet('${ex}',${i})">✕</button></div>`
-            });
-        } else {
-            let i=0,cnt=1;
-            while(i<sets.length){
-                let s=sets[i], ns=sets[i+1], lbl=cnt;
-                if(s.side){lbl=`${cnt} ${s.side}`;if(s.side==='R')cnt++;}else{cnt++}
-                if(s.type==='drop_parent'&&ns&&ns.type==='drop_child'){
-                    r+=`<div class="set-group-box set-group-drop">${rr(ex,exIdx,i,s,lbl)}${rr(ex,exIdx,i+1,ns,"DROP")}</div>`;i+=2;
-                } else if(s.type==='super_parent'&&ns&&ns.type==='super_child'){
-                    r+=`<div class="set-group-box set-group-super">${rr(ex,exIdx,i,s,lbl)}${rr(ex,exIdx,i+1,ns,"SUPER")}</div>`;i+=2;
-                } else if(s.type==='assist_parent'&&ns&&ns.type==='assist_child'){
-                    r+=`<div class="set-group-box set-group-assist">${rr(ex,exIdx,i,s,lbl)}${rr(ex,exIdx,i+1,ns,"ASST")}</div>`;i+=2;
-                } else {
-                    r+=`<div class="set-container">${rr(ex,exIdx,i,s,lbl)}</div>`;i++;
-                }
-            }
-        }
-        area.innerHTML+=`<div class="ex-card">${h}<div id="sets-${ex}">${r}</div><button class="btn btn-sec btn-sm" onclick="addSet('${ex}')">+ ADD SET</button></div>`
+// --- ANALYTICS ENGINE (V13) ---
+let graphMode = 'global';
+function setGraphMode(m){
+    graphMode = m;
+    document.getElementById('toggle-global').className = m==='global'?'st-btn active':'st-btn';
+    document.getElementById('toggle-local').className = m==='local'?'st-btn active':'st-btn';
+    renderGraph();
+}
+function populateStatDropdown(){
+    const sel = document.getElementById('stat-select');
+    // Get unique exercises from globalLog
+    const uniqueEx = [...new Set(globalLog.map(l => l.ex))].sort();
+    sel.innerHTML = '<option value="">Select Exercise...</option>';
+    uniqueEx.forEach(e => {
+        sel.innerHTML += `<option value="${e}">${e}</option>`;
     });
 }
-// Render Row Helper (rr) - Uses Direct ID link for calc
-function rr(ex,exIdx,i,s,lbl){
-    const uid=`input_${exIdx}_${i}`; const safeEx=ex.replace(/'/g,"\\'");
-    return `<div class="set-row"><div style="display:flex;flex-direction:column;align-items:center;"><span class="set-num">${lbl}</span></div><div class="input-wrapper"><input type="text" inputmode="decimal" id="${uid}" value="${s.w}" onchange="updateSet('${safeEx}',${i},'w',this.value)"><span class="input-unit">LBS</span></div><button class="calc-btn" onclick="openCalc('${uid}')">🧮</button><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.r}" onchange="updateSet('${safeEx}',${i},'r',this.value)"><span class="input-unit">REPS</span></div><button class="menu-btn" onclick="openSetOpt('${safeEx}',${i})">...</button><button class="del-btn" onclick="removeSet('${safeEx}',${i})">✕</button></div>`
+function renderGraph(){
+    const ex = document.getElementById('stat-select').value;
+    const box = document.getElementById('graph-container');
+    const det = document.getElementById('stat-details');
+    box.innerHTML = ""; det.innerHTML = "";
+    
+    if(!ex) return;
+    
+    // Filter Data based on Global vs Local (Local logic requires gym tracking in logs, adding retroactively)
+    // Note: V12 didn't track gym name in log. V13 starts now.
+    // For old data, 'global' is default.
+    let data = globalLog.filter(l => l.ex === ex);
+    
+    // If Local mode, we strictly filter (if gym data exists)
+    // NOTE: This assumes future logs will have 'gym' property. 
+    // Old logs won't have it, so they disappear in Local mode (correct behavior for precision).
+    if(graphMode === 'local') {
+        data = data.filter(l => l.gym === appData.currentGym);
+    }
+    
+    if(data.length === 0) {
+        box.innerHTML = "<div style='color:#666; font-size:12px; margin:auto;'>No data for this mode</div>";
+        return;
+    }
+
+    // Sort by Date
+    data.sort((a,b) => new Date(a.date) - new Date(b.date));
+    
+    // Calculate Max RM for scaling
+    let maxVal = 0;
+    data.forEach(d => { if(d.rm > maxVal) maxVal = d.rm; });
+    
+    // Draw Bars (Simple CSS visualization)
+    // We take the last 20 sessions max to fit screen
+    const recent = data.slice(-15);
+    recent.forEach(d => {
+        let h = (d.rm / maxVal) * 200; 
+        if(h < 10) h = 10; // Min height
+        
+        let bar = document.createElement('div');
+        bar.className = 'bar';
+        bar.style.height = h + "px";
+        bar.title = `${d.date}: ${d.rm}`; // Tooltip
+        
+        // Color coding for trend? Simple green for now.
+        box.appendChild(bar);
+    });
+    
+    // Stats text
+    const best = Math.max(...data.map(d=>d.rm));
+    const last = data[data.length-1].rm;
+    det.innerHTML = `ALL TIME BEST: <b>${best}</b> | LATEST: <b>${last}</b>`;
 }
 
-let optTarget=null;
-function openSetOpt(ex,i){optTarget={ex,i};document.getElementById('modal-set-opt').style.display='flex'}
-function applySetType(t){if(optTarget){const{ex,i}=optTarget,s=sessionData[ex][i];let nw=s.w;if(t==='drop')nw="";const ns={w:nw,r:'',type:t+'_child'};sessionData[ex].splice(i+1,0,ns);s.type=t+'_parent';saveSession();renderCart();document.getElementById('modal-set-opt').style.display='none'}}
-function toggleLR(e){const c=sessionData[e+'_LR']===true;sessionData[e+'_LR']=!c;saveSession();renderCart()}
-function addSet(e){if(!sessionData[e])sessionData[e]=[];if(sessionData[e+'_LR']===true){sessionData[e].push({w:'',r:'',side:'L'});sessionData[e].push({w:'',r:'',side:'R'})}else{sessionData[e].push({w:'',r:''})}saveSession();renderCart()}
-function removeSet(e,i){sessionData[e].splice(i,1);saveSession();renderCart()}
-function updateSet(e,i,f,v){if(!sessionData[e][i])return;sessionData[e][i][f]=v;saveSession()}
-
-function renderShelf(){const a=document.getElementById('tile-area'),g=getCurrentGymData(),l=g.library[currentFolder]||[];a.innerHTML=`<button class="tile tile-add" onclick="promptNewEx()">+ NEW</button>`;l.forEach(e=>{a.innerHTML+=`<div class="tile" onclick="addToCart('${e}')">${e}</div>`})}
-function addToCart(e){if(!activeCart.includes(e)){activeCart.push(e);if(!sessionData[e])sessionData[e]=[{w:'',r:''}];saveSession();renderCart()}}
-function removeExFromCart(e){activeCart=activeCart.filter(x=>x!==e);delete sessionData[e];saveSession();renderCart()}
-function promptNewEx(){document.getElementById('new-ex-name').value="";document.getElementById('modal-new-ex').style.display='flex'}
-function confirmNewEx(t){const v=document.getElementById('new-ex-name').value;if(v){const g=getCurrentGymData();if(!g.library[currentFolder])g.library[currentFolder]=[];g.library[currentFolder].push(v);appData.exTypes[v]=t;saveAppData();renderShelf();addToCart(v)}document.getElementById('modal-new-ex').style.display='none'}
-
-function saveSession(){localStorage.setItem('activeCart',JSON.stringify(activeCart));localStorage.setItem('sessionData',JSON.stringify(sessionData))}
-function saveAppData(){localStorage.setItem('netGainsData',JSON.stringify(appData))}
-function finishSession(){showConfirm("Save?",()=>{const t=new Date().toISOString().split('T')[0];activeCart.forEach(e=>{const c=appData.exTypes[e]==='cardio',s=sessionData[e]||[];if(c){s.forEach(x=>{const m=parseFloat(x.w),d=parseFloat(x.r);if(m&&d){const p=(m/d).toFixed(2);globalLog.push({date:t,ex:e,w:m,r:d,rm:p,hr:x.hr,type:'cardio'});history[e]=`${p} /mi`}})}else{let b=0,bs="";s.forEach(x=>{const w=parseFloat(x.w),r=parseFloat(x.r);if(!isNaN(w)&&!isNaN(r)){const e1=w*(1+(0.033*r));if(e1>b){b=e1;bs=`${x.w} lbs x ${r}`}globalLog.push({date:t,ex:e,w:w,r:r,rm:Math.round(e1),type:x.type||'',side:x.side||''})}else if(x.w==="BW"&&r){globalLog.push({date:t,ex:e,w:"BW",r:r,rm:0,type:x.type||'',side:x.side||''})}});if(bs)history[e]=bs}});localStorage.setItem('liftHistory',JSON.stringify(history));localStorage.setItem('globalLog',JSON.stringify(globalLog));activeCart=[];sessionData={};saveSession();closeSession();showToast("Saved")})}
-
-function promptAddDay(){openInputModal("Folder","Name",v=>{if(v){const g=getCurrentGymData();if(!g.folders.includes(v))g.folders.push(v);saveAppData();renderDays()}})}
-function renameFolder(o){openInputModal("Rename",o,v=>{if(v&&v!==o){const g=getCurrentGymData(),i=g.folders.indexOf(o);if(i!==-1)g.folders[i]=v;if(g.library[o]){g.library[v]=g.library[o];delete g.library[o]}saveAppData();renderDays()}})}
-function delFolder(n){showConfirm("Delete?",()=>{const g=getCurrentGymData();g.folders=g.folders.filter(d=>d!==n);delete g.library[n];saveAppData();renderDays()})}
-function showToast(m){const t=document.getElementById('toast');document.getElementById('toast-msg').innerText=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
-function openInputModal(t,p,c){const m=document.getElementById('modal-input-overlay'),i=document.getElementById('modal-input'),b=document.getElementById('modal-ok');document.getElementById('modal-title').innerText=t;i.value="";i.placeholder=p;m.style.display='flex';i.focus();let n=b.cloneNode(true);b.parentNode.replaceChild(n,b);n.addEventListener('click',()=>{m.style.display='none';c(i.value)})}
-function closeInputModal(){document.getElementById('modal-input-overlay').style.display='none'}
-function showConfirm(m,c){const d=document.getElementById('modal-confirm-overlay'),b=document.getElementById('confirm-ok');document.getElementById('confirm-desc').innerText=m;d.style.display='flex';let n=b.cloneNode(true);b.parentNode.replaceChild(n,b);n.addEventListener('click',()=>{d.style.display='none';c()})}
-function closeConfirmModal(){document.getElementById('modal-confirm-overlay').style.display='none'}
-function nuke(){showConfirm("DELETE ALL?",()=>{localStorage.clear();location.reload()})}
-function exportCSV(){if(globalLog.length===0){showToast("No data");return}let c="Date,Exercise,Weight,Reps,Side,Type,HR\n";globalLog.forEach(l=>{c+=`${l.date},${l.ex},${l.w},${l.r},${l.side||''},${l.type||''},${l.hr||''}\n`});const b=document.createElement('a');b.href=encodeURI("data:text/csv;charset=utf-8,"+c);b.download="netgains_data.csv";document.body.appendChild(b);b.click()}
-
-// PLATE CALC LOGIC (FIXED)
-let targetInputId = null; // Store ID string here
-let calcSideWeight=0, calcBar=45, calcMode='bar';
-
-function openCalc(uid){
-    targetInputId = uid; // Save the ID of the input box
-    calcSideWeight=0; 
-    setCalcMode('bar'); 
-    document.getElementById('modal-plate-calc').style.display='flex'; 
+// --- LOGGING ---
+function finishSession(){
+    showConfirm("Save Log?",()=>{
+        const t=new Date().toISOString().split('T')[0];
+        activeCart.forEach(e=>{
+            const isC=appData.exTypes[e]==='cardio', s=sessionData[e]||[];
+            if(isC){
+                // Cardio Logic
+                let bestPace=999, bestDist=0;
+                s.forEach(x=>{
+                    const m=parseFloat(x.w),d=parseFloat(x.r);
+                    if(m&&d){
+                        const p=m/d; 
+                        // Save Gym Name now
+                        globalLog.push({date:t, ex:e, w:m, r:d, rm:parseFloat(p.toFixed(2)), hr:x.hr, type:'cardio', gym:appData.currentGym});
+                        if(p<bestPace) bestPace=p;
+                        if(d>bestDist) bestDist=d;
+                    }
+                });
+                if(bestDist>0) history[e] = `Best: ${bestPace.toFixed(2)}/mi | ${bestDist}mi`;
+            } else {
+                // Strength Logic
+                let sessBest=0, sessStr="";
+                s.forEach(x=>{
+                    const w=parseFloat(x.w), r=parseFloat(x.r);
+                    if(!isNaN(w)&&!isNaN(r)){
+                        const e1=w*(1+(0.033*r));
+                        if(e1>sessBest) { sessBest=e1; sessStr=`${x.w}lbs x ${r}`; }
+                        globalLog.push({date:t, ex:e, w:w, r:r, rm:Math.round(e1), type:x.type||'', side:x.side||'', gym:appData.currentGym});
+                    } else if(x.w==="BW"&&r){
+                        globalLog.push({date:t, ex:e, w:"BW", r:r, rm:0, type:x.type||'', side:x.side||'', gym:appData.currentGym});
+                    }
+                });
+                if(sessStr) history[e] = sessStr;
+            }
+        });
+        localStorage.setItem('liftHistory',JSON.stringify(history));
+        localStorage.setItem('globalLog',JSON.stringify(globalLog));
+        activeCart=[]; sessionData={}; saveSession(); closeSession(); showToast("Saved");
+    });
 }
-function calcPlates(){ targetInputId=null; calcSideWeight=0; setCalcMode('bar'); document.getElementById('modal-plate-calc').style.display='flex'; }
+
+// --- SMART ADD / TAGS ---
+function promptNewEx(){ 
+    document.getElementById('new-ex-name').value=""; 
+    document.getElementById('modal-new-ex').style.display='flex';
+}
+function appendTag(t){
+    document.getElementById('new-ex-name').value += t;
+}
+function confirmNewEx(t){
+    const v=document.getElementById('new-ex-name').value;
+    if(v){
+        const g=getCurrentGymData();
+        if(!g.library[currentFolder]) g.library[currentFolder]=[];
+        g.library[currentFolder].push(v);
+        appData.exTypes[v]=t;
+        saveAppData(); renderShelf(); addToCart(v);
+    }
+    document.getElementById('modal-new-ex').style.display='none';
+}
+
+// --- CALCULATOR (DIRECT LINK) ---
+let calcTarget = null; // {ex: name, idx: index}
+let calcSide=0, calcBar=45, calcMode='bar';
+
+function openCalc(exIdx, setIdx){
+    if(exIdx !== undefined){
+        const exName = activeCart[exIdx];
+        calcTarget = {ex: exName, idx: setIdx};
+    } else {
+        calcTarget = null;
+    }
+    calcSide=0; setCalcMode('bar');
+    document.getElementById('modal-plate-calc').style.display='flex';
+}
+function closeCalc(){ document.getElementById('modal-plate-calc').style.display='none'; }
+function calcPlates(){ openCalc(); }
 
 function setCalcMode(m){
     calcMode=m; calcBar=(m==='bar')?45:0;
@@ -401,36 +421,164 @@ function setCalcMode(m){
     document.getElementById('mode-single').style.color=(m==='single')?'black':'white';
     updateCalcDisplay();
 }
-function addPlate(w){calcSideWeight+=w;updateCalcDisplay()}
-function resetCalc(){calcSideWeight=0;updateCalcDisplay()}
+function addPlate(w){ calcSide+=w; updateCalcDisplay(); }
+function resetCalc(){ calcSide=0; updateCalcDisplay(); }
 function updateCalcDisplay(){
-    let t=0; if(calcMode==='bar')t=(calcSideWeight*2)+calcBar; else t=calcSideWeight;
-    document.getElementById('calc-total').value=t;
+    let t=0; if(calcMode==='bar') t=(calcSide*2)+calcBar; else t=calcSide;
+    document.getElementById('calc-total').value = t;
 }
-function manualCalcUpdate(v){const n=parseFloat(v);if(!isNaN(n)){if(calcMode==='bar'){calcSideWeight=(n-calcBar)/2}else{calcSideWeight=n}}}
-
+function manualCalcUpdate(v){
+    const n=parseFloat(v);
+    if(!isNaN(n)){ if(calcMode==='bar') calcSide=(n-calcBar)/2; else calcSide=n; }
+}
 function applyCalc(){
-    if(targetInputId){
-        const el = document.getElementById(targetInputId);
-        if(el){
-            el.value = document.getElementById('calc-total').value;
-            el.dispatchEvent(new Event('change')); // Trigger save
+    if(calcTarget){
+        const val = document.getElementById('calc-total').value;
+        if(sessionData[calcTarget.ex] && sessionData[calcTarget.ex][calcTarget.idx]){
+            sessionData[calcTarget.ex][calcTarget.idx].w = val;
+            saveSession(); renderCart();
         }
     }
-    document.getElementById('modal-plate-calc').style.display='none';
+    closeCalc();
 }
 function useBW(){
-    if(targetInputId){
-        const el = document.getElementById(targetInputId);
-        if(el){
-            el.value = "BW";
-            el.dispatchEvent(new Event('change'));
-        }
+    if(calcTarget){
+        sessionData[calcTarget.ex][calcTarget.idx].w = "BW";
+        saveSession(); renderCart();
     }
-    document.getElementById('modal-plate-calc').style.display='none';
+    closeCalc();
 }
 
-function genProgram(){const w=parseFloat(document.getElementById('w').value),r=parseFloat(document.getElementById('r').value);if(!w||!r)return;const rnd=n=>Math.round(n/5)*5,max=rnd(w*(1+(0.033*r))),rm5=rnd(max*0.87),rm3=rnd(max*0.93);const weeks=[{n:1,t:"BASE",b:rm5,m:.85,s:4,r:6},{n:2,t:"LOAD",b:rm5,m:.9,s:4,r:6},{n:3,t:"INTENSE",b:rm5,m:.95,s:4,r:6},{n:4,t:"PEAK",b:rm5,m:1.05,s:4,r:6},{n:5,t:"UNLOAD",b:rm5,m:.85,s:2,r:4,f:.9},{n:6,t:"SPEED",b:rm3,m:1,s:3,r:4,w:.75,f:.85},{n:7,t:"FORCE",b:rm3,m:1,s:3,r:4,w:.85,f:.9},{n:8,t:"MAX",b:rm3,m:1,s:3,r:4,w:.7,f:.85}];let h=`<div style="text-align:center;margin-bottom:20px;color:var(--success);font-weight:bold;border:1px solid #333;padding:10px;border-radius:10px;">EST 1RM: ${max} LBS</div>`;weeks.forEach(k=>{let m=rnd(k.b*k.m),wL=rnd(m*(k.w||.85)),f=rnd(m*(k.f||.95));if(k.n===4)wL=rnd(m*.8);h+=`<div class="week"><div class="week-head"><span>Week ${k.n}</span><span style="color:#ff4757">${k.t}</span></div><div class="day-row"><div><b>Mon</b></div><div>${m} lbs ${k.s}x${k.r} <span class="tag tag-h">H</span></div></div><div class="day-row"><div><b>Wed</b></div><div>${wL} lbs ${k.s}x${k.r} <span class="tag tag-l">L</span></div></div><div class="day-row"><div><b>Fri</b></div><div>${f} lbs ${k.s}x${k.r} <span class="tag tag-m">M</span></div></div></div>`});document.getElementById('schedule-area').innerHTML=h}
+// --- RENDER CART (SMART SPLIT) ---
+function renderCart(){
+    const area=document.getElementById('active-workout-area'); area.innerHTML="";
+    if(activeCart.length===0){ area.innerHTML="<div style='text-align:center;padding:30px;color:#555;'>Empty Workout</div>"; return; }
+    
+    activeCart.forEach((ex, exIdx)=>{
+        const isC=appData.exTypes[ex]==='cardio', sets=sessionData[ex]||[], isLR=sessionData[ex+'_LR']===true;
+        let histHTML = history[ex] ? `<div class="hist-badge">BEST: ${history[ex]}</div>` : '';
+        if(isC && history[ex]) histHTML = `<div class="hist-badge" style="background:rgba(255,165,2,0.1); border-color:rgba(255,165,2,0.3);">${history[ex]}</div>`;
+
+        let h=`<div class="ex-top"><div><span class="ex-name">${ex}</span><div class="ex-hist">${histHTML}</div></div><div class="ex-tools">${!isC?`<div class="toggle-lr ${isLR?'active':''}" onclick="toggleLR('${ex}')">L+R</div>`:''}<button onclick="removeExFromCart('${ex}')" style="background:none;border:none;color:#555;">✕</button></div></div>`;
+        
+        let r="";
+        if(isC){
+            sets.forEach((s,i)=>{
+                r+=`<div class="cardio-row"><span class="set-num">${i+1}</span><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.w}" onchange="updateSet('${ex}',${i},'w',this.value)"><span class="input-unit">MIN</span></div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.r}" onchange="updateSet('${ex}',${i},'r',this.value)"><span class="input-unit">MI</span></div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.hr||''}" onchange="updateSet('${ex}',${i},'hr',this.value)"><span class="input-unit">BPM</span></div><button class="del-btn" onclick="removeSet('${ex}',${i})">✕</button></div>`
+            });
+        } else {
+            let i=0, cnt=1;
+            while(i<sets.length){
+                let s=sets[i], ns=sets[i+1], lbl=cnt;
+                if(s.side){ lbl=`${cnt} ${s.side}`; if(s.side==='R') cnt++; } else { cnt++; }
+                
+                // Safe string escape
+                const safeEx = ex.replace(/'/g, "\\'");
+                
+                // Helper to generate input row
+                const row = (idx, st, lab) => `
+                <div class="set-row">
+                    <div style="display:flex;flex-direction:column;align-items:center;"><span class="set-num">${lab}</span></div>
+                    <div class="input-wrapper"><input type="text" inputmode="decimal" value="${st.w}" onchange="updateSet('${safeEx}',${idx},'w',this.value)"><span class="input-unit">LBS</span></div>
+                    <button class="calc-btn" onclick="openCalc(${exIdx},${idx})">🧮</button>
+                    <div class="input-wrapper"><input type="text" inputmode="decimal" value="${st.r}" onchange="updateSet('${safeEx}',${idx},'r',this.value)"><span class="input-unit">REPS</span></div>
+                    <button class="menu-btn" onclick="openSetOpt('${safeEx}',${idx})">...</button>
+                    <button class="del-btn" onclick="removeSet('${safeEx}',${idx})">✕</button>
+                </div>`;
+
+                if(s.type==='drop_parent' && ns && ns.type==='drop_child'){
+                    r+=`<div class="set-group-box set-group-drop">${row(i,s,lbl)}${row(i+1,ns,"DROP")}</div>`; i+=2;
+                } else if(s.type==='super_parent' && ns && ns.type==='super_child'){
+                    r+=`<div class="set-group-box set-group-super">${row(i,s,lbl)}${row(i+1,ns,"SUPER")}</div>`; i+=2;
+                } else if(s.type==='assist_parent' && ns && ns.type==='assist_child'){
+                    r+=`<div class="set-group-box set-group-assist">${row(i,s,lbl)}${row(i+1,ns,"ASST")}</div>`; i+=2;
+                } else {
+                    r+=`<div class="set-container">${row(i,s,lbl)}</div>`; i++;
+                }
+            }
+        }
+        area.innerHTML+=`<div class="ex-card">${h}<div id="sets-${ex}">${r}</div><button class="btn btn-sec btn-sm" onclick="addSet('${ex}')">+ ADD SET</button></div>`
+    });
+}
+
+// --- PROGRAM LOGIC (WITH CHECKBOXES) ---
+function genProgram(){
+    const w=parseFloat(document.getElementById('prog-w').value), r=parseFloat(document.getElementById('prog-r').value);
+    if(!w||!r)return;
+    const rnd=n=>Math.round(n/5)*5, max=rnd(w*(1+(0.033*r))), rm5=rnd(max*0.87), rm3=rnd(max*0.93);
+    const weeks=[
+        {n:1,t:"BASE",b:rm5,m:.85,s:4,r:6},{n:2,t:"LOAD",b:rm5,m:.9,s:4,r:6},
+        {n:3,t:"INTENSE",b:rm5,m:.95,s:4,r:6},{n:4,t:"PEAK",b:rm5,m:1.05,s:4,r:6},
+        {n:5,t:"UNLOAD",b:rm5,m:.85,s:2,r:4,f:.9},{n:6,t:"SPEED",b:rm3,m:1,s:3,r:4,w:.75,f:.85},
+        {n:7,t:"FORCE",b:rm3,m:1,s:3,r:4,w:.85,f:.9},{n:8,t:"MAX",b:rm3,m:1,s:3,r:4,w:.7,f:.85}
+    ];
+    let h=`<div style="text-align:center;margin-bottom:20px;color:var(--success);font-weight:bold;border:1px solid #333;padding:10px;border-radius:10px;">EST 1RM: ${max} LBS</div>`;
+    
+    // Warmup Logic based on Max
+    const wu = [rnd(max*0.5), rnd(max*0.6), rnd(max*0.7)];
+    
+    weeks.forEach((k, idx)=>{
+        let m=rnd(k.b*k.m), wL=rnd(m*(k.w||.85)), f=rnd(m*(k.f||.95)); if(k.n===4)wL=rnd(m*.8);
+        const wKey = `w${k.n}`;
+        const isDone = appData.programState[wKey] === true;
+        
+        h+=`<div class="week">
+            <div class="week-head">
+                <span>Week ${k.n} <span style="color:#666;font-size:11px">(${k.t})</span></span>
+                <div class="chk-box ${isDone?'checked':''}" onclick="toggleWeek('${wKey}', this)"></div>
+            </div>
+            <div style="padding:10px 15px; border-bottom:1px solid #333; display:${isDone?'none':'block'}">
+                <span class="warmup-text">Warmup: 10x${wu[0]}, 5x${wu[1]}, 3x${wu[2]}</span>
+            </div>
+            <div class="day-row" style="opacity:${isDone?0.3:1}"><div>Mon</div><div>${m} lbs ${k.s}x${k.r} <span class="tag tag-h">H</span></div></div>
+            <div class="day-row" style="opacity:${isDone?0.3:1}"><div>Wed</div><div>${wL} lbs ${k.s}x${k.r} <span class="tag tag-l">L</span></div></div>
+            <div class="day-row" style="opacity:${isDone?0.3:1}"><div>Fri</div><div>${f} lbs ${k.s}x${k.r} <span class="tag tag-m">M</span></div></div>
+        </div>`;
+    });
+    document.getElementById('schedule-area').innerHTML=h;
+}
+function toggleWeek(key, el){
+    const done = el.classList.contains('checked');
+    if(done) { el.classList.remove('checked'); appData.programState[key]=false; }
+    else { el.classList.add('checked'); appData.programState[key]=true; }
+    saveAppData(); genProgram(); // Re-render to collapse
+}
+
+// --- STANDARD FUNCTIONS (Boilerplate) ---
+function getCurrentGymData(){if(!appData.gyms[appData.currentGym])appData.gyms[appData.currentGym]={folders:[],library:{}};return appData.gyms[appData.currentGym]}
+function showGymManager(){document.getElementById('split-manager').classList.add('hidden');document.getElementById('gym-manager').classList.remove('hidden');renderGymList()}
+function closeGymManager(){document.getElementById('gym-manager').classList.add('hidden');document.getElementById('split-manager').classList.remove('hidden')}
+function renderGymList(){const d=document.getElementById('gym-list');d.innerHTML="";Object.keys(appData.gyms).forEach(g=>{const a=g===appData.currentGym;d.innerHTML+=`<div class="day-card" style="${a?'border:1px solid var(--accent)':''}"><div style="flex-grow:1;cursor:pointer;" onclick="selectGym('${g}')"><b>${g}</b>${a?' <span style="font-size:9px;background:var(--accent);padding:2px 4px;border-radius:4px;">ACTIVE</span>':''}</div><div style="display:flex;gap:8px;"><button class="icon-btn" onclick="delGym('${g}')">✕</button></div></div>`})}
+function selectGym(n){appData.currentGym=n;saveAppData();renderDays();closeGymManager();showToast("Switched")}
+function promptAddGym(){openInputModal("New Gym","Name",v=>{if(v){appData.gyms[v]={folders:[],library:{}};selectGym(v)}})}
+function delGym(n){if(Object.keys(appData.gyms).length<=1)return;showConfirm("Delete?",()=>{delete appData.gyms[n];selectGym(Object.keys(appData.gyms)[0])})}
+function toggleLR(e){
+    const c=sessionData[e+'_LR']===true; 
+    sessionData[e+'_LR']=!c;
+    // Smart Split Logic: If last set is empty, split it now
+    if(!c && sessionData[e] && sessionData[e].length > 0) {
+        let last = sessionData[e][sessionData[e].length-1];
+        if(last.w === "" && !last.side) {
+            sessionData[e].pop();
+            sessionData[e].push({w:'', r:'', side:'L'});
+            sessionData[e].push({w:'', r:'', side:'R'});
+        }
+    }
+    saveSession(); renderCart();
+}
+function addSet(e){if(!sessionData[e])sessionData[e]=[];if(sessionData[e+'_LR']===true){sessionData[e].push({w:'',r:'',side:'L'});sessionData[e].push({w:'',r:'',side:'R'})}else{sessionData[e].push({w:'',r:''})}saveSession();renderCart()}
+function removeSet(e,i){sessionData[e].splice(i,1);saveSession();renderCart()}
+function updateSet(e,i,f,v){if(!sessionData[e][i])return;sessionData[e][i][f]=v;saveSession()}
+function promptAddDay(){openInputModal("Folder","Name",v=>{if(v){const g=getCurrentGymData();if(!g.folders.includes(v))g.folders.push(v);saveAppData();renderDays()}})}
+function renameFolder(o){openInputModal("Rename",o,v=>{if(v&&v!==o){const g=getCurrentGymData(),i=g.folders.indexOf(o);if(i!==-1)g.folders[i]=v;if(g.library[o]){g.library[v]=g.library[o];delete g.library[o]}saveAppData();renderDays()}})}
+function delFolder(n){showConfirm("Delete?",()=>{const g=getCurrentGymData();g.folders=g.folders.filter(d=>d!==n);delete g.library[n];saveAppData();renderDays()})}
+function showToast(m){const t=document.getElementById('toast');document.getElementById('toast-msg').innerText=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+function openInputModal(t,p,c){const m=document.getElementById('modal-input-overlay'),i=document.getElementById('modal-input'),b=document.getElementById('modal-ok');document.getElementById('modal-title').innerText=t;i.value="";i.placeholder=p;m.style.display='flex';i.focus();let n=b.cloneNode(true);b.parentNode.replaceChild(n,b);n.addEventListener('click',()=>{m.style.display='none';c(i.value)})}
+function closeInputModal(){document.getElementById('modal-input-overlay').style.display='none'}
+function showConfirm(m,c){const d=document.getElementById('modal-confirm-overlay'),b=document.getElementById('confirm-ok');document.getElementById('confirm-desc').innerText=m;d.style.display='flex';let n=b.cloneNode(true);b.parentNode.replaceChild(n,b);n.addEventListener('click',()=>{d.style.display='none';c()})}
+function closeConfirmModal(){document.getElementById('modal-confirm-overlay').style.display='none'}
+function nuke(){showConfirm("DELETE ALL?",()=>{localStorage.clear();location.reload()})}
+function exportCSV(){if(globalLog.length===0){showToast("No data");return}let c="Date,Gym,Exercise,Weight,Reps,Side,Type,HR\n";globalLog.forEach(l=>{c+=`${l.date},${l.gym||''},${l.ex},${l.w},${l.r},${l.side||''},${l.type||''},${l.hr||''}\n`});const b=document.createElement('a');b.href=encodeURI("data:text/csv;charset=utf-8,"+c);b.download="netgains_data.csv";document.body.appendChild(b);b.click()}
 let timer;function startTimer(s){clearInterval(timer);const end=Date.now()+s*1000;timer=setInterval(()=>{const r=Math.round((end-Date.now())/1000);if(r<0){clearInterval(timer);document.getElementById('t-disp').innerText="DONE";return}const m=Math.floor(r/60),rs=r%60;document.getElementById('t-disp').innerText=`${m}:${rs<10?'0':''}${rs}`},1000)}
 </script>
 </body>
