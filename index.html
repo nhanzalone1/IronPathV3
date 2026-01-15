@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V13.4</title>
+<title>NetGains V13.5</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   /* --- 1. VARIABLES & RESET --- */
@@ -17,9 +17,13 @@
     --input-bg: #121212; --border: #333;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  /* MASTER FONT FIX: Forces all buttons/inputs to use system font */
-  body, button, input, select, textarea { margin: 0; padding: 0; font-family: -apple-system, system-ui, sans-serif; }
-  body { background-color: var(--bg); color: var(--text); overflow-x: hidden; padding-bottom: 90px; }
+  
+  /* NUCLEAR FONT FIX: Forces system font on EVERYTHING */
+  body, button, input, select, textarea, div, span, p, h1, h2, h3 { 
+      font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important; 
+  }
+  
+  body { margin: 0; padding: 0; background-color: var(--bg); color: var(--text); overflow-x: hidden; padding-bottom: 90px; }
 
   /* --- 2. UTILS --- */
   .hidden { display: none !important; }
@@ -29,6 +33,11 @@
   .btn-sec { background: #333; color: white; border: 1px solid #444; }
   .btn-ghost { background: transparent; border: 1px dashed #444; color: #666; font-size: 10px; padding: 6px 10px; width: auto; display: inline-block; cursor: pointer; border-radius: 6px; }
   .btn-sm { padding: 8px; font-size: 11px; width: auto; display: inline-block; margin: 0; }
+  
+  /* SET TYPE BUTTONS (VIVID COLORS) */
+  .btn-drop { border: 2px solid var(--drop); color: var(--drop); background: transparent; font-weight: 900; }
+  .btn-super { border: 2px solid var(--super); color: var(--super); background: transparent; font-weight: 900; }
+  .btn-assist { border: 2px solid var(--assist); color: var(--assist); background: transparent; font-weight: 900; }
   
   h1 { text-align: center; margin: 25px 0 5px; font-size: 26px; letter-spacing: -1px; font-weight: 900; color: white; }
   .brand-span { color: var(--accent); }
@@ -55,8 +64,12 @@
 
   /* WORKOUT ROWS */
   .ex-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border); }
-  .ex-top { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: center; }
-  .ex-name { font-weight: bold; font-size: 16px; }
+  
+  /* FIXED HEADER SPACING */
+  .ex-top { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: flex-start; }
+  .ex-name { font-weight: bold; font-size: 16px; margin-right: 10px; flex-grow: 1; }
+  .ex-tools { display: flex; gap: 15px; align-items: center; flex-shrink: 0; }
+  
   .ex-hist { font-size: 10px; color: var(--success); margin-bottom: 10px; display: flex; gap: 10px; }
   .hist-badge { background: rgba(46, 213, 115, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(46, 213, 115, 0.3); }
   
@@ -68,7 +81,7 @@
   .menu-btn { background: none; border: 1px solid #333; color: #888; border-radius: 6px; cursor: pointer; height: 42px; display: flex; align-items: center; justify-content: center; padding-bottom: 5px; }
 
   /* REAL BUTTON STYLE FOR L+R */
-  .toggle-lr { font-size: 11px; background: #222; color: #888; padding: 6px 12px; border-radius: 6px; border: 1px solid #444; cursor: pointer; font-weight: 800; display: inline-block; transition: 0.1s; }
+  .toggle-lr { font-size: 11px; background: #222; color: #aaa; padding: 8px 12px; border-radius: 6px; border: 1px solid #444; cursor: pointer; font-weight: 800; display: inline-block; transition: 0.1s; }
   .toggle-lr.active { background: var(--accent); color: white; border-color: var(--accent); }
 
   /* SHELF & EDIT MODE */
@@ -207,9 +220,9 @@
 <div id="modal-set-opt" class="modal-overlay">
   <div class="modal-box">
     <h3 class="modal-title">Link Set</h3>
-    <button class="btn btn-sec" style="border-color:var(--drop); color:var(--drop); font-weight:bold;" onclick="applySetType('drop')">💧 Drop Set</button>
-    <button class="btn btn-sec" style="border-color:var(--super); color:var(--super); font-weight:bold;" onclick="applySetType('super')">🔗 Superset</button>
-    <button class="btn btn-sec" style="border-color:var(--assist); color:var(--assist); font-weight:bold;" onclick="applySetType('assist')">🤝 Assisted</button>
+    <button class="btn btn-drop" onclick="applySetType('drop')">💧 Drop Set</button>
+    <button class="btn btn-super" onclick="applySetType('super')">🔗 Superset</button>
+    <button class="btn btn-assist" onclick="applySetType('assist')">🤝 Assisted</button>
     <button class="btn btn-sec" style="margin-top:20px" onclick="document.getElementById('modal-set-opt').style.display='none'">CANCEL</button>
   </div>
 </div>
@@ -219,7 +232,7 @@
 <div id="toast"><span id="toast-msg">Saved</span></div>
 
 <div id="view-program" class="view">
-  <h1>NETGAINS <span class="brand-span">V13.4</span></h1>
+  <h1>NETGAINS <span class="brand-span">V13.5</span></h1>
   <p class="sub">ENGINE</p>
   <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
