@@ -6,8 +6,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V13.8</title>
+<title>NetGains V14</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
   /* --- 1. VARIABLES & RESET --- */
   :root { 
@@ -69,11 +71,9 @@
 
   /* WORKOUT ROWS */
   .ex-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border); }
-  
   .ex-top { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: flex-start; }
   .ex-name { font-weight: bold; font-size: 16px; margin-right: 10px; flex-grow: 1; }
   .ex-tools { display: flex; gap: 15px; align-items: center; flex-shrink: 0; }
-  
   .ex-hist { font-size: 10px; color: var(--success); margin-bottom: 10px; display: flex; gap: 10px; }
   .hist-badge { background: rgba(46, 213, 115, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(46, 213, 115, 0.3); }
   
@@ -99,10 +99,8 @@
   .tile.deleting { border-color: var(--danger); color: var(--danger); background: rgba(255, 71, 87, 0.1); }
   .tile-add { border: 1px dashed #666; color: #888; background: transparent; }
 
-  /* STATS GRAPH */
-  .graph-box { background: #111; border: 1px solid #333; border-radius: 12px; padding: 15px; height: 250px; position: relative; margin-top: 15px; display: flex; align-items: flex-end; justify-content: space-between; }
-  .bar { width: 10px; background: var(--success); border-radius: 4px 4px 0 0; opacity: 0.7; transition: 0.3s; position: relative; }
-  .bar:hover { opacity: 1; transform: scaleY(1.05); }
+  /* STATS GRAPH (CHART.JS) */
+  .chart-container { position: relative; height: 300px; width: 100%; background: #111; border: 1px solid #333; border-radius: 12px; padding: 10px; margin-top: 15px; }
   .stat-toggle { display: flex; gap: 10px; margin-bottom: 10px; }
   .st-btn { flex: 1; padding: 8px; background: #222; border: 1px solid #333; color: #666; font-size: 11px; border-radius: 6px; font-weight: bold; cursor: pointer; }
   .st-btn.active { background: var(--success); color: black; border-color: var(--success); }
@@ -236,7 +234,7 @@
 <div id="toast"><span id="toast-msg">Saved</span></div>
 
 <div id="view-program" class="view">
-  <h1>NETGAINS <span class="brand-span">V13.8</span></h1>
+  <h1>NETGAINS <span class="brand-span">V14</span></h1>
   <p class="sub">ENGINE</p>
   <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
@@ -302,8 +300,8 @@
           <button id="toggle-local" class="st-btn" onclick="setGraphMode('local')">📍 LOCAL (This Gym)</button>
       </div>
       
-      <div id="graph-container" class="graph-box">
-          <div style="color:#666; font-size:12px; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);">Select an exercise</div>
+      <div class="chart-container">
+          <canvas id="perfChart"></canvas>
       </div>
       <div id="stat-details" style="margin-top:15px; font-size:12px; color:#888; text-align:center;"></div>
   </div>
@@ -362,7 +360,7 @@ function selectGym(n){
 function promptAddGym(){openInputModal("New Gym","Name",v=>{if(v){appData.gyms[v]={folders:[],library:{}};selectGym(v)}})}
 function delGym(n){if(Object.keys(appData.gyms).length<=1)return;showConfirm("Delete?",()=>{delete appData.gyms[n];selectGym(Object.keys(appData.gyms)[0])})}
 
-// --- PROGRAM ENGINE (V13.3: SCIENTIFIC RAMP) ---
+// --- PROGRAM ENGINE (V13.3) ---
 function genProgram(){
     const w=parseFloat(document.getElementById('prog-w').value), r=parseFloat(document.getElementById('prog-r').value);
     if(!w||!r)return;
@@ -420,8 +418,10 @@ function toggleWeek(key, el){
     saveAppData(); genProgram(); 
 }
 
-// --- ANALYTICS ---
+// --- ANALYTICS (CHART.JS V14) ---
 let graphMode = 'global';
+let myChart = null;
+
 function setGraphMode(m){
     graphMode = m;
     document.getElementById('toggle-global').className = m==='global'?'st-btn active':'st-btn';
@@ -436,25 +436,81 @@ function populateStatDropdown(){
 }
 function renderGraph(){
     const ex = document.getElementById('stat-select').value;
-    const box = document.getElementById('graph-container');
+    const ctx = document.getElementById('perfChart').getContext('2d');
     const det = document.getElementById('stat-details');
-    box.innerHTML = ""; det.innerHTML = "";
+    
+    // Cleanup old chart
+    if(myChart) myChart.destroy();
     if(!ex) return;
+
+    // Filter Data
     let data = globalLog.filter(l => l.ex === ex);
     if(graphMode === 'local') data = data.filter(l => l.gym === appData.currentGym);
-    if(data.length === 0) { box.innerHTML = "<div style='color:#666; font-size:12px; margin:auto;'>No data for this mode</div>"; return; }
+    
     data.sort((a,b) => new Date(a.date) - new Date(b.date));
-    let maxVal = 0; data.forEach(d => { if(d.rm > maxVal) maxVal = d.rm; });
-    const recent = data.slice(-15);
-    recent.forEach(d => {
-        let h = (d.rm / maxVal) * 200; if(h < 10) h = 10;
-        let bar = document.createElement('div');
-        bar.className = 'bar'; bar.style.height = h + "px"; bar.title = `${d.date}: ${d.rm}`;
-        box.appendChild(bar);
-    });
-    const best = Math.max(...data.map(d=>d.rm));
-    const last = data[data.length-1].rm;
+    
+    if(data.length === 0) {
+        det.innerText = "No data available for this view.";
+        return;
+    }
+
+    const labels = data.map(d => d.date.substring(5)); // Remove year for space
+    const values = data.map(d => d.rm);
+    const best = Math.max(...values);
+    const last = values[values.length-1];
+    
     det.innerHTML = `ALL TIME BEST: <b>${best}</b> | LATEST: <b>${last}</b>`;
+
+    // Create Gradient
+    let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(46, 213, 115, 0.5)'); // Top opacity
+    gradient.addColorStop(1, 'rgba(46, 213, 115, 0.0)'); // Bottom fade
+
+    // Draw Chart
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Est. 1RM',
+                data: values,
+                borderColor: '#2ed573',
+                backgroundColor: gradient,
+                borderWidth: 2,
+                pointBackgroundColor: '#fff',
+                pointRadius: 4,
+                fill: true,
+                tension: 0.3 // Curve smoothing
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: '#222',
+                    titleColor: '#2ed573',
+                    bodyColor: '#fff',
+                    borderColor: '#333',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: '#222' },
+                    ticks: { color: '#666', font: {size: 10} }
+                },
+                y: {
+                    grid: { color: '#222' },
+                    ticks: { color: '#666', font: {size: 10} },
+                    beginAtZero: false // Stock style: Focus on range
+                }
+            }
+        }
+    });
 }
 
 // --- LOGGING ---
