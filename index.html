@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V16.5</title>
+<title>NetGains V16.6</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -387,7 +387,7 @@
 // --- CORE ---
 let appData, activeCart, sessionData, history, globalLog;
 
-// Initialize
+// 1. Force Load Data First
 try {
     appData = JSON.parse(localStorage.getItem('netGainsData') || 'null');
     if(!appData){
@@ -396,7 +396,7 @@ try {
         appData = {currentGym:'Main Gym', gyms:{'Main Gym':{folders:d,library:l}}, exTypes:{}, programState:{}, programInputs:{}, unit:'lbs', customTags:[]};
         localStorage.setItem('netGainsData',JSON.stringify(appData));
     }
-    // Self-Heal
+    // Deep Merge fixes
     if(!appData.programState) appData.programState = {};
     if(!appData.programInputs) appData.programInputs = {}; 
     if(!appData.customTags) appData.customTags = [];
@@ -407,7 +407,7 @@ try {
     history = JSON.parse(localStorage.getItem('liftHistory') || '{}');
     globalLog = JSON.parse(localStorage.getItem('globalLog') || '[]');
 } catch (e) {
-    console.log("Resetting");
+    console.error("Data Corrupt, resetting");
     localStorage.clear();
     location.reload();
 }
@@ -417,6 +417,7 @@ function saveAppData(){
 }
 
 // --- INIT UI CALLS ---
+// These run immediately because the script is at the bottom
 updateUnitUI(); 
 renderDays();
 populateStatDropdown();
@@ -445,14 +446,21 @@ function toggleUnit(){
 
 function updateUnitUI(){
     const btn = document.getElementById('unit-toggle');
-    btn.innerText = appData.unit.toUpperCase();
+    if(btn) btn.innerText = appData.unit.toUpperCase();
+    
     document.querySelectorAll('.input-unit').forEach(el => {
         if(el.innerText === 'LBS' || el.innerText === 'KG') el.innerText = appData.unit.toUpperCase();
     });
     const ph = (appData.unit === 'lbs') ? 'lbs' : 'kg';
-    document.getElementById('prog-s').placeholder = ph;
-    document.getElementById('prog-b').placeholder = ph;
-    document.getElementById('prog-d').placeholder = ph;
+    
+    const sIn = document.getElementById('prog-s');
+    if(sIn) sIn.placeholder = ph;
+    
+    const bIn = document.getElementById('prog-b');
+    if(bIn) bIn.placeholder = ph;
+    
+    const dIn = document.getElementById('prog-d');
+    if(dIn) dIn.placeholder = ph;
 }
 
 // --- GYM SWITCHER ---
