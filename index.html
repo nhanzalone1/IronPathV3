@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V15.2</title>
+<title>NetGains V15.3</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -239,21 +239,21 @@
 <div id="toast"><span id="toast-msg">Saved</span></div>
 
 <div id="view-program" class="view">
-  <h1>NETGAINS <span class="brand-span">V15.2</span></h1>
+  <h1>NETGAINS <span class="brand-span">V15.3</span></h1>
   <p class="sub">BAECHLE HLM</p>
   <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
         <div>
             <label style="font-size:9px; color:#888;">SQUAT (1RM)</label>
-            <input type="number" id="prog-s" placeholder="lbs" style="margin:0; padding:8px; text-align:center;">
+            <input type="number" id="prog-s" placeholder="lbs" style="margin:0; padding:8px; text-align:center;" oninput="saveProgramInputs()">
         </div>
         <div>
             <label style="font-size:9px; color:#888;">BENCH (1RM)</label>
-            <input type="number" id="prog-b" placeholder="lbs" style="margin:0; padding:8px; text-align:center;">
+            <input type="number" id="prog-b" placeholder="lbs" style="margin:0; padding:8px; text-align:center;" oninput="saveProgramInputs()">
         </div>
         <div>
             <label style="font-size:9px; color:#888;">DEADLIFT (1RM)</label>
-            <input type="number" id="prog-d" placeholder="lbs" style="margin:0; padding:8px; text-align:center;">
+            <input type="number" id="prog-d" placeholder="lbs" style="margin:0; padding:8px; text-align:center;" oninput="saveProgramInputs()">
         </div>
     </div>
     <button class="btn btn-main" onclick="genProgram()">Generate HLM Cycle</button>
@@ -338,11 +338,12 @@
 let appData=JSON.parse(localStorage.getItem('netGainsData')||'null');
 if(!appData){
     const d=JSON.parse(localStorage.getItem('myDays')||'[]'),l=JSON.parse(localStorage.getItem('myLibrary')||'{}');
-    appData={currentGym:'Main Gym', gyms:{'Main Gym':{folders:d,library:l}}, exTypes:{}, programState:{}};
+    appData={currentGym:'Main Gym', gyms:{'Main Gym':{folders:d,library:l}}, exTypes:{}, programState:{}, programInputs:{}};
     localStorage.setItem('netGainsData',JSON.stringify(appData));
 }
 if(!appData.programState) appData.programState = {};
-if(!appData.customTags) appData.customTags = []; // V15.2: Initialize Custom Tags
+if(!appData.programInputs) appData.programInputs = {}; // V15.3 Init
+if(!appData.customTags) appData.customTags = []; 
 
 let activeCart=JSON.parse(localStorage.getItem('activeCart')||'[]'), 
     sessionData=JSON.parse(localStorage.getItem('sessionData')||'{}'), 
@@ -352,6 +353,7 @@ let activeCart=JSON.parse(localStorage.getItem('activeCart')||'[]'),
 // --- APP INIT ---
 renderDays();
 populateStatDropdown();
+loadProgramInputs(); // V15.3 Auto Load
 
 function switchTab(id,b){
     document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
@@ -376,7 +378,26 @@ function selectGym(n){
 function promptAddGym(){openInputModal("New Gym","Name",v=>{if(v){appData.gyms[v]={folders:[],library:{}};selectGym(v)}})}
 function delGym(n){if(Object.keys(appData.gyms).length<=1)return;showConfirm("Delete?",()=>{delete appData.gyms[n];selectGym(Object.keys(appData.gyms)[0])})}
 
-// --- PROGRAM ENGINE (V15.1: DROPDOWN WARMUP) ---
+// --- PROGRAM ENGINE (V15.3: AUTO-SAVE INPUTS) ---
+function saveProgramInputs(){
+    appData.programInputs.s = document.getElementById('prog-s').value;
+    appData.programInputs.b = document.getElementById('prog-b').value;
+    appData.programInputs.d = document.getElementById('prog-d').value;
+    saveAppData();
+}
+
+function loadProgramInputs(){
+    if(appData.programInputs){
+        if(appData.programInputs.s) document.getElementById('prog-s').value = appData.programInputs.s;
+        if(appData.programInputs.b) document.getElementById('prog-b').value = appData.programInputs.b;
+        if(appData.programInputs.d) document.getElementById('prog-d').value = appData.programInputs.d;
+        // If data exists, auto-generate so the schedule appears immediately
+        if(appData.programInputs.s && appData.programInputs.b && appData.programInputs.d) {
+            genProgram();
+        }
+    }
+}
+
 function toggleWarmup(el){
     const drop = el.querySelector('.warmup-drop');
     if(drop) { drop.classList.toggle('open'); }
@@ -387,7 +408,7 @@ function genProgram(){
     const bMax=parseFloat(document.getElementById('prog-b').value);
     const dMax=parseFloat(document.getElementById('prog-d').value);
     
-    if(!sMax || !bMax || !dMax) { showToast("Enter all 3 Maxes"); return; }
+    if(!sMax || !bMax || !dMax) { return; } // Silent fail if loading
     
     const rnd=n=>Math.round(n/5)*5;
     const s5RM = rnd(sMax * 0.87); const b5RM = rnd(bMax * 0.87); const d5RM = rnd(dMax * 0.87);
@@ -690,6 +711,7 @@ function toggleEditMode(){
     btn.innerText = isEditing ? 'DONE' : '✎ EDIT';
     renderShelf();
 }
+// NEW: Custom Modal for Deletion
 function deleteLibItem(e){
     showConfirm(`Delete "${e}"?`, () => {
         const g=getCurrentGymData();
