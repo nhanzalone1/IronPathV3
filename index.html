@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V16.4</title>
+<title>NetGains V16.5</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -298,7 +298,7 @@
 <div id="toast"><span id="toast-msg">Saved</span></div>
 
 <div id="view-program" class="view">
-  <h1>NETGAINS <span class="brand-span">V16.3</span></h1>
+  <h1>NETGAINS <span class="brand-span">V16.5</span></h1>
   <p class="sub">BAECHLE HLM</p>
   <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
@@ -373,7 +373,7 @@
   </div>
   <div style="margin-top:30px; text-align:center;">
       <button class="btn btn-sec" onclick="exportCSV()">DOWNLOAD DATA (CSV)</button>
-      <button class="btn btn-sec" style="margin-top:10px; color:#ff4757; border-color:#ff4757;" onclick="nuke()">FACTORY RESET</button>
+      <div style="margin-top:20px; font-size:9px; color:#444; text-decoration:underline; cursor:pointer;" onclick="localStorage.clear();location.reload()">System Reset</div>
   </div>
 </div>
 
@@ -384,52 +384,45 @@
 </div>
 
 <script>
-// --- CORE: SELF-HEALING INIT ---
+// --- CORE ---
 let appData, activeCart, sessionData, history, globalLog;
 
-// 1. Initialize function to run at end
-function initApp(){
-    try {
-        appData = JSON.parse(localStorage.getItem('netGainsData') || 'null');
-        if(!appData){
-            const d = JSON.parse(localStorage.getItem('myDays') || '[]');
-            const l = JSON.parse(localStorage.getItem('myLibrary') || '{}');
-            appData = {currentGym:'Main Gym', gyms:{'Main Gym':{folders:d,library:l}}, exTypes:{}, programState:{}, programInputs:{}, unit:'lbs', customTags:[]};
-            localStorage.setItem('netGainsData',JSON.stringify(appData));
-        }
-        
-        // SELF-HEAL: Fill missing properties to prevent crash
-        if(!appData.programState) appData.programState = {};
-        if(!appData.programInputs) appData.programInputs = {}; 
-        if(!appData.customTags) appData.customTags = [];
-        if(!appData.unit) appData.unit = 'lbs';
-
-        activeCart = JSON.parse(localStorage.getItem('activeCart') || '[]');
-        sessionData = JSON.parse(localStorage.getItem('sessionData') || '{}');
-        history = JSON.parse(localStorage.getItem('liftHistory') || '{}');
-        globalLog = JSON.parse(localStorage.getItem('globalLog') || '[]');
-        
-        // SAVE FIXED DATA
-        saveAppData();
-
-        // START UI
-        updateUnitUI(); 
-        renderDays();
-        populateStatDropdown();
-        loadProgramInputs();
-        
-    } catch (e) {
-        console.log("Resetting corrupted data");
-        localStorage.clear();
-        location.reload();
+// Initialize
+try {
+    appData = JSON.parse(localStorage.getItem('netGainsData') || 'null');
+    if(!appData){
+        const d = JSON.parse(localStorage.getItem('myDays') || '[]');
+        const l = JSON.parse(localStorage.getItem('myLibrary') || '{}');
+        appData = {currentGym:'Main Gym', gyms:{'Main Gym':{folders:d,library:l}}, exTypes:{}, programState:{}, programInputs:{}, unit:'lbs', customTags:[]};
+        localStorage.setItem('netGainsData',JSON.stringify(appData));
     }
+    // Self-Heal
+    if(!appData.programState) appData.programState = {};
+    if(!appData.programInputs) appData.programInputs = {}; 
+    if(!appData.customTags) appData.customTags = [];
+    if(!appData.unit) appData.unit = 'lbs';
+
+    activeCart = JSON.parse(localStorage.getItem('activeCart') || '[]');
+    sessionData = JSON.parse(localStorage.getItem('sessionData') || '{}');
+    history = JSON.parse(localStorage.getItem('liftHistory') || '{}');
+    globalLog = JSON.parse(localStorage.getItem('globalLog') || '[]');
+} catch (e) {
+    console.log("Resetting");
+    localStorage.clear();
+    location.reload();
 }
 
 function saveAppData(){
     localStorage.setItem('netGainsData',JSON.stringify(appData));
 }
 
-// --- TABS & UNIT ---
+// --- INIT UI CALLS ---
+updateUnitUI(); 
+renderDays();
+populateStatDropdown();
+loadProgramInputs();
+
+// --- TABS ---
 function switchTab(id,b){
     document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
     document.getElementById('view-'+id).classList.remove('hidden');
@@ -530,11 +523,8 @@ function openProgramLogModal(sW, bW, dW, sR, bR, dR, dayKey, event){
     document.getElementById('log-s-w').value = sW; document.getElementById('log-s-r').value = sR;
     document.getElementById('log-b-w').value = bW; document.getElementById('log-b-r').value = bR;
     document.getElementById('log-d-w').value = dW; document.getElementById('log-d-r').value = dR;
-    
-    // Update labels in modal
     const u = appData.unit.toUpperCase();
     document.querySelectorAll('.lbl-unit').forEach(e => e.innerText = u);
-    
     document.getElementById('modal-program-log').style.display = 'flex';
 }
 
@@ -913,9 +903,6 @@ function saveSession(){localStorage.setItem('activeCart',JSON.stringify(activeCa
 let optTarget=null;
 function openSetOpt(ex,i){optTarget={ex,i};document.getElementById('modal-set-opt').style.display='flex'}
 function applySetType(t){if(optTarget){const{ex,i}=optTarget,s=sessionData[ex][i];let nw=s.w;if(t==='drop')nw="";const ns={w:nw,r:'',type:t+'_child'};sessionData[ex].splice(i+1,0,ns);s.type=t+'_parent';saveSession();renderCart();document.getElementById('modal-set-opt').style.display='none'}}
-
-// INITIALIZE APP AT VERY END
-initApp();
 </script>
 </body>
 </html>
