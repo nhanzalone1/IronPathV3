@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V13.1</title>
+<title>NetGains V13.2</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   /* --- 1. VARIABLES & RESET --- */
@@ -91,12 +91,11 @@
   .import-textarea { width: 100%; background: #111; color: #0f0; font-family: monospace; border: 1px solid #333; border-radius: 5px; padding: 10px; font-size: 10px; height: 60px; margin-bottom: 10px; }
 
   /* PROGRAM CSS FIXED */
-  .week { background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; overflow: hidden; }
+  .week { background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; overflow: hidden; transition: 0.3s; }
   .week-head { display: flex; justify-content: space-between; padding: 15px; background: #222; border-bottom: 1px solid #333; font-weight: bold; }
   .day-row { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; }
   .day-main { display: flex; justify-content: space-between; align-items: center; }
   
-  /* TAG COLORS RESTORED */
   .tag { font-size: 9px; padding: 3px 6px; border-radius: 4px; color: black; font-weight: 800; margin-left: 8px; text-transform: uppercase; }
   .tag-h { background: #ff4757; color: white; } 
   .tag-l { background: #2ed573; color: black; } 
@@ -106,8 +105,11 @@
   .chk-box.checked { background: var(--success); border-color: var(--success); }
   .chk-box.checked::after { content: '✓'; color: black; font-weight: bold; font-size: 14px; }
   
-  /* SPECIFIC WARMUP TEXT */
   .warmup-line { font-size: 10px; color: #666; margin-top: 6px; display: block; font-family: monospace; }
+  
+  /* CROSSED OUT STATE */
+  .week-content { transition: 0.3s; }
+  .week-content.dimmed { opacity: 0.3; pointer-events: none; filter: grayscale(100%); text-decoration: line-through; }
 
   .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: #181818; border-top: 1px solid #333; display: grid; grid-template-columns: 1fr 1fr 1fr; z-index: 1000; padding-bottom: 20px; }
   .nav-btn { background: none; border: none; color: #666; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
@@ -196,7 +198,7 @@
 <div id="toast"><span id="toast-msg">Saved</span></div>
 
 <div id="view-program" class="view">
-  <h1>NETGAINS <span class="brand-span">V13.1</span></h1>
+  <h1>NETGAINS <span class="brand-span">V13.2</span></h1>
   <p class="sub">ENGINE</p>
   <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
@@ -303,7 +305,7 @@ function switchTab(id,b){
     if(id==='stats') populateStatDropdown();
 }
 
-// --- GYM SWITCHER (FIXED) ---
+// --- GYM SWITCHER ---
 function getCurrentGymData(){if(!appData.gyms[appData.currentGym])appData.gyms[appData.currentGym]={folders:[],library:{}};return appData.gyms[appData.currentGym]}
 function showGymManager(){document.getElementById('split-manager').classList.add('hidden');document.getElementById('gym-manager').classList.remove('hidden');renderGymList()}
 function closeGymManager(){document.getElementById('gym-manager').classList.add('hidden');document.getElementById('split-manager').classList.remove('hidden')}
@@ -318,7 +320,7 @@ function selectGym(n){
 function promptAddGym(){openInputModal("New Gym","Name",v=>{if(v){appData.gyms[v]={folders:[],library:{}};selectGym(v)}})}
 function delGym(n){if(Object.keys(appData.gyms).length<=1)return;showConfirm("Delete?",()=>{delete appData.gyms[n];selectGym(Object.keys(appData.gyms)[0])})}
 
-// --- PROGRAM ENGINE (FIXED WARMUPS & COLORS) ---
+// --- PROGRAM ENGINE (V13.2: BARBELL WARMUP + STRIKETHROUGH) ---
 function genProgram(){
     const w=parseFloat(document.getElementById('prog-w').value), r=parseFloat(document.getElementById('prog-r').value);
     if(!w||!r)return;
@@ -331,9 +333,14 @@ function genProgram(){
     ];
     let h=`<div style="text-align:center;margin-bottom:20px;color:var(--success);font-weight:bold;border:1px solid #333;padding:10px;border-radius:10px;">EST 1RM: ${max} LBS</div>`;
     
-    // Helper to generate warmup string based on specific day's weight
-    const getWarmup = (weight) => {
-        return `Warmup: ${rnd(weight*0.5)}x10, ${rnd(weight*0.7)}x5, ${rnd(weight*0.85)}x2`;
+    // NEW: Warmup function (Step ladders from 45)
+    const getWarmup = (target) => {
+        if(target < 65) return "Warmup: Bar (45lbs)"; // Too light for steps
+        // Steps: Bar -> 40-50% -> 60-70% -> 85%
+        const s1 = 45;
+        const s2 = rnd((target - 45) * 0.4 + 45); 
+        const s3 = rnd((target - 45) * 0.7 + 45);
+        return `Warmup: ${s1}x10, ${s2}x5, ${s3}x3`;
     };
 
     weeks.forEach((k, idx)=>{
@@ -346,7 +353,7 @@ function genProgram(){
                 <span>Week ${k.n} <span style="color:#666;font-size:11px">(${k.t})</span></span>
                 <div class="chk-box ${isDone?'checked':''}" onclick="toggleWeek('${wKey}', this)"></div>
             </div>
-            <div style="opacity:${isDone?0.3:1}; display:${isDone?'none':'block'}">
+            <div class="week-content ${isDone?'dimmed':''}">
                 <div class="day-row">
                     <div class="day-main"><div>Mon</div><div>${m} lbs ${k.s}x${k.r} <span class="tag tag-h">H</span></div></div>
                     <span class="warmup-line">${getWarmup(m)}</span>
