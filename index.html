@@ -9,7 +9,6 @@
 <title>NetGains V14</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
   /* --- 1. VARIABLES & RESET --- */
   :root { 
@@ -19,12 +18,9 @@
     --input-bg: #121212; --border: #333;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  
-  /* NUCLEAR FONT FIX */
   body, button, input, select, textarea, div, span, p, h1, h2, h3, .set-num { 
       font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important; 
   }
-  
   body { margin: 0; padding: 0; background-color: var(--bg); color: var(--text); overflow-x: hidden; padding-bottom: 90px; }
 
   /* --- 2. UTILS --- */
@@ -36,12 +32,10 @@
   .btn-ghost { background: transparent; border: 1px dashed #444; color: #666; font-size: 10px; padding: 6px 10px; width: auto; display: inline-block; cursor: pointer; border-radius: 6px; }
   .btn-sm { padding: 8px; font-size: 11px; width: auto; display: inline-block; margin: 0; }
   
-  /* SET TYPE BUTTONS */
   .btn-drop { background: var(--drop); color: white; border: none; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
   .btn-super { background: var(--super); color: white; border: none; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
   .btn-assist { background: var(--assist); color: black; border: none; font-weight: 800; }
   
-  /* SET LABELS */
   .label-drop { color: var(--drop); font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
   .label-super { color: var(--super); font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
   .label-assist { color: var(--assist); font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
@@ -123,19 +117,23 @@
   .calc-input { text-align: center; font-size: 24px; font-weight: bold; color: var(--success); margin-bottom: 15px; padding: 10px; background: #111; border-radius: 8px; border: 1px solid #333; width: 100%; }
   .import-textarea { width: 100%; background: #111; color: #0f0; font-family: monospace; border: 1px solid #333; border-radius: 5px; padding: 10px; font-size: 10px; height: 60px; margin-bottom: 10px; }
 
-  /* PROGRAM CSS */
+  /* PROGRAM CSS (UPDATED FOR BAECHLE) */
   .week { background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; overflow: hidden; transition: 0.3s; }
   .week-head { display: flex; justify-content: space-between; padding: 15px; background: #222; border-bottom: 1px solid #333; font-weight: bold; }
   .day-row { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; }
-  .day-main { display: flex; justify-content: space-between; align-items: center; }
-  .tag { font-size: 9px; padding: 3px 6px; border-radius: 4px; color: black; font-weight: 800; margin-left: 8px; text-transform: uppercase; }
-  .tag-h { background: #ff4757; color: white; } 
-  .tag-l { background: #2ed573; color: black; } 
-  .tag-m { background: #ffa502; color: black; }
+  .day-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .day-type { font-size: 9px; padding: 3px 6px; border-radius: 4px; font-weight: 800; text-transform: uppercase; }
+  .type-h { background: #ff4757; color: white; } 
+  .type-l { background: #2ed573; color: black; } 
+  .type-m { background: #ffa502; color: black; }
+  
+  .lift-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; border-bottom: 1px solid #222; padding-bottom: 4px; }
+  .lift-name { color: #888; width: 40px; font-weight: bold; }
+  .lift-nums { color: white; font-family: monospace; letter-spacing: -0.5px; }
+  
   .chk-box { width: 24px; height: 24px; border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
   .chk-box.checked { background: var(--success); border-color: var(--success); }
   .chk-box.checked::after { content: '✓'; color: black; font-weight: bold; font-size: 14px; }
-  .warmup-line { font-size: 10px; color: #666; margin-top: 6px; display: block; font-family: monospace; letter-spacing: -0.5px; }
   .week-content { transition: 0.3s; }
   .week-content.dimmed { opacity: 0.3; pointer-events: none; filter: grayscale(100%); text-decoration: line-through; }
 
@@ -235,13 +233,23 @@
 
 <div id="view-program" class="view">
   <h1>NETGAINS <span class="brand-span">V14</span></h1>
-  <p class="sub">ENGINE</p>
+  <p class="sub">BAECHLE ENGINE</p>
   <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-        <input type="number" id="prog-w" placeholder="Working Weight (lbs)">
-        <input type="number" id="prog-r" placeholder="Reps Achieved">
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
+        <div>
+            <label style="font-size:9px; color:#888;">SQUAT (1RM)</label>
+            <input type="number" id="prog-s" placeholder="lbs" style="margin:0; padding:8px; text-align:center;">
+        </div>
+        <div>
+            <label style="font-size:9px; color:#888;">BENCH (1RM)</label>
+            <input type="number" id="prog-b" placeholder="lbs" style="margin:0; padding:8px; text-align:center;">
+        </div>
+        <div>
+            <label style="font-size:9px; color:#888;">DEADLIFT (1RM)</label>
+            <input type="number" id="prog-d" placeholder="lbs" style="margin:0; padding:8px; text-align:center;">
+        </div>
     </div>
-    <button class="btn btn-main" onclick="genProgram()">Generate Cycle</button>
+    <button class="btn btn-main" onclick="genProgram()">Generate HLM Cycle</button>
   </div>
   <div id="schedule-area"></div>
 </div>
@@ -355,57 +363,93 @@ function selectGym(n){
     saveAppData();
     renderDays(); // Refresh folders
     closeGymManager(); // INSTANT CLOSE
-    showToast("Switched to "+n); // VISUAL CONFIRMATION
+    showToast("Switched to "+n);
 }
 function promptAddGym(){openInputModal("New Gym","Name",v=>{if(v){appData.gyms[v]={folders:[],library:{}};selectGym(v)}})}
 function delGym(n){if(Object.keys(appData.gyms).length<=1)return;showConfirm("Delete?",()=>{delete appData.gyms[n];selectGym(Object.keys(appData.gyms)[0])})}
 
-// --- PROGRAM ENGINE (V13.3) ---
+// --- PROGRAM ENGINE (V14: BAECHLE HLM) ---
 function genProgram(){
-    const w=parseFloat(document.getElementById('prog-w').value), r=parseFloat(document.getElementById('prog-r').value);
-    if(!w||!r)return;
-    const rnd=n=>Math.round(n/5)*5, max=rnd(w*(1+(0.033*r))), rm5=rnd(max*0.87), rm3=rnd(max*0.93);
-    const weeks=[
-        {n:1,t:"BASE",b:rm5,m:.85,s:4,r:6},{n:2,t:"LOAD",b:rm5,m:.9,s:4,r:6},
-        {n:3,t:"INTENSE",b:rm5,m:.95,s:4,r:6},{n:4,t:"PEAK",b:rm5,m:1.05,s:4,r:6},
-        {n:5,t:"UNLOAD",b:rm5,m:.85,s:2,r:4,f:.9},{n:6,t:"SPEED",b:rm3,m:1,s:3,r:4,w:.75,f:.85},
-        {n:7,t:"FORCE",b:rm3,m:1,s:3,r:4,w:.85,f:.9},{n:8,t:"MAX",b:rm3,m:1,s:3,r:4,w:.7,f:.85}
-    ];
-    let h=`<div style="text-align:center;margin-bottom:20px;color:var(--success);font-weight:bold;border:1px solid #333;padding:10px;border-radius:10px;">EST 1RM: ${max} LBS</div>`;
+    const sMax=parseFloat(document.getElementById('prog-s').value);
+    const bMax=parseFloat(document.getElementById('prog-b').value);
+    const dMax=parseFloat(document.getElementById('prog-d').value);
     
-    // Warmup Ramping
+    if(!sMax || !bMax || !dMax) { showToast("Enter all 3 Maxes"); return; }
+    
+    const rnd=n=>Math.round(n/5)*5;
+    
+    // Standard Baechle 8-Week Progression (% of 1RM)
+    // Week 1-4: Prep. Week 5-8: Peak.
+    const weeks=[
+        {n:1,t:"BASE",m:.75,s:3,r:10}, {n:2,t:"BASE",m:.77,s:3,r:10},
+        {n:3,t:"STRENGTH",m:.82,s:3,r:5}, {n:4,t:"STRENGTH",m:.85,s:3,r:5},
+        {n:5,t:"POWER",m:.87,s:3,r:5}, {n:6,t:"POWER",m:.90,s:3,r:3},
+        {n:7,t:"PEAK",m:.92,s:2,r:3}, {n:8,t:"MAX",m:.95,s:2,r:2}
+    ];
+    
+    // Warmup Logic (Shows on click)
     const getWarmup = (target) => {
-        if(target < 65) return "Warmup: Bar (45lbs) x 10";
         if(target < 135) return `Warmup: 45x10, ${rnd(target*0.6)}x5`;
-        const s2 = rnd(target * 0.5); 
-        const s3 = rnd(target * 0.7);
-        const s4 = rnd(target * 0.85);
-        return `Warmup: 45x12, ${s2}x5, ${s3}x3, ${s4}x1 (Prime)`;
+        return `Warmup: 45x10, ${rnd(target*0.5)}x5, ${rnd(target*0.7)}x3, ${rnd(target*0.85)}x1`;
     };
 
+    let h=``;
     weeks.forEach((k, idx)=>{
-        let m=rnd(k.b*k.m), wL=rnd(m*(k.w||.85)), f=rnd(m*(k.f||.95)); if(k.n===4)wL=rnd(m*.8);
         const wKey = `w${k.n}`;
         const isDone = appData.programState[wKey] === true;
         
+        // Calculate Heavy (Monday)
+        const sH = rnd(sMax * k.m);
+        const bH = rnd(bMax * k.m);
+        const dH = rnd(dMax * k.m);
+        
+        // Calculate Light (Wednesday - 80%)
+        const sL = rnd(sH * 0.8);
+        const bL = rnd(bH * 0.8);
+        const dL = rnd(dH * 0.8);
+        
+        // Calculate Medium (Friday - 90%)
+        const sM = rnd(sH * 0.9);
+        const bM = rnd(bH * 0.9);
+        const dM = rnd(dH * 0.9);
+
         h+=`<div class="week">
             <div class="week-head">
                 <span>Week ${k.n} <span style="color:#666;font-size:11px">(${k.t})</span></span>
                 <div class="chk-box ${isDone?'checked':''}" onclick="toggleWeek('${wKey}', this)"></div>
             </div>
             <div class="week-content ${isDone?'dimmed':''}">
-                <div class="day-row">
-                    <div class="day-main"><div>Mon</div><div>${m} lbs ${k.s}x${k.r} <span class="tag tag-h">H</span></div></div>
-                    <span class="warmup-line">${getWarmup(m)}</span>
+                
+                <div class="day-row" onclick="alert('${getWarmup(sH)}')">
+                    <div class="day-title">
+                        <span style="font-weight:bold; color:var(--text)">MON</span>
+                        <span class="day-type type-h">HEAVY</span>
+                    </div>
+                    <div class="lift-row"><span class="lift-name">SQ</span> <span class="lift-nums">${sH} lbs (${k.s}x${k.r})</span></div>
+                    <div class="lift-row"><span class="lift-name">BP</span> <span class="lift-nums">${bH} lbs (${k.s}x${k.r})</span></div>
+                    <div class="lift-row" style="border:none"><span class="lift-name">DL</span> <span class="lift-nums">${dH} lbs (${k.s}x${k.r})</span></div>
                 </div>
-                <div class="day-row">
-                    <div class="day-main"><div>Wed</div><div>${wL} lbs ${k.s}x${k.r} <span class="tag tag-l">L</span></div></div>
-                    <span class="warmup-line">${getWarmup(wL)}</span>
+
+                <div class="day-row" onclick="alert('${getWarmup(sL)}')">
+                    <div class="day-title">
+                        <span style="font-weight:bold; color:var(--text)">WED</span>
+                        <span class="day-type type-l">LIGHT (80%)</span>
+                    </div>
+                    <div class="lift-row"><span class="lift-name">SQ</span> <span class="lift-nums">${sL} lbs (${k.s}x${k.r})</span></div>
+                    <div class="lift-row"><span class="lift-name">BP</span> <span class="lift-nums">${bL} lbs (${k.s}x${k.r})</span></div>
+                    <div class="lift-row" style="border:none"><span class="lift-name">DL</span> <span class="lift-nums">${dL} lbs (${k.s}x${k.r})</span></div>
                 </div>
-                <div class="day-row">
-                    <div class="day-main"><div>Fri</div><div>${f} lbs ${k.s}x${k.r} <span class="tag tag-m">M</span></div></div>
-                    <span class="warmup-line">${getWarmup(f)}</span>
+
+                <div class="day-row" onclick="alert('${getWarmup(sM)}')">
+                    <div class="day-title">
+                        <span style="font-weight:bold; color:var(--text)">FRI</span>
+                        <span class="day-type type-m">MEDIUM (90%)</span>
+                    </div>
+                    <div class="lift-row"><span class="lift-name">SQ</span> <span class="lift-nums">${sM} lbs (${k.s}x${k.r})</span></div>
+                    <div class="lift-row"><span class="lift-name">BP</span> <span class="lift-nums">${bM} lbs (${k.s}x${k.r})</span></div>
+                    <div class="lift-row" style="border:none"><span class="lift-name">DL</span> <span class="lift-nums">${dM} lbs (${k.s}x${k.r})</span></div>
                 </div>
+
             </div>
         </div>`;
     });
@@ -418,7 +462,7 @@ function toggleWeek(key, el){
     saveAppData(); genProgram(); 
 }
 
-// --- ANALYTICS (CHART.JS V14) ---
+// --- ANALYTICS (CHART.JS) ---
 let graphMode = 'global';
 let myChart = null;
 
@@ -439,34 +483,27 @@ function renderGraph(){
     const ctx = document.getElementById('perfChart').getContext('2d');
     const det = document.getElementById('stat-details');
     
-    // Cleanup old chart
     if(myChart) myChart.destroy();
     if(!ex) return;
 
-    // Filter Data
     let data = globalLog.filter(l => l.ex === ex);
     if(graphMode === 'local') data = data.filter(l => l.gym === appData.currentGym);
     
     data.sort((a,b) => new Date(a.date) - new Date(b.date));
     
-    if(data.length === 0) {
-        det.innerText = "No data available for this view.";
-        return;
-    }
+    if(data.length === 0) { det.innerText = "No data available for this view."; return; }
 
-    const labels = data.map(d => d.date.substring(5)); // Remove year for space
+    const labels = data.map(d => d.date.substring(5)); 
     const values = data.map(d => d.rm);
     const best = Math.max(...values);
     const last = values[values.length-1];
     
     det.innerHTML = `ALL TIME BEST: <b>${best}</b> | LATEST: <b>${last}</b>`;
 
-    // Create Gradient
     let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(46, 213, 115, 0.5)'); // Top opacity
-    gradient.addColorStop(1, 'rgba(46, 213, 115, 0.0)'); // Bottom fade
+    gradient.addColorStop(0, 'rgba(46, 213, 115, 0.5)'); 
+    gradient.addColorStop(1, 'rgba(46, 213, 115, 0.0)'); 
 
-    // Draw Chart
     myChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -480,34 +517,16 @@ function renderGraph(){
                 pointBackgroundColor: '#fff',
                 pointRadius: 4,
                 fill: true,
-                tension: 0.3 // Curve smoothing
+                tension: 0.3
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                    backgroundColor: '#222',
-                    titleColor: '#2ed573',
-                    bodyColor: '#fff',
-                    borderColor: '#333',
-                    borderWidth: 1
-                }
-            },
+            plugins: { legend: { display: false } },
             scales: {
-                x: {
-                    grid: { color: '#222' },
-                    ticks: { color: '#666', font: {size: 10} }
-                },
-                y: {
-                    grid: { color: '#222' },
-                    ticks: { color: '#666', font: {size: 10} },
-                    beginAtZero: false // Stock style: Focus on range
-                }
+                x: { grid: { color: '#222' }, ticks: { color: '#666', font: {size: 10} } },
+                y: { grid: { color: '#222' }, ticks: { color: '#666', font: {size: 10} }, beginAtZero: false }
             }
         }
     });
@@ -613,12 +632,9 @@ function renderCart(){
                 if(s.side){ lbl=`${cnt} ${s.side}`; if(s.side==='R') cnt++; } else { cnt++; }
                 const safeEx = ex.replace(/'/g, "\\'");
                 const row = (idx, st, lab) => `<div class="set-row"><div class="set-num">${lab}</div><div class="input-wrapper"><input type="text" inputmode="decimal" id="input-${exIdx}-${idx}" value="${st.w}" onchange="updateSet('${safeEx}',${idx},'w',this.value)"><span class="input-unit">LBS</span></div><button class="calc-btn" onclick="openCalc(${exIdx},${idx})">🧮</button><div class="input-wrapper"><input type="text" inputmode="decimal" value="${st.r}" onchange="updateSet('${safeEx}',${idx},'r',this.value)"><span class="input-unit">REPS</span></div><button class="menu-btn" onclick="openSetOpt('${safeEx}',${idx})">...</button><button class="del-btn" onclick="removeSet('${safeEx}',${idx})">✕</button></div>`;
-                
-                // INJECT COLORED LABELS
                 const dropLbl = `<span class="label-drop">DROP</span>`;
                 const superLbl = `<span class="label-super">SUPER</span>`;
                 const asstLbl = `<span class="label-assist">ASST</span>`;
-
                 if(s.type==='drop_parent' && ns && ns.type==='drop_child'){ r+=`<div class="set-group-box set-group-drop">${row(i,s,lbl)}${row(i+1,ns,dropLbl)}</div>`; i+=2; } 
                 else if(s.type==='super_parent' && ns && ns.type==='super_child'){ r+=`<div class="set-group-box set-group-super">${row(i,s,lbl)}${row(i+1,ns,superLbl)}</div>`; i+=2; } 
                 else if(s.type==='assist_parent' && ns && ns.type==='assist_child'){ r+=`<div class="set-group-box set-group-assist">${row(i,s,lbl)}${row(i+1,ns,asstLbl)}</div>`; i+=2; } 
@@ -654,7 +670,6 @@ function toggleEditMode(){
     btn.innerText = isEditing ? 'DONE' : '✎ EDIT';
     renderShelf();
 }
-// NEW: Custom Modal for Deletion
 function deleteLibItem(e){
     showConfirm(`Delete "${e}"?`, () => {
         const g=getCurrentGymData();
