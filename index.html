@@ -6,9 +6,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V16</title>
+<title>NetGains V16.1</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
   /* --- 1. VARIABLES & RESET --- */
   :root { 
@@ -18,9 +19,12 @@
     --input-bg: #121212; --border: #333;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  
+  /* NUCLEAR FONT FIX */
   body, button, input, select, textarea, div, span, p, h1, h2, h3, .set-num { 
       font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important; 
   }
+  
   body { margin: 0; padding: 0; background-color: var(--bg); color: var(--text); overflow-x: hidden; padding-bottom: 90px; }
 
   /* --- 2. UTILS --- */
@@ -32,8 +36,22 @@
   .btn-ghost { background: transparent; border: 1px dashed #444; color: #666; font-size: 10px; padding: 6px 10px; width: auto; display: inline-block; cursor: pointer; border-radius: 6px; }
   .btn-sm { padding: 8px; font-size: 11px; width: auto; display: inline-block; margin: 0; }
   
-  /* UNIT TOGGLE (TOP RIGHT) */
-  #unit-toggle { position: absolute; top: 20px; right: 20px; background: #222; border: 1px solid #444; color: var(--accent); padding: 6px 12px; border-radius: 20px; font-weight: 800; font-size: 10px; cursor: pointer; z-index: 100; }
+  /* UNIT TOGGLE (FIXED TOP RIGHT) */
+  #unit-toggle { 
+      position: fixed; /* Ensures it stays visible */
+      top: 15px; 
+      right: 15px; 
+      background: #222; 
+      border: 1px solid #444; 
+      color: var(--accent); 
+      padding: 8px 12px; 
+      border-radius: 20px; 
+      font-weight: 800; 
+      font-size: 11px; 
+      cursor: pointer; 
+      z-index: 9999; /* Higher than everything */
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
 
   /* SET TYPE BUTTONS */
   .btn-drop { background: var(--drop); color: white; border: none; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
@@ -301,7 +319,7 @@
 <div id="toast"><span id="toast-msg">Saved</span></div>
 
 <div id="view-program" class="view">
-  <h1>NETGAINS <span class="brand-span">V16</span></h1>
+  <h1>NETGAINS <span class="brand-span">V16.1</span></h1>
   <p class="sub">BAECHLE HLM</p>
   <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
@@ -387,25 +405,35 @@
 </div>
 
 <script>
-// --- CORE ---
-let appData=JSON.parse(localStorage.getItem('netGainsData')||'null');
-if(!appData){
-    const d=JSON.parse(localStorage.getItem('myDays')||'[]'),l=JSON.parse(localStorage.getItem('myLibrary')||'{}');
-    appData={currentGym:'Main Gym', gyms:{'Main Gym':{folders:d,library:l}}, exTypes:{}, programState:{}, programInputs:{}, unit:'lbs'};
-    localStorage.setItem('netGainsData',JSON.stringify(appData));
-}
-if(!appData.programState) appData.programState = {};
-if(!appData.programInputs) appData.programInputs = {}; 
-if(!appData.customTags) appData.customTags = [];
-if(!appData.unit) appData.unit = 'lbs'; // V16 Init
+// --- CORE (V16.1: SAFE LOAD) ---
+let appData, activeCart, sessionData, history, globalLog;
 
-let activeCart=JSON.parse(localStorage.getItem('activeCart')||'[]'), 
-    sessionData=JSON.parse(localStorage.getItem('sessionData')||'{}'), 
-    history=JSON.parse(localStorage.getItem('liftHistory')||'{}'), 
-    globalLog=JSON.parse(localStorage.getItem('globalLog')||'[]');
+try {
+    appData = JSON.parse(localStorage.getItem('netGainsData') || 'null');
+    if(!appData){
+        const d = JSON.parse(localStorage.getItem('myDays') || '[]');
+        const l = JSON.parse(localStorage.getItem('myLibrary') || '{}');
+        appData = {currentGym:'Main Gym', gyms:{'Main Gym':{folders:d,library:l}}, exTypes:{}, programState:{}, programInputs:{}, unit:'lbs'};
+        localStorage.setItem('netGainsData',JSON.stringify(appData));
+    }
+    // Deep Merge fixes
+    if(!appData.programState) appData.programState = {};
+    if(!appData.programInputs) appData.programInputs = {}; 
+    if(!appData.customTags) appData.customTags = [];
+    if(!appData.unit) appData.unit = 'lbs';
+
+    activeCart = JSON.parse(localStorage.getItem('activeCart') || '[]');
+    sessionData = JSON.parse(localStorage.getItem('sessionData') || '{}');
+    history = JSON.parse(localStorage.getItem('liftHistory') || '{}');
+    globalLog = JSON.parse(localStorage.getItem('globalLog') || '[]');
+} catch (e) {
+    console.error("Data Corrupt, resetting");
+    localStorage.clear();
+    location.reload();
+}
 
 // --- APP INIT ---
-updateUnitUI(); // Apply Unit
+updateUnitUI(); 
 renderDays();
 populateStatDropdown();
 loadProgramInputs();
@@ -435,13 +463,9 @@ function toggleUnit(){
 function updateUnitUI(){
     const btn = document.getElementById('unit-toggle');
     btn.innerText = appData.unit.toUpperCase();
-    
-    // Update all static labels
     document.querySelectorAll('.input-unit').forEach(el => {
         if(el.innerText === 'LBS' || el.innerText === 'KG') el.innerText = appData.unit.toUpperCase();
     });
-    
-    // Update calc placeholders
     const ph = (appData.unit === 'lbs') ? 'lbs' : 'kg';
     document.getElementById('prog-s').placeholder = ph;
     document.getElementById('prog-b').placeholder = ph;
@@ -560,7 +584,6 @@ function genProgram(){
     const dMax=parseFloat(document.getElementById('prog-d').value);
     if(!sMax || !bMax || !dMax) { return; } 
     
-    // Rounding: 5 for lbs, 2.5 for kg
     const step = (appData.unit === 'lbs') ? 5 : 2.5;
     const rnd=n=>Math.round(n/step)*step;
     
@@ -579,7 +602,6 @@ function genProgram(){
     const barW = (appData.unit === 'lbs') ? 45 : 20;
     
     const calcRamp = (target) => {
-        // Ramp Logic adjusted for Bar weight
         if(target < (barW + 20)) return `${barW}x10, ${rnd((target-barW)*0.6 + barW)}x5`;
         const s2 = rnd((target - barW) * 0.4 + barW); 
         const s3 = rnd((target - barW) * 0.7 + barW);
@@ -649,13 +671,10 @@ let calcTarget = null; let calcSide=0, calcBar=45, calcMode='bar';
 function openCalc(exIdx, setIdx){ 
     if(exIdx !== undefined){ const exName = activeCart[exIdx]; calcTarget = {ex: exName, idx: setIdx}; } 
     else { calcTarget = null; }
-    
-    // Set Bar Weight based on Unit
     calcBar = (appData.unit === 'lbs') ? 45 : 20;
     calcSide=0; 
     setCalcMode('bar'); 
-    renderPlateButtons(); // Render correct buttons
-    
+    renderPlateButtons(); 
     document.getElementById('modal-plate-calc').style.display='flex'; 
 }
 function closeCalc(){ document.getElementById('modal-plate-calc').style.display='none'; }
@@ -677,7 +696,6 @@ function renderPlateButtons(){
 
 function setCalcMode(m){ 
     calcMode=m; 
-    // Reset bar weight check based on unit
     const stdBar = (appData.unit === 'lbs') ? 45 : 20;
     calcBar=(m==='bar')?stdBar:0; 
     document.getElementById('mode-bar').style.background=(m==='bar')?'var(--success)':'#333'; 
@@ -708,25 +726,19 @@ function renderPlateViz(weight){
     const viz = document.getElementById('plate-stack-display');
     viz.innerHTML = "";
     let rem = weight;
-    
-    // DEFINE PLATE SETS
     const lbsPlates = [
         {w:45, c:'vp-45', t:'45'}, {w:35, c:'vp-35', t:'35'},
         {w:25, c:'vp-25', t:'25'}, {w:10, c:'vp-10', t:'10'},
         {w:5, c:'vp-5', t:'5'}, {w:2.5, c:'vp-2_5', t:'2.5'}
     ];
-    
     const kgPlates = [
         {w:25, c:'vp-kg-25', t:'25'}, {w:20, c:'vp-kg-20', t:'20'},
         {w:15, c:'vp-kg-15', t:'15'}, {w:10, c:'vp-kg-10', t:'10'},
         {w:5, c:'vp-kg-5', t:'5'}, {w:2.5, c:'vp-kg-2_5', t:'2.5'},
         {w:1.25, c:'vp-kg-1_25', t:'1.25'}
     ];
-
     const plates = (appData.unit === 'lbs') ? lbsPlates : kgPlates;
-
     plates.forEach(p => {
-        // Fix for floating point math errors (e.g. 1.25)
         while(rem >= p.w - 0.01){
             viz.innerHTML += `<div class="viz-plate ${p.c}">${p.t}</div>`;
             rem -= p.w;
@@ -734,7 +746,7 @@ function renderPlateViz(weight){
     });
 }
 
-// --- ANALYTICS ---
+// --- ANALYTICS (V16.1: ROBUST GRAPH) ---
 function setGraphMode(m){
     graphMode = m;
     document.getElementById('toggle-global').className = m==='global'?'st-btn active':'st-btn';
@@ -743,6 +755,11 @@ function setGraphMode(m){
 }
 function populateStatDropdown(){
     const sel = document.getElementById('stat-select');
+    // Guard against empty log
+    if(!globalLog || globalLog.length === 0) {
+        sel.innerHTML = '<option value="">No Data</option>';
+        return;
+    }
     const uniqueEx = [...new Set(globalLog.map(l => l.ex))].sort();
     sel.innerHTML = '<option value="">Select Exercise...</option>';
     uniqueEx.forEach(e => { sel.innerHTML += `<option value="${e}">${e}</option>`; });
@@ -751,20 +768,40 @@ function renderGraph(){
     const ex = document.getElementById('stat-select').value;
     const ctx = document.getElementById('perfChart').getContext('2d');
     const det = document.getElementById('stat-details');
+    
+    // Safety clear
     if(myChart) myChart.destroy();
-    if(!ex) return;
+    
+    if(!ex || ex === "No Data") {
+        det.innerText = "Log a workout to see stats.";
+        // Draw empty chart just to clear canvas visual
+        myChart = new Chart(ctx, { type: 'line', data: {labels:[], datasets:[]} });
+        return;
+    }
+    
     let data = globalLog.filter(l => l.ex === ex);
     if(graphMode === 'local') data = data.filter(l => l.gym === appData.currentGym);
+    
+    // Safety check if user selected something but filtered it out
+    if(data.length === 0) { 
+        det.innerText = "No data available for this view."; 
+        myChart = new Chart(ctx, { type: 'line', data: {labels:[], datasets:[]} });
+        return; 
+    }
+    
     data.sort((a,b) => new Date(a.date) - new Date(b.date));
-    if(data.length === 0) { det.innerText = "No data available for this view."; return; }
+    
     const labels = data.map(d => d.date.substring(5)); 
     const values = data.map(d => d.rm);
     const best = Math.max(...values);
     const last = values[values.length-1];
+    
     det.innerHTML = `ALL TIME BEST: <b>${best}</b> | LATEST: <b>${last}</b>`;
+    
     let gradient = ctx.createLinearGradient(0, 0, 0, 400);
     gradient.addColorStop(0, 'rgba(46, 213, 115, 0.5)'); 
     gradient.addColorStop(1, 'rgba(46, 213, 115, 0.0)'); 
+    
     myChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -828,6 +865,7 @@ function finishSession(){
         localStorage.setItem('liftHistory',JSON.stringify(history));
         localStorage.setItem('globalLog',JSON.stringify(globalLog));
         activeCart=[]; sessionData={}; saveSession(); closeSession(); showToast("Saved");
+        populateStatDropdown(); // Refresh stats immediately
     });
 }
 
@@ -874,6 +912,30 @@ function showConfirm(m,c){const d=document.getElementById('modal-confirm-overlay
 function closeConfirmModal(){document.getElementById('modal-confirm-overlay').style.display='none'}
 function nuke(){showConfirm("DELETE ALL?",()=>{localStorage.clear();location.reload()})}
 function exportCSV(){if(globalLog.length===0){showToast("No data");return}let c="Date,Gym,Exercise,Weight,Reps,Side,Type,HR\n";globalLog.forEach(l=>{c+=`${l.date},${l.gym||''},${l.ex},${l.w},${l.r},${l.side||''},${l.type||''},${l.hr||''}\n`});const b=document.createElement('a');b.href=encodeURI("data:text/csv;charset=utf-8,"+c);b.download="netgains_data.csv";document.body.appendChild(b);b.click()}
+// CALC
+let calcTarget = null; let calcSide=0, calcBar=45, calcMode='bar';
+function openCalc(exIdx, setIdx){ 
+    if(exIdx !== undefined){ const exName = activeCart[exIdx]; calcTarget = {ex: exName, idx: setIdx}; } 
+    else { calcTarget = null; }
+    calcSide=0; setCalcMode('bar'); document.getElementById('modal-plate-calc').style.display='flex'; 
+}
+function closeCalc(){ document.getElementById('modal-plate-calc').style.display='none'; }
+function calcPlates(){ openCalc(); } 
+function setCalcMode(m){ calcMode=m; calcBar=(m==='bar')?45:0; document.getElementById('mode-bar').style.background=(m==='bar')?'var(--success)':'#333'; document.getElementById('mode-bar').style.color=(m==='bar')?'black':'white'; document.getElementById('mode-single').style.background=(m==='single')?'var(--success)':'#333'; document.getElementById('mode-single').style.color=(m==='single')?'black':'white'; updateCalcDisplay(); }
+function addPlate(w){ calcSide+=w; updateCalcDisplay(); }
+function resetCalc(){ calcSide=0; updateCalcDisplay(); }
+function updateCalcDisplay(){ let t=0; if(calcMode==='bar') t=(calcSide*2)+calcBar; else t=calcSide; document.getElementById('calc-total').value = t; }
+function manualCalcUpdate(v){ const n=parseFloat(v); if(!isNaN(n)){ if(calcMode==='bar') calcSide=(n-calcBar)/2; else calcSide=n; } }
+function applyCalc(){ if(calcTarget){ const val = document.getElementById('calc-total').value; if(sessionData[calcTarget.ex] && sessionData[calcTarget.ex][calcTarget.idx]){ sessionData[calcTarget.ex][calcTarget.idx].w = val; saveSession(); renderCart(); } } closeCalc(); }
+function useBW(){ if(calcTarget){ sessionData[calcTarget.ex][calcTarget.idx].w = "BW"; saveSession(); renderCart(); } closeCalc(); }
+// MANUAL IMPORT
+const urlParams=new URLSearchParams(window.location.search), importData=urlParams.get('import');
+if(importData){window.bridgeCode=importData;document.getElementById('modal-bridge').style.display='flex'}
+function copyBridgeCode(){navigator.clipboard.writeText(window.bridgeCode).then(()=>{showToast("Copied!");document.getElementById('modal-bridge').style.display='none';window.history.replaceState({},document.title,"/")})}
+function openManualImport(){document.getElementById('import-area').value="";document.getElementById('modal-manual-import').style.display='flex'}
+function runManualImport(){const r=document.getElementById('import-area').value;if(!r)return;try{const d=JSON.parse(atob(r)),g=getCurrentGymData();if(!g.folders.includes(d.name))g.folders.push(d.name);g.library[d.name]=d.exs;saveAppData();renderDays();document.getElementById('modal-manual-import').style.display='none';showToast("Imported!")}catch(e){showToast("Invalid")}}
+function shareFolder(n){const g=getCurrentGymData(),d={name:n,exs:g.library[n]||[]},s=btoa(JSON.stringify(d)),l=window.location.origin+window.location.pathname+"?import="+s;document.getElementById('qrcode').innerHTML="";new QRCode(document.getElementById("qrcode"),{text:l,width:128,height:128});window.shareCode=s;document.getElementById('modal-share').style.display='flex'}
+function copyShareCode(){navigator.clipboard.writeText(window.shareCode).then(()=>showToast("Copied!"))}
 // RENDER CART
 function renderCart(){
     const area=document.getElementById('active-workout-area'); area.innerHTML="";
@@ -884,7 +946,6 @@ function renderCart(){
         if(isC && history[ex]) histHTML = `<div class="hist-badge" style="background:rgba(255,165,2,0.1); border-color:rgba(255,165,2,0.3);">${history[ex]}</div>`;
         let h=`<div class="ex-top"><div><span class="ex-name">${ex}</span><div class="ex-hist">${histHTML}</div></div><div class="ex-tools">${!isC?`<div class="toggle-lr ${isLR?'active':''}" onclick="toggleLR('${ex}')">L+R</div>`:''}<button onclick="removeExFromCart('${ex}')" style="background:none;border:none;color:#555;">✕</button></div></div>`;
         let r="";
-        const u = appData.unit.toUpperCase(); // V16 Label
         if(isC){
             sets.forEach((s,i)=>{ r+=`<div class="cardio-row"><span class="set-num">${i+1}</span><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.w}" onchange="updateSet('${ex}',${i},'w',this.value)"><span class="input-unit">MIN</span></div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.r}" onchange="updateSet('${ex}',${i},'r',this.value)"><span class="input-unit">MI</span></div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.hr||''}" onchange="updateSet('${ex}',${i},'hr',this.value)"><span class="input-unit">BPM</span></div><button class="del-btn" onclick="removeSet('${ex}',${i})">✕</button></div>` });
         } else {
@@ -893,7 +954,7 @@ function renderCart(){
                 let s=sets[i], ns=sets[i+1], lbl=cnt;
                 if(s.side){ lbl=`${cnt} ${s.side}`; if(s.side==='R') cnt++; } else { cnt++; }
                 const safeEx = ex.replace(/'/g, "\\'");
-                const row = (idx, st, lab) => `<div class="set-row"><div class="set-num">${lab}</div><div class="input-wrapper"><input type="text" inputmode="decimal" id="input-${exIdx}-${idx}" value="${st.w}" onchange="updateSet('${safeEx}',${idx},'w',this.value)"><span class="input-unit">${u}</span></div><button class="calc-btn" onclick="openCalc(${exIdx},${idx})">🧮</button><div class="input-wrapper"><input type="text" inputmode="decimal" value="${st.r}" onchange="updateSet('${safeEx}',${idx},'r',this.value)"><span class="input-unit">REPS</span></div><button class="menu-btn" onclick="openSetOpt('${safeEx}',${idx})">...</button><button class="del-btn" onclick="removeSet('${safeEx}',${idx})">✕</button></div>`;
+                const row = (idx, st, lab) => `<div class="set-row"><div class="set-num">${lab}</div><div class="input-wrapper"><input type="text" inputmode="decimal" id="input-${exIdx}-${idx}" value="${st.w}" onchange="updateSet('${safeEx}',${idx},'w',this.value)"><span class="input-unit">LBS</span></div><button class="calc-btn" onclick="openCalc(${exIdx},${idx})">🧮</button><div class="input-wrapper"><input type="text" inputmode="decimal" value="${st.r}" onchange="updateSet('${safeEx}',${idx},'r',this.value)"><span class="input-unit">REPS</span></div><button class="menu-btn" onclick="openSetOpt('${safeEx}',${idx})">...</button><button class="del-btn" onclick="removeSet('${safeEx}',${idx})">✕</button></div>`;
                 const dropLbl = `<span class="label-drop">DROP</span>`;
                 const superLbl = `<span class="label-super">SUPER</span>`;
                 const asstLbl = `<span class="label-assist">ASST</span>`;
@@ -932,7 +993,6 @@ function toggleEditMode(){
     btn.innerText = isEditing ? 'DONE' : '✎ EDIT';
     renderShelf();
 }
-// NEW: Custom Modal for Deletion
 function deleteLibItem(e){
     showConfirm(`Delete "${e}"?`, () => {
         const g=getCurrentGymData();
