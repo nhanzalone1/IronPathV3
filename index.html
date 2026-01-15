@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V15.4</title>
+<title>NetGains V15.5</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -122,7 +122,7 @@
   .calc-input { text-align: center; font-size: 24px; font-weight: bold; color: var(--success); margin-bottom: 15px; padding: 10px; background: #111; border-radius: 8px; border: 1px solid #333; width: 100%; }
   .import-textarea { width: 100%; background: #111; color: #0f0; font-family: monospace; border: 1px solid #333; border-radius: 5px; padding: 10px; font-size: 10px; height: 60px; margin-bottom: 10px; }
 
-  /* PROGRAM CSS (BAECHLE + DROPDOWN) */
+  /* PROGRAM CSS */
   .week { background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; overflow: hidden; transition: 0.3s; }
   .week-head { display: flex; justify-content: space-between; padding: 15px; background: #222; border-bottom: 1px solid #333; font-weight: bold; }
   .day-row { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; }
@@ -137,7 +137,6 @@
   .lift-name { color: #888; width: 40px; font-weight: bold; }
   .lift-nums { color: white; font-family: monospace; letter-spacing: -0.5px; }
   
-  /* DROPDOWN WARMUP + LOG */
   .warmup-drop { background: #111; padding: 10px; border-top: 1px dashed #333; display: none; }
   .warmup-drop.open { display: block; animation: slideDown 0.2s ease-out; }
   .warmup-header { font-size: 10px; color: var(--accent); font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
@@ -149,6 +148,10 @@
   .chk-box.checked::after { content: '✓'; color: black; font-weight: bold; font-size: 14px; }
   .week-content { transition: 0.3s; }
   .week-content.dimmed { opacity: 0.3; pointer-events: none; filter: grayscale(100%); text-decoration: line-through; }
+
+  /* PRE-LOG ADJUSTMENT MODAL */
+  .log-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .log-lbl { font-size: 10px; color: #888; text-align: center; }
 
   .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: #181818; border-top: 1px solid #333; display: grid; grid-template-columns: 1fr 1fr 1fr; z-index: 1000; padding-bottom: 20px; }
   .nav-btn { background: none; border: none; color: #666; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
@@ -178,6 +181,46 @@
       <button class="btn btn-sec" onclick="resetCalc()">RESET</button>
       <button class="btn btn-main" onclick="applyCalc()">USE</button>
     </div>
+  </div>
+</div>
+
+<div id="modal-program-log" class="modal-overlay">
+  <div class="modal-box">
+    <div class="close-x" onclick="document.getElementById('modal-program-log').style.display='none'">✕</div>
+    <h3 class="modal-title">Log Results</h3>
+    <p class="modal-desc">Edit numbers if you did more/less.</p>
+    
+    <div style="margin-bottom:15px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <b style="color:var(--accent)">SQUAT</b>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="input-wrapper"><input type="number" id="log-s-w"><span class="input-unit">LBS</span></div>
+            <div class="input-wrapper"><input type="number" id="log-s-r"><span class="input-unit">REPS</span></div>
+        </div>
+    </div>
+
+    <div style="margin-bottom:15px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <b style="color:var(--accent)">BENCH</b>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="input-wrapper"><input type="number" id="log-b-w"><span class="input-unit">LBS</span></div>
+            <div class="input-wrapper"><input type="number" id="log-b-r"><span class="input-unit">REPS</span></div>
+        </div>
+    </div>
+
+    <div style="margin-bottom:20px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <b style="color:var(--accent)">DEADLIFT</b>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="input-wrapper"><input type="number" id="log-d-w"><span class="input-unit">LBS</span></div>
+            <div class="input-wrapper"><input type="number" id="log-d-r"><span class="input-unit">REPS</span></div>
+        </div>
+    </div>
+
+    <button class="btn btn-main" onclick="confirmProgramLog()">SAVE TO HISTORY</button>
   </div>
 </div>
 
@@ -239,7 +282,7 @@
 <div id="toast"><span id="toast-msg">Saved</span></div>
 
 <div id="view-program" class="view">
-  <h1>NETGAINS <span class="brand-span">V15.4</span></h1>
+  <h1>NETGAINS <span class="brand-span">V15.5</span></h1>
   <p class="sub">BAECHLE HLM</p>
   <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
@@ -380,7 +423,9 @@ function selectGym(n){
 function promptAddGym(){openInputModal("New Gym","Name",v=>{if(v){appData.gyms[v]={folders:[],library:{}};selectGym(v)}})}
 function delGym(n){if(Object.keys(appData.gyms).length<=1)return;showConfirm("Delete?",()=>{delete appData.gyms[n];selectGym(Object.keys(appData.gyms)[0])})}
 
-// --- PROGRAM ENGINE (V15.4: LOG & RESET) ---
+// --- PROGRAM ENGINE (V15.5: SMART LOGGING) ---
+let pendingLog = null; // Stores data for modal
+
 function saveProgramInputs(){
     appData.programInputs.s = document.getElementById('prog-s').value;
     appData.programInputs.b = document.getElementById('prog-b').value;
@@ -416,32 +461,43 @@ function toggleWarmup(el){
     if(drop) { drop.classList.toggle('open'); }
 }
 
-// Function to log the day's numbers to Stats
-window.logProgramDay = function(sW, bW, dW, sR, bR, dR, wKey, event){
-    event.stopPropagation(); // Stop dropdown toggle
-    showConfirm(`Log this workout?`, ()=>{
-        const t=new Date().toISOString().split('T')[0];
-        
-        // Push Squat
-        const s1RM = Math.round(sW * (1+(0.033*sR))); // Calc 1RM
-        globalLog.push({date:t, ex:"Squat", w:sW, r:sR, rm:s1RM, type:'program', gym:appData.currentGym});
-        
-        // Push Bench
-        const b1RM = Math.round(bW * (1+(0.033*bR)));
-        globalLog.push({date:t, ex:"Bench Press", w:bW, r:bR, rm:b1RM, type:'program', gym:appData.currentGym});
-        
-        // Push Deadlift
-        const d1RM = Math.round(dW * (1+(0.033*dR)));
-        globalLog.push({date:t, ex:"Deadlift", w:dW, r:dR, rm:d1RM, type:'program', gym:appData.currentGym});
-        
-        localStorage.setItem('globalLog',JSON.stringify(globalLog));
-        
-        // Check the box
-        appData.programState[wKey] = true;
-        saveAppData();
-        genProgram(); // Re-render
-        showToast("Logged to Stats!");
-    });
+function openProgramLogModal(sW, bW, dW, sR, bR, dR, wKey, event){
+    event.stopPropagation();
+    pendingLog = { wKey }; // Store key
+    
+    // Fill Modal Inputs
+    document.getElementById('log-s-w').value = sW; document.getElementById('log-s-r').value = sR;
+    document.getElementById('log-b-w').value = bW; document.getElementById('log-b-r').value = bR;
+    document.getElementById('log-d-w').value = dW; document.getElementById('log-d-r').value = dR;
+    
+    document.getElementById('modal-program-log').style.display = 'flex';
+}
+
+function confirmProgramLog(){
+    if(!pendingLog) return;
+    
+    // Read Edited Values
+    const sW = parseFloat(document.getElementById('log-s-w').value); const sR = parseFloat(document.getElementById('log-s-r').value);
+    const bW = parseFloat(document.getElementById('log-b-w').value); const bR = parseFloat(document.getElementById('log-b-r').value);
+    const dW = parseFloat(document.getElementById('log-d-w').value); const dR = parseFloat(document.getElementById('log-d-r').value);
+    
+    const t=new Date().toISOString().split('T')[0];
+    const s1RM = Math.round(sW * (1+(0.033*sR)));
+    const b1RM = Math.round(bW * (1+(0.033*bR)));
+    const d1RM = Math.round(dW * (1+(0.033*dR)));
+    
+    globalLog.push({date:t, ex:"Squat", w:sW, r:sR, rm:s1RM, type:'program', gym:appData.currentGym});
+    globalLog.push({date:t, ex:"Bench Press", w:bW, r:bR, rm:b1RM, type:'program', gym:appData.currentGym});
+    globalLog.push({date:t, ex:"Deadlift", w:dW, r:dR, rm:d1RM, type:'program', gym:appData.currentGym});
+    
+    localStorage.setItem('globalLog',JSON.stringify(globalLog));
+    
+    appData.programState[pendingLog.wKey] = true;
+    saveAppData();
+    
+    document.getElementById('modal-program-log').style.display = 'none';
+    genProgram();
+    showToast("Logged!");
 }
 
 function genProgram(){
@@ -455,7 +511,7 @@ function genProgram(){
     const s5RM = rnd(sMax * 0.87); const b5RM = rnd(bMax * 0.87); const d5RM = rnd(dMax * 0.87);
 
     const weeks=[
-        {n:1, t:"STRENGTH", m:.85, s:3, r:5, base:"5RM"}, // Fixed reps to 5 for simplicity in logging
+        {n:1, t:"STRENGTH", m:.85, s:3, r:5, base:"5RM"},
         {n:2, t:"STRENGTH", m:.90, s:3, r:5, base:"5RM"},
         {n:3, t:"STRENGTH", m:.95, s:3, r:5, base:"5RM"},
         {n:4, t:"STRENGTH", m:1.05, s:3, r:5, base:"5RM", l_drop:.80, m_drop:.90},
@@ -501,7 +557,7 @@ function genProgram(){
                     <div class="warmup-line">SQ: ${calcRamp(s)}</div>
                     <div class="warmup-line">BP: ${calcRamp(b)}</div>
                     <div class="warmup-line">DL: ${calcRamp(d)}</div>
-                    <button class="btn btn-main" style="margin-top:10px; font-size:11px; padding:10px;" onclick="logProgramDay(${s},${b},${d},${reps},${reps},${reps},'${wKey}', event)">✓ COMPLETE & LOG</button>
+                    <button class="btn btn-main" style="margin-top:10px; font-size:11px; padding:10px;" onclick="openProgramLogModal(${s},${b},${d},${reps},${reps},${reps},'${wKey}', event)">✓ COMPLETE & LOG</button>
                 </div>
             </div>`;
         };
@@ -512,16 +568,16 @@ function genProgram(){
                 <div class="chk-box ${isDone?'checked':''}"></div>
             </div>
             <div class="week-content ${isDone?'dimmed':''}">
-                ${buildDay("MON", `HEAVY (${Math.round(k.m*100)}% ${k.base})`, "type-h", sH, bH, dH, k.r, wKey)}
-                ${buildDay("WED", `LIGHT (${Math.round(l_mult*100)}%)`, "type-l", sL, bL, dL, k.r, wKey)}
-                ${buildDay("FRI", `MEDIUM (${Math.round(m_mult*100)}%)`, "type-m", sM, bM, dM, k.r, wKey)}
+                ${buildDay("MON", `HEAVY (${Math.round(k.m*100)}% ${k.base})`, "type-h", sH, bH, dH, k.r, wKey+"_m")}
+                ${buildDay("WED", `LIGHT (${Math.round(l_mult*100)}%)`, "type-l", sL, bL, dL, k.r, wKey+"_w")}
+                ${buildDay("FRI", `MEDIUM (${Math.round(m_mult*100)}%)`, "type-m", sM, bM, dM, k.r, wKey+"_f")}
             </div>
         </div>`;
     });
     document.getElementById('schedule-area').innerHTML=h;
 }
 function toggleWeek(key, el){
-    // Deprecated for manual toggle, now handled by Log button
+    // Deprecated for manual toggle
 }
 
 // --- ANALYTICS ---
