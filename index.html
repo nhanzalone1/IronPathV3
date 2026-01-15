@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V15</title>
+<title>NetGains V15.1</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -70,11 +70,9 @@
 
   /* WORKOUT ROWS */
   .ex-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border); }
-  
   .ex-top { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: flex-start; }
   .ex-name { font-weight: bold; font-size: 16px; margin-right: 10px; flex-grow: 1; }
   .ex-tools { display: flex; gap: 15px; align-items: center; flex-shrink: 0; }
-  
   .ex-hist { font-size: 10px; color: var(--success); margin-bottom: 10px; display: flex; gap: 10px; }
   .hist-badge { background: rgba(46, 213, 115, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(46, 213, 115, 0.3); }
   
@@ -124,10 +122,11 @@
   .calc-input { text-align: center; font-size: 24px; font-weight: bold; color: var(--success); margin-bottom: 15px; padding: 10px; background: #111; border-radius: 8px; border: 1px solid #333; width: 100%; }
   .import-textarea { width: 100%; background: #111; color: #0f0; font-family: monospace; border: 1px solid #333; border-radius: 5px; padding: 10px; font-size: 10px; height: 60px; margin-bottom: 10px; }
 
-  /* PROGRAM CSS (BAECHLE) */
+  /* PROGRAM CSS (BAECHLE + DROPDOWN) */
   .week { background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; overflow: hidden; transition: 0.3s; }
   .week-head { display: flex; justify-content: space-between; padding: 15px; background: #222; border-bottom: 1px solid #333; font-weight: bold; }
   .day-row { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; }
+  .day-row:active { background: #222; }
   .day-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .day-type { font-size: 9px; padding: 3px 6px; border-radius: 4px; font-weight: 800; text-transform: uppercase; }
   .type-h { background: #ff4757; color: white; } 
@@ -138,6 +137,13 @@
   .lift-name { color: #888; width: 40px; font-weight: bold; }
   .lift-nums { color: white; font-family: monospace; letter-spacing: -0.5px; }
   
+  /* DROPDOWN WARMUP STYLES */
+  .warmup-drop { background: #111; padding: 10px; border-top: 1px dashed #333; display: none; }
+  .warmup-drop.open { display: block; animation: slideDown 0.2s ease-out; }
+  .warmup-header { font-size: 10px; color: var(--accent); font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
+  .warmup-line { font-size: 11px; color: #aaa; margin-bottom: 3px; font-family: monospace; }
+  @keyframes slideDown { from{opacity:0; transform:translateY(-5px)} to{opacity:1; transform:translateY(0)} }
+
   .chk-box { width: 24px; height: 24px; border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
   .chk-box.checked { background: var(--success); border-color: var(--success); }
   .chk-box.checked::after { content: '✓'; color: black; font-weight: bold; font-size: 14px; }
@@ -239,7 +245,7 @@
 <div id="toast"><span id="toast-msg">Saved</span></div>
 
 <div id="view-program" class="view">
-  <h1>NETGAINS <span class="brand-span">V15</span></h1>
+  <h1>NETGAINS <span class="brand-span">V15.1</span></h1>
   <p class="sub">BAECHLE HLM</p>
   <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
@@ -375,7 +381,15 @@ function selectGym(n){
 function promptAddGym(){openInputModal("New Gym","Name",v=>{if(v){appData.gyms[v]={folders:[],library:{}};selectGym(v)}})}
 function delGym(n){if(Object.keys(appData.gyms).length<=1)return;showConfirm("Delete?",()=>{delete appData.gyms[n];selectGym(Object.keys(appData.gyms)[0])})}
 
-// --- PROGRAM ENGINE (V15: BAECHLE HLM LOGIC) ---
+// --- PROGRAM ENGINE (V15.1: DROPDOWN WARMUP) ---
+function toggleWarmup(el){
+    // Toggle the .open class on the sibling .warmup-drop
+    const drop = el.querySelector('.warmup-drop');
+    if(drop) {
+        drop.classList.toggle('open');
+    }
+}
+
 function genProgram(){
     const sMax=parseFloat(document.getElementById('prog-s').value);
     const bMax=parseFloat(document.getElementById('prog-b').value);
@@ -385,36 +399,28 @@ function genProgram(){
     
     const rnd=n=>Math.round(n/5)*5;
     
-    // 5RM Calculation (Estimated at 87% of 1RM)
     const s5RM = rnd(sMax * 0.87);
     const b5RM = rnd(bMax * 0.87);
     const d5RM = rnd(dMax * 0.87);
 
-    // LOGIC EXTRACTED FROM IMAGE IMG_0752.HEIC
     const weeks=[
-        // PHASE 1: STRENGTH (Image Weeks 8-11)
         {n:1, t:"STRENGTH", m:.85, s:3, r:"5-6", base:"5RM"},
         {n:2, t:"STRENGTH", m:.90, s:3, r:"5-6", base:"5RM"},
         {n:3, t:"STRENGTH", m:.95, s:3, r:"5-6", base:"5RM"},
-        {n:4, t:"STRENGTH", m:1.05, s:3, r:"5-6", base:"5RM", l_drop:.80, m_drop:.90}, // Week 11 Logic: Light drops to 80%, Medium drops to 90%
-
-        // PHASE 2: UNLOADING (Image Week 12)
+        {n:4, t:"STRENGTH", m:1.05, s:3, r:"5-6", base:"5RM", l_drop:.80, m_drop:.90},
         {n:5, t:"UNLOAD", m:.85, s:2, r:"2-4", base:"5RM", l_drop:.85, m_drop:.90},
-
-        // PHASE 3: POWER (Image Weeks 13-15)
-        // Note: Power phase uses % of 1RM directly for Heavy days (2-4RM ~ 92% 1RM)
-        {n:6, t:"POWER", m:.92, s:3, r:"2-4", base:"1RM", l_drop:.75, m_drop:.85}, // Week 13
-        {n:7, t:"POWER", m:.92, s:3, r:"2-4", base:"1RM", l_drop:.85, m_drop:.90}, // Week 14
-        {n:8, t:"POWER", m:.95, s:3, r:"2-3", base:"1RM", l_drop:.70, m_drop:.85}  // Week 15
+        {n:6, t:"POWER", m:.92, s:3, r:"2-4", base:"1RM", l_drop:.75, m_drop:.85}, 
+        {n:7, t:"POWER", m:.92, s:3, r:"2-4", base:"1RM", l_drop:.85, m_drop:.90}, 
+        {n:8, t:"POWER", m:.95, s:3, r:"2-3", base:"1RM", l_drop:.70, m_drop:.85}  
     ];
     
-    // New Scientific Warmup (Start at 45, even steps)
-    const getWarmup = (target) => {
-        if(target < 135) return `Warmup: 45x10, ${rnd((target-45)*0.6 + 45)}x5`;
+    // Ramp Logic: Start at 45 (bar), even steps
+    const calcRamp = (target) => {
+        if(target < 135) return `45x10, ${rnd((target-45)*0.6 + 45)}x5`;
         const s2 = rnd((target - 45) * 0.4 + 45); 
         const s3 = rnd((target - 45) * 0.7 + 45);
         const s4 = rnd((target - 45) * 0.85 + 45);
-        return `Warmup: 45x12, ${s2}x5, ${s3}x3, ${s4}x1`;
+        return `45x12, ${s2}x5, ${s3}x3, ${s4}x1`;
     };
 
     let h=``;
@@ -423,23 +429,35 @@ function genProgram(){
         const isDone = appData.programState[wKey] === true;
         
         let sH, bH, dH;
+        if(k.base === "5RM"){ sH = rnd(s5RM * k.m); bH = rnd(b5RM * k.m); dH = rnd(d5RM * k.m); } 
+        else { sH = rnd(sMax * k.m); bH = rnd(bMax * k.m); dH = rnd(dMax * k.m); }
         
-        // Calculate HEAVY (Monday)
-        if(k.base === "5RM"){
-            sH = rnd(s5RM * k.m); bH = rnd(b5RM * k.m); dH = rnd(d5RM * k.m);
-        } else {
-            // Power phase uses 1RM
-            sH = rnd(sMax * k.m); bH = rnd(bMax * k.m); dH = rnd(dMax * k.m);
-        }
-        
-        // Calculate Light/Medium Multipliers
-        // Default: Light = 85% of Mon, Medium = 95% of Mon (Weeks 8-10 logic)
-        // Overrides: Specific weeks have different drops (Week 11, 13, 15)
         let l_mult = k.l_drop || 0.85;
         let m_mult = k.m_drop || 0.95;
         
         const sL = rnd(sH * l_mult); bL = rnd(bH * l_mult); dL = rnd(dH * l_mult);
         const sM = rnd(sH * m_mult); bM = rnd(bH * m_mult); dM = rnd(dH * m_mult);
+
+        // Helper to build a day row with embedded hidden warmup dropdown
+        const buildDay = (dayName, typeLabel, typeClass, s, b, d) => {
+            return `
+            <div class="day-row" onclick="toggleWarmup(this)">
+                <div class="day-title">
+                    <span style="font-weight:bold; color:var(--text)">${dayName}</span>
+                    <span class="day-type ${typeClass}">${typeLabel}</span>
+                </div>
+                <div class="lift-row"><span class="lift-name">SQ</span> <span class="lift-nums">${s} lbs (${k.s}x${k.r})</span></div>
+                <div class="lift-row"><span class="lift-name">BP</span> <span class="lift-nums">${b} lbs (${k.s}x${k.r})</span></div>
+                <div class="lift-row" style="border:none"><span class="lift-name">DL</span> <span class="lift-nums">${d} lbs (${k.s}x${k.r})</span></div>
+                
+                <div class="warmup-drop">
+                    <div class="warmup-header">WARMUP SETS (START WITH BAR)</div>
+                    <div class="warmup-line">SQ: ${calcRamp(s)}</div>
+                    <div class="warmup-line">BP: ${calcRamp(b)}</div>
+                    <div class="warmup-line">DL: ${calcRamp(d)}</div>
+                </div>
+            </div>`;
+        };
 
         h+=`<div class="week">
             <div class="week-head">
@@ -447,37 +465,9 @@ function genProgram(){
                 <div class="chk-box ${isDone?'checked':''}" onclick="toggleWeek('${wKey}', this)"></div>
             </div>
             <div class="week-content ${isDone?'dimmed':''}">
-                
-                <div class="day-row" onclick="alert('${getWarmup(sH)}')">
-                    <div class="day-title">
-                        <span style="font-weight:bold; color:var(--text)">MON</span>
-                        <span class="day-type type-h">HEAVY (${Math.round(k.m*100)}% of ${k.base})</span>
-                    </div>
-                    <div class="lift-row"><span class="lift-name">SQ</span> <span class="lift-nums">${sH} lbs (${k.s}x${k.r})</span></div>
-                    <div class="lift-row"><span class="lift-name">BP</span> <span class="lift-nums">${bH} lbs (${k.s}x${k.r})</span></div>
-                    <div class="lift-row" style="border:none"><span class="lift-name">DL</span> <span class="lift-nums">${dH} lbs (${k.s}x${k.r})</span></div>
-                </div>
-
-                <div class="day-row" onclick="alert('${getWarmup(sL)}')">
-                    <div class="day-title">
-                        <span style="font-weight:bold; color:var(--text)">WED</span>
-                        <span class="day-type type-l">LIGHT (${Math.round(l_mult*100)}%)</span>
-                    </div>
-                    <div class="lift-row"><span class="lift-name">SQ</span> <span class="lift-nums">${sL} lbs (${k.s}x${k.r})</span></div>
-                    <div class="lift-row"><span class="lift-name">BP</span> <span class="lift-nums">${bL} lbs (${k.s}x${k.r})</span></div>
-                    <div class="lift-row" style="border:none"><span class="lift-name">DL</span> <span class="lift-nums">${dL} lbs (${k.s}x${k.r})</span></div>
-                </div>
-
-                <div class="day-row" onclick="alert('${getWarmup(sM)}')">
-                    <div class="day-title">
-                        <span style="font-weight:bold; color:var(--text)">FRI</span>
-                        <span class="day-type type-m">MEDIUM (${Math.round(m_mult*100)}%)</span>
-                    </div>
-                    <div class="lift-row"><span class="lift-name">SQ</span> <span class="lift-nums">${sM} lbs (${k.s}x${k.r})</span></div>
-                    <div class="lift-row"><span class="lift-name">BP</span> <span class="lift-nums">${bM} lbs (${k.s}x${k.r})</span></div>
-                    <div class="lift-row" style="border:none"><span class="lift-name">DL</span> <span class="lift-nums">${dM} lbs (${k.s}x${k.r})</span></div>
-                </div>
-
+                ${buildDay("MON", `HEAVY (${Math.round(k.m*100)}% ${k.base})`, "type-h", sH, bH, dH)}
+                ${buildDay("WED", `LIGHT (${Math.round(l_mult*100)}%)`, "type-l", sL, bL, dL)}
+                ${buildDay("FRI", `MEDIUM (${Math.round(m_mult*100)}%)`, "type-m", sM, bM, dM)}
             </div>
         </div>`;
     });
@@ -490,7 +480,7 @@ function toggleWeek(key, el){
     saveAppData(); genProgram(); 
 }
 
-// --- ANALYTICS (CHART.JS) ---
+// --- ANALYTICS ---
 let graphMode = 'global';
 let myChart = null;
 
@@ -698,6 +688,7 @@ function toggleEditMode(){
     btn.innerText = isEditing ? 'DONE' : '✎ EDIT';
     renderShelf();
 }
+// NEW: Custom Modal for Deletion
 function deleteLibItem(e){
     showConfirm(`Delete "${e}"?`, () => {
         const g=getCurrentGymData();
