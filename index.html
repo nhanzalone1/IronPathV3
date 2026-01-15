@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V15.3</title>
+<title>NetGains V15.4</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -137,7 +137,7 @@
   .lift-name { color: #888; width: 40px; font-weight: bold; }
   .lift-nums { color: white; font-family: monospace; letter-spacing: -0.5px; }
   
-  /* DROPDOWN WARMUP STYLES */
+  /* DROPDOWN WARMUP + LOG */
   .warmup-drop { background: #111; padding: 10px; border-top: 1px dashed #333; display: none; }
   .warmup-drop.open { display: block; animation: slideDown 0.2s ease-out; }
   .warmup-header { font-size: 10px; color: var(--accent); font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
@@ -239,7 +239,7 @@
 <div id="toast"><span id="toast-msg">Saved</span></div>
 
 <div id="view-program" class="view">
-  <h1>NETGAINS <span class="brand-span">V15.3</span></h1>
+  <h1>NETGAINS <span class="brand-span">V15.4</span></h1>
   <p class="sub">BAECHLE HLM</p>
   <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
@@ -259,6 +259,8 @@
     <button class="btn btn-main" onclick="genProgram()">Generate HLM Cycle</button>
   </div>
   <div id="schedule-area"></div>
+  
+  <button class="btn btn-sec" style="margin-top:30px; border-color:#ff4757; color:#ff4757; border-style:dashed;" onclick="resetProgram()">⚠ RESET PROGRAM</button>
 </div>
 
 <div id="view-log" class="view hidden">
@@ -342,7 +344,7 @@ if(!appData){
     localStorage.setItem('netGainsData',JSON.stringify(appData));
 }
 if(!appData.programState) appData.programState = {};
-if(!appData.programInputs) appData.programInputs = {}; // V15.3 Init
+if(!appData.programInputs) appData.programInputs = {}; 
 if(!appData.customTags) appData.customTags = []; 
 
 let activeCart=JSON.parse(localStorage.getItem('activeCart')||'[]'), 
@@ -353,7 +355,7 @@ let activeCart=JSON.parse(localStorage.getItem('activeCart')||'[]'),
 // --- APP INIT ---
 renderDays();
 populateStatDropdown();
-loadProgramInputs(); // V15.3 Auto Load
+loadProgramInputs();
 
 function switchTab(id,b){
     document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
@@ -378,7 +380,7 @@ function selectGym(n){
 function promptAddGym(){openInputModal("New Gym","Name",v=>{if(v){appData.gyms[v]={folders:[],library:{}};selectGym(v)}})}
 function delGym(n){if(Object.keys(appData.gyms).length<=1)return;showConfirm("Delete?",()=>{delete appData.gyms[n];selectGym(Object.keys(appData.gyms)[0])})}
 
-// --- PROGRAM ENGINE (V15.3: AUTO-SAVE INPUTS) ---
+// --- PROGRAM ENGINE (V15.4: LOG & RESET) ---
 function saveProgramInputs(){
     appData.programInputs.s = document.getElementById('prog-s').value;
     appData.programInputs.b = document.getElementById('prog-b').value;
@@ -391,11 +393,22 @@ function loadProgramInputs(){
         if(appData.programInputs.s) document.getElementById('prog-s').value = appData.programInputs.s;
         if(appData.programInputs.b) document.getElementById('prog-b').value = appData.programInputs.b;
         if(appData.programInputs.d) document.getElementById('prog-d').value = appData.programInputs.d;
-        // If data exists, auto-generate so the schedule appears immediately
         if(appData.programInputs.s && appData.programInputs.b && appData.programInputs.d) {
             genProgram();
         }
     }
+}
+
+function resetProgram(){
+    showConfirm("Reset Cycle? (Clear Checkmarks)", ()=>{
+        appData.programState = {};
+        document.getElementById('prog-s').value = "";
+        document.getElementById('prog-b').value = "";
+        document.getElementById('prog-d').value = "";
+        appData.programInputs = {};
+        saveAppData();
+        document.getElementById('schedule-area').innerHTML = "";
+    });
 }
 
 function toggleWarmup(el){
@@ -403,25 +416,53 @@ function toggleWarmup(el){
     if(drop) { drop.classList.toggle('open'); }
 }
 
+// Function to log the day's numbers to Stats
+window.logProgramDay = function(sW, bW, dW, sR, bR, dR, wKey, event){
+    event.stopPropagation(); // Stop dropdown toggle
+    showConfirm(`Log this workout?`, ()=>{
+        const t=new Date().toISOString().split('T')[0];
+        
+        // Push Squat
+        const s1RM = Math.round(sW * (1+(0.033*sR))); // Calc 1RM
+        globalLog.push({date:t, ex:"Squat", w:sW, r:sR, rm:s1RM, type:'program', gym:appData.currentGym});
+        
+        // Push Bench
+        const b1RM = Math.round(bW * (1+(0.033*bR)));
+        globalLog.push({date:t, ex:"Bench Press", w:bW, r:bR, rm:b1RM, type:'program', gym:appData.currentGym});
+        
+        // Push Deadlift
+        const d1RM = Math.round(dW * (1+(0.033*dR)));
+        globalLog.push({date:t, ex:"Deadlift", w:dW, r:dR, rm:d1RM, type:'program', gym:appData.currentGym});
+        
+        localStorage.setItem('globalLog',JSON.stringify(globalLog));
+        
+        // Check the box
+        appData.programState[wKey] = true;
+        saveAppData();
+        genProgram(); // Re-render
+        showToast("Logged to Stats!");
+    });
+}
+
 function genProgram(){
     const sMax=parseFloat(document.getElementById('prog-s').value);
     const bMax=parseFloat(document.getElementById('prog-b').value);
     const dMax=parseFloat(document.getElementById('prog-d').value);
     
-    if(!sMax || !bMax || !dMax) { return; } // Silent fail if loading
+    if(!sMax || !bMax || !dMax) { return; } 
     
     const rnd=n=>Math.round(n/5)*5;
     const s5RM = rnd(sMax * 0.87); const b5RM = rnd(bMax * 0.87); const d5RM = rnd(dMax * 0.87);
 
     const weeks=[
-        {n:1, t:"STRENGTH", m:.85, s:3, r:"5-6", base:"5RM"},
-        {n:2, t:"STRENGTH", m:.90, s:3, r:"5-6", base:"5RM"},
-        {n:3, t:"STRENGTH", m:.95, s:3, r:"5-6", base:"5RM"},
-        {n:4, t:"STRENGTH", m:1.05, s:3, r:"5-6", base:"5RM", l_drop:.80, m_drop:.90},
-        {n:5, t:"UNLOAD", m:.85, s:2, r:"2-4", base:"5RM", l_drop:.85, m_drop:.90},
-        {n:6, t:"POWER", m:.92, s:3, r:"2-4", base:"1RM", l_drop:.75, m_drop:.85}, 
-        {n:7, t:"POWER", m:.92, s:3, r:"2-4", base:"1RM", l_drop:.85, m_drop:.90}, 
-        {n:8, t:"POWER", m:.95, s:3, r:"2-3", base:"1RM", l_drop:.70, m_drop:.85}  
+        {n:1, t:"STRENGTH", m:.85, s:3, r:5, base:"5RM"}, // Fixed reps to 5 for simplicity in logging
+        {n:2, t:"STRENGTH", m:.90, s:3, r:5, base:"5RM"},
+        {n:3, t:"STRENGTH", m:.95, s:3, r:5, base:"5RM"},
+        {n:4, t:"STRENGTH", m:1.05, s:3, r:5, base:"5RM", l_drop:.80, m_drop:.90},
+        {n:5, t:"UNLOAD", m:.85, s:2, r:3, base:"5RM", l_drop:.85, m_drop:.90},
+        {n:6, t:"POWER", m:.92, s:3, r:3, base:"1RM", l_drop:.75, m_drop:.85}, 
+        {n:7, t:"POWER", m:.92, s:3, r:3, base:"1RM", l_drop:.85, m_drop:.90}, 
+        {n:8, t:"POWER", m:.95, s:3, r:2, base:"1RM", l_drop:.70, m_drop:.85}  
     ];
     
     const calcRamp = (target) => {
@@ -445,21 +486,22 @@ function genProgram(){
         const sL = rnd(sH * l_mult); bL = rnd(bH * l_mult); dL = rnd(dH * l_mult);
         const sM = rnd(sH * m_mult); bM = rnd(bH * m_mult); dM = rnd(dH * m_mult);
 
-        const buildDay = (dayName, typeLabel, typeClass, s, b, d) => {
+        const buildDay = (dayName, typeLabel, typeClass, s, b, d, reps, wKey) => {
             return `
             <div class="day-row" onclick="toggleWarmup(this)">
                 <div class="day-title">
                     <span style="font-weight:bold; color:var(--text)">${dayName}</span>
                     <span class="day-type ${typeClass}">${typeLabel}</span>
                 </div>
-                <div class="lift-row"><span class="lift-name">SQ</span> <span class="lift-nums">${s} lbs (${k.s}x${k.r})</span></div>
-                <div class="lift-row"><span class="lift-name">BP</span> <span class="lift-nums">${b} lbs (${k.s}x${k.r})</span></div>
-                <div class="lift-row" style="border:none"><span class="lift-name">DL</span> <span class="lift-nums">${d} lbs (${k.s}x${k.r})</span></div>
+                <div class="lift-row"><span class="lift-name">SQ</span> <span class="lift-nums">${s} lbs (${k.s}x${reps})</span></div>
+                <div class="lift-row"><span class="lift-name">BP</span> <span class="lift-nums">${b} lbs (${k.s}x${reps})</span></div>
+                <div class="lift-row" style="border:none"><span class="lift-name">DL</span> <span class="lift-nums">${d} lbs (${k.s}x${reps})</span></div>
                 <div class="warmup-drop">
                     <div class="warmup-header">WARMUP SETS (START WITH BAR)</div>
                     <div class="warmup-line">SQ: ${calcRamp(s)}</div>
                     <div class="warmup-line">BP: ${calcRamp(b)}</div>
                     <div class="warmup-line">DL: ${calcRamp(d)}</div>
+                    <button class="btn btn-main" style="margin-top:10px; font-size:11px; padding:10px;" onclick="logProgramDay(${s},${b},${d},${reps},${reps},${reps},'${wKey}', event)">✓ COMPLETE & LOG</button>
                 </div>
             </div>`;
         };
@@ -467,22 +509,19 @@ function genProgram(){
         h+=`<div class="week">
             <div class="week-head">
                 <span>Week ${k.n} <span style="color:#666;font-size:11px">(${k.t})</span></span>
-                <div class="chk-box ${isDone?'checked':''}" onclick="toggleWeek('${wKey}', this)"></div>
+                <div class="chk-box ${isDone?'checked':''}"></div>
             </div>
             <div class="week-content ${isDone?'dimmed':''}">
-                ${buildDay("MON", `HEAVY (${Math.round(k.m*100)}% ${k.base})`, "type-h", sH, bH, dH)}
-                ${buildDay("WED", `LIGHT (${Math.round(l_mult*100)}%)`, "type-l", sL, bL, dL)}
-                ${buildDay("FRI", `MEDIUM (${Math.round(m_mult*100)}%)`, "type-m", sM, bM, dM)}
+                ${buildDay("MON", `HEAVY (${Math.round(k.m*100)}% ${k.base})`, "type-h", sH, bH, dH, k.r, wKey)}
+                ${buildDay("WED", `LIGHT (${Math.round(l_mult*100)}%)`, "type-l", sL, bL, dL, k.r, wKey)}
+                ${buildDay("FRI", `MEDIUM (${Math.round(m_mult*100)}%)`, "type-m", sM, bM, dM, k.r, wKey)}
             </div>
         </div>`;
     });
     document.getElementById('schedule-area').innerHTML=h;
 }
 function toggleWeek(key, el){
-    const done = el.classList.contains('checked');
-    if(done) { el.classList.remove('checked'); appData.programState[key]=false; }
-    else { el.classList.add('checked'); appData.programState[key]=true; }
-    saveAppData(); genProgram(); 
+    // Deprecated for manual toggle, now handled by Log button
 }
 
 // --- ANALYTICS ---
