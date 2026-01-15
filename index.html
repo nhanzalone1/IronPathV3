@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V15.5</title>
+<title>NetGains V15.6</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -122,12 +122,20 @@
   .calc-input { text-align: center; font-size: 24px; font-weight: bold; color: var(--success); margin-bottom: 15px; padding: 10px; background: #111; border-radius: 8px; border: 1px solid #333; width: 100%; }
   .import-textarea { width: 100%; background: #111; color: #0f0; font-family: monospace; border: 1px solid #333; border-radius: 5px; padding: 10px; font-size: 10px; height: 60px; margin-bottom: 10px; }
 
-  /* PROGRAM CSS */
+  /* PROGRAM CSS (BAECHLE + GRANULAR CHECKS) */
   .week { background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; overflow: hidden; transition: 0.3s; }
   .week-head { display: flex; justify-content: space-between; padding: 15px; background: #222; border-bottom: 1px solid #333; font-weight: bold; }
-  .day-row { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; }
+  .day-row { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; position: relative; }
   .day-row:active { background: #222; }
-  .day-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  
+  .day-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .day-left-grp { display: flex; align-items: center; gap: 10px; }
+  
+  /* DAY CHECKBOX (CIRCLE) */
+  .day-check { width: 24px; height: 24px; border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; z-index: 10; cursor: pointer; }
+  .day-check.checked { background: var(--success); border-color: var(--success); }
+  .day-check.checked::after { content: '✓'; color: black; font-weight: bold; font-size: 14px; }
+  
   .day-type { font-size: 9px; padding: 3px 6px; border-radius: 4px; font-weight: 800; text-transform: uppercase; }
   .type-h { background: #ff4757; color: white; } 
   .type-l { background: #2ed573; color: black; } 
@@ -137,15 +145,18 @@
   .lift-name { color: #888; width: 40px; font-weight: bold; }
   .lift-nums { color: white; font-family: monospace; letter-spacing: -0.5px; }
   
+  /* DROPDOWN WARMUP (No button inside now, logging handled by header circle) */
   .warmup-drop { background: #111; padding: 10px; border-top: 1px dashed #333; display: none; }
   .warmup-drop.open { display: block; animation: slideDown 0.2s ease-out; }
   .warmup-header { font-size: 10px; color: var(--accent); font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
   .warmup-line { font-size: 11px; color: #aaa; margin-bottom: 3px; font-family: monospace; }
   @keyframes slideDown { from{opacity:0; transform:translateY(-5px)} to{opacity:1; transform:translateY(0)} }
 
-  .chk-box { width: 24px; height: 24px; border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
-  .chk-box.checked { background: var(--success); border-color: var(--success); }
-  .chk-box.checked::after { content: '✓'; color: black; font-weight: bold; font-size: 14px; }
+  /* WEEK CHECKBOX (MANUAL OVERRIDE) */
+  .chk-box { width: 20px; height: 20px; border: 2px solid #444; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+  .chk-box.checked { background: #444; border-color: #444; }
+  .chk-box.checked::after { content: '✓'; color: #888; font-weight: bold; font-size: 12px; }
+  
   .week-content { transition: 0.3s; }
   .week-content.dimmed { opacity: 0.3; pointer-events: none; filter: grayscale(100%); text-decoration: line-through; }
 
@@ -282,7 +293,7 @@
 <div id="toast"><span id="toast-msg">Saved</span></div>
 
 <div id="view-program" class="view">
-  <h1>NETGAINS <span class="brand-span">V15.5</span></h1>
+  <h1>NETGAINS <span class="brand-span">V15.6</span></h1>
   <p class="sub">BAECHLE HLM</p>
   <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
@@ -423,8 +434,8 @@ function selectGym(n){
 function promptAddGym(){openInputModal("New Gym","Name",v=>{if(v){appData.gyms[v]={folders:[],library:{}};selectGym(v)}})}
 function delGym(n){if(Object.keys(appData.gyms).length<=1)return;showConfirm("Delete?",()=>{delete appData.gyms[n];selectGym(Object.keys(appData.gyms)[0])})}
 
-// --- PROGRAM ENGINE (V15.5: SMART LOGGING) ---
-let pendingLog = null; // Stores data for modal
+// --- PROGRAM ENGINE (V15.6: 3-CHECKBOX SYSTEM) ---
+let pendingLog = null; 
 
 function saveProgramInputs(){
     appData.programInputs.s = document.getElementById('prog-s').value;
@@ -461,9 +472,9 @@ function toggleWarmup(el){
     if(drop) { drop.classList.toggle('open'); }
 }
 
-function openProgramLogModal(sW, bW, dW, sR, bR, dR, wKey, event){
-    event.stopPropagation();
-    pendingLog = { wKey }; // Store key
+function openProgramLogModal(sW, bW, dW, sR, bR, dR, dayKey, event){
+    event.stopPropagation(); // Stop row expansion
+    pendingLog = { dayKey }; // Store full key e.g. "w1_m"
     
     // Fill Modal Inputs
     document.getElementById('log-s-w').value = sW; document.getElementById('log-s-r').value = sR;
@@ -476,7 +487,6 @@ function openProgramLogModal(sW, bW, dW, sR, bR, dR, wKey, event){
 function confirmProgramLog(){
     if(!pendingLog) return;
     
-    // Read Edited Values
     const sW = parseFloat(document.getElementById('log-s-w').value); const sR = parseFloat(document.getElementById('log-s-r').value);
     const bW = parseFloat(document.getElementById('log-b-w').value); const bR = parseFloat(document.getElementById('log-b-r').value);
     const dW = parseFloat(document.getElementById('log-d-w').value); const dR = parseFloat(document.getElementById('log-d-r').value);
@@ -492,12 +502,21 @@ function confirmProgramLog(){
     
     localStorage.setItem('globalLog',JSON.stringify(globalLog));
     
-    appData.programState[pendingLog.wKey] = true;
+    // SAVE GRANULAR STATE
+    appData.programState[pendingLog.dayKey] = true;
     saveAppData();
     
     document.getElementById('modal-program-log').style.display = 'none';
     genProgram();
     showToast("Logged!");
+}
+
+function toggleManualWeek(wKey, el){
+    event.stopPropagation();
+    const done = el.classList.contains('checked');
+    if(done) { el.classList.remove('checked'); appData.programState[wKey]=false; }
+    else { el.classList.add('checked'); appData.programState[wKey]=true; }
+    saveAppData(); genProgram();
 }
 
 function genProgram(){
@@ -532,7 +551,19 @@ function genProgram(){
     let h=``;
     weeks.forEach((k, idx)=>{
         const wKey = `w${k.n}`;
-        const isDone = appData.programState[wKey] === true;
+        
+        // Granular States
+        const doneM = appData.programState[wKey+"_m"] === true;
+        const doneW = appData.programState[wKey+"_w"] === true;
+        const doneF = appData.programState[wKey+"_f"] === true;
+        
+        // Auto-Check Week if all days done
+        if(doneM && doneW && doneF && !appData.programState[wKey]) {
+            appData.programState[wKey] = true;
+            saveAppData();
+        }
+        
+        const isWeekDone = appData.programState[wKey] === true;
         
         let sH, bH, dH;
         if(k.base === "5RM"){ sH = rnd(s5RM * k.m); bH = rnd(b5RM * k.m); dH = rnd(d5RM * k.m); } 
@@ -542,11 +573,14 @@ function genProgram(){
         const sL = rnd(sH * l_mult); bL = rnd(bH * l_mult); dL = rnd(dH * l_mult);
         const sM = rnd(sH * m_mult); bM = rnd(bH * m_mult); dM = rnd(dH * m_mult);
 
-        const buildDay = (dayName, typeLabel, typeClass, s, b, d, reps, wKey) => {
+        const buildDay = (dayName, typeLabel, typeClass, s, b, d, reps, dayKey, isDone) => {
             return `
             <div class="day-row" onclick="toggleWarmup(this)">
-                <div class="day-title">
-                    <span style="font-weight:bold; color:var(--text)">${dayName}</span>
+                <div class="day-title-row">
+                    <div class="day-left-grp">
+                        <div class="day-check ${isDone?'checked':''}" onclick="openProgramLogModal(${s},${b},${d},${reps},${reps},${reps},'${dayKey}', event)"></div>
+                        <span style="font-weight:bold; color:var(--text)">${dayName}</span>
+                    </div>
                     <span class="day-type ${typeClass}">${typeLabel}</span>
                 </div>
                 <div class="lift-row"><span class="lift-name">SQ</span> <span class="lift-nums">${s} lbs (${k.s}x${reps})</span></div>
@@ -557,7 +591,6 @@ function genProgram(){
                     <div class="warmup-line">SQ: ${calcRamp(s)}</div>
                     <div class="warmup-line">BP: ${calcRamp(b)}</div>
                     <div class="warmup-line">DL: ${calcRamp(d)}</div>
-                    <button class="btn btn-main" style="margin-top:10px; font-size:11px; padding:10px;" onclick="openProgramLogModal(${s},${b},${d},${reps},${reps},${reps},'${wKey}', event)">✓ COMPLETE & LOG</button>
                 </div>
             </div>`;
         };
@@ -565,19 +598,16 @@ function genProgram(){
         h+=`<div class="week">
             <div class="week-head">
                 <span>Week ${k.n} <span style="color:#666;font-size:11px">(${k.t})</span></span>
-                <div class="chk-box ${isDone?'checked':''}"></div>
+                <div class="chk-box ${isWeekDone?'checked':''}" onclick="toggleManualWeek('${wKey}', this)"></div>
             </div>
-            <div class="week-content ${isDone?'dimmed':''}">
-                ${buildDay("MON", `HEAVY (${Math.round(k.m*100)}% ${k.base})`, "type-h", sH, bH, dH, k.r, wKey+"_m")}
-                ${buildDay("WED", `LIGHT (${Math.round(l_mult*100)}%)`, "type-l", sL, bL, dL, k.r, wKey+"_w")}
-                ${buildDay("FRI", `MEDIUM (${Math.round(m_mult*100)}%)`, "type-m", sM, bM, dM, k.r, wKey+"_f")}
+            <div class="week-content ${isWeekDone?'dimmed':''}">
+                ${buildDay("MON", `HEAVY (${Math.round(k.m*100)}% ${k.base})`, "type-h", sH, bH, dH, k.r, wKey+"_m", doneM)}
+                ${buildDay("WED", `LIGHT (${Math.round(l_mult*100)}%)`, "type-l", sL, bL, dL, k.r, wKey+"_w", doneW)}
+                ${buildDay("FRI", `MEDIUM (${Math.round(m_mult*100)}%)`, "type-m", sM, bM, dM, k.r, wKey+"_f", doneF)}
             </div>
         </div>`;
     });
     document.getElementById('schedule-area').innerHTML=h;
-}
-function toggleWeek(key, el){
-    // Deprecated for manual toggle
 }
 
 // --- ANALYTICS ---
