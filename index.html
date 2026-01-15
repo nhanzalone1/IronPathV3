@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V15.6</title>
+<title>NetGains V15.7</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -144,8 +144,10 @@
   .lift-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; border-bottom: 1px solid #222; padding-bottom: 4px; }
   .lift-name { color: #888; width: 40px; font-weight: bold; }
   .lift-nums { color: white; font-family: monospace; letter-spacing: -0.5px; }
+  /* CLICKABLE WEIGHT */
+  .calc-trigger { color: var(--success); cursor: pointer; border-bottom: 1px dashed #444; }
   
-  /* DROPDOWN WARMUP (No button inside now, logging handled by header circle) */
+  /* DROPDOWN WARMUP */
   .warmup-drop { background: #111; padding: 10px; border-top: 1px dashed #333; display: none; }
   .warmup-drop.open { display: block; animation: slideDown 0.2s ease-out; }
   .warmup-header { font-size: 10px; color: var(--accent); font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
@@ -293,7 +295,7 @@
 <div id="toast"><span id="toast-msg">Saved</span></div>
 
 <div id="view-program" class="view">
-  <h1>NETGAINS <span class="brand-span">V15.6</span></h1>
+  <h1>NETGAINS <span class="brand-span">V15.7</span></h1>
   <p class="sub">BAECHLE HLM</p>
   <div style="background:#222; padding:15px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px;">
@@ -434,7 +436,7 @@ function selectGym(n){
 function promptAddGym(){openInputModal("New Gym","Name",v=>{if(v){appData.gyms[v]={folders:[],library:{}};selectGym(v)}})}
 function delGym(n){if(Object.keys(appData.gyms).length<=1)return;showConfirm("Delete?",()=>{delete appData.gyms[n];selectGym(Object.keys(appData.gyms)[0])})}
 
-// --- PROGRAM ENGINE (V15.6: 3-CHECKBOX SYSTEM) ---
+// --- PROGRAM ENGINE (V15.7: QUICK CALC) ---
 let pendingLog = null; 
 
 function saveProgramInputs(){
@@ -470,6 +472,15 @@ function resetProgram(){
 function toggleWarmup(el){
     const drop = el.querySelector('.warmup-drop');
     if(drop) { drop.classList.toggle('open'); }
+}
+
+function openQuickCalc(weight, event) {
+    event.stopPropagation(); // Don't toggle warmup
+    calcTarget = null; // No saving destination
+    setCalcMode('bar'); 
+    document.getElementById('calc-total').value = weight;
+    manualCalcUpdate(weight); // Trigger plate math
+    document.getElementById('modal-plate-calc').style.display='flex';
 }
 
 function openProgramLogModal(sW, bW, dW, sR, bR, dR, dayKey, event){
@@ -557,7 +568,6 @@ function genProgram(){
         const doneW = appData.programState[wKey+"_w"] === true;
         const doneF = appData.programState[wKey+"_f"] === true;
         
-        // Auto-Check Week if all days done
         if(doneM && doneW && doneF && !appData.programState[wKey]) {
             appData.programState[wKey] = true;
             saveAppData();
@@ -583,9 +593,9 @@ function genProgram(){
                     </div>
                     <span class="day-type ${typeClass}">${typeLabel}</span>
                 </div>
-                <div class="lift-row"><span class="lift-name">SQ</span> <span class="lift-nums">${s} lbs (${k.s}x${reps})</span></div>
-                <div class="lift-row"><span class="lift-name">BP</span> <span class="lift-nums">${b} lbs (${k.s}x${reps})</span></div>
-                <div class="lift-row" style="border:none"><span class="lift-name">DL</span> <span class="lift-nums">${d} lbs (${k.s}x${reps})</span></div>
+                <div class="lift-row"><span class="lift-name">SQ</span> <span class="lift-nums"><span class="calc-trigger" onclick="openQuickCalc(${s}, event)">${s}</span> lbs (${k.s}x${reps})</span></div>
+                <div class="lift-row"><span class="lift-name">BP</span> <span class="lift-nums"><span class="calc-trigger" onclick="openQuickCalc(${b}, event)">${b}</span> lbs (${k.s}x${reps})</span></div>
+                <div class="lift-row" style="border:none"><span class="lift-name">DL</span> <span class="lift-nums"><span class="calc-trigger" onclick="openQuickCalc(${d}, event)">${d}</span> lbs (${k.s}x${reps})</span></div>
                 <div class="warmup-drop">
                     <div class="warmup-header">WARMUP SETS (START WITH BAR)</div>
                     <div class="warmup-line">SQ: ${calcRamp(s)}</div>
