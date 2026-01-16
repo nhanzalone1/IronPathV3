@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V18.1</title>
+<title>NetGains V18.2</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -23,10 +23,8 @@
   .input-wrapper { position:relative; width:100%; }
   .input-unit { position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:10px; color:#666; font-weight:bold; }
 
-  /* TOGGLE */
   #unit-toggle { position:fixed; top:15px; right:15px; background:#222; border:1px solid #444; color:var(--accent); padding:8px 12px; border-radius:20px; font-weight:800; font-size:11px; z-index:9999; cursor:pointer; }
 
-  /* VIEWS */
   .view { padding:20px; max-width:600px; margin:0 auto; }
   h1 { text-align:center; margin:25px 0 5px; font-weight:900; font-size:24px; }
   .sub { text-align:center; color:#666; font-size:11px; letter-spacing:2px; margin-bottom:25px; text-transform:uppercase; }
@@ -39,7 +37,6 @@
   .day-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
   .day-left-grp { display:flex; align-items:center; gap:10px; }
   
-  /* CIRCLE CHECKBOX */
   .day-circle { width:26px; height:26px; border:2px solid #555; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; background:#111; z-index:50; }
   .day-circle.checked { background:var(--success); border-color:var(--success); color:#000; font-weight:bold; }
   .day-circle.checked::after { content:'✓'; }
@@ -53,7 +50,6 @@
   @keyframes slideDown { from{opacity:0; transform:translateY(-5px)} to{opacity:1; transform:translateY(0)} }
   .warmup-line { font-family:monospace; font-size:11px; color:#aaa; margin-bottom:4px; }
 
-  /* WEEK CHECKBOX */
   .chk-box { width:20px; height:20px; border:2px solid #444; border-radius:4px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
   .chk-box.checked { background:#444; }
   .chk-box.checked::after { content:'✓'; color:#888; font-size:12px; font-weight:bold; }
@@ -90,7 +86,6 @@
   .plate-btn-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:15px; }
   .p-btn { background:#222; border:1px solid #444; color:white; padding:15px 0; border-radius:8px; font-weight:bold; cursor:pointer; }
 
-  /* NAV */
   .nav { position:fixed; bottom:0; left:0; width:100%; height:80px; background:#181818; border-top:1px solid #333; display:grid; grid-template-columns:1fr 1fr 1fr; z-index:1000; padding-bottom:20px; }
   .nav-btn { background:none; border:none; color:#666; font-size:10px; font-weight:bold; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; }
   .nav-btn.active { color:var(--accent); }
@@ -102,7 +97,6 @@
 <body>
 
 <button id="unit-toggle" onclick="window.toggleUnit()">LBS</button>
-<div id="debug-status" style="position:fixed; bottom:90px; right:10px; font-size:9px; color:#333; z-index:9000;">Status: OK</div>
 <div id="toast">Saved</div>
 
 <div id="modal-calc" class="modal-overlay">
@@ -113,7 +107,7 @@
         <div class="sleeve"></div>
         <div class="plate-stack" id="plate-stack-display"></div>
     </div>
-    <input type="number" id="calc-total" oninput="window.manualCalcUpdate(this.value)">
+    <input type="text" inputmode="decimal" id="calc-total" oninput="window.manualCalcUpdate(this.value)">
     <div style="display:flex; gap:10px; margin-bottom:15px;">
         <button id="mode-bar" class="btn btn-sm" style="background:var(--success); color:black;" onclick="window.setCalcMode('bar')">BARBELL</button>
         <button id="mode-single" class="btn btn-sm" style="background:#333;" onclick="window.setCalcMode('single')">SINGLE</button>
@@ -131,7 +125,6 @@
     <div class="close-x" onclick="document.getElementById('modal-program-log').style.display='none'">✕</div>
     <h3>Log Results</h3>
     <p style="font-size:11px; color:#888; margin-bottom:15px;">Adjust actual numbers performed.</p>
-    
     <div style="margin-bottom:10px;">
         <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><b style="color:var(--accent); font-size:12px;">SQUAT</b></div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
@@ -153,15 +146,13 @@
             <div class="input-wrapper"><input type="number" id="log-d-r"><span class="input-unit">REPS</span></div>
         </div>
     </div>
-    
     <button class="btn btn-main" onclick="window.confirmProgramLog()">Save to History</button>
   </div>
 </div>
 
 <div id="view-prog" class="view">
-  <h1>NETGAINS <span class="brand-span">V18.1</span></h1>
+  <h1>NETGAINS <span class="brand-span">V18.2</span></h1>
   <p class="sub">BAECHLE ENGINE</p>
-  
   <div style="background:#222; padding:15px; border-radius:12px; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
         <div><label style="font-size:10px; color:#888">SQUAT</label><input type="number" id="prog-s" placeholder="-" oninput="window.saveProgramInputs()"></div>
@@ -170,18 +161,26 @@
     </div>
     <button class="btn btn-main" onclick="window.genProgram()">Update Cycle</button>
   </div>
-  
   <div id="schedule-area"></div>
   <button class="btn btn-sec" style="margin-top:30px; border-style:dashed; color:#ff4757;" onclick="window.resetProgram()">⚠ Reset Program</button>
 </div>
 
-<div id="view-log" class="view hidden"><h1>LOG</h1><p style="text-align:center;color:#666">Tracker Active</p></div>
-<div id="view-stats" class="view hidden"><h1>STATS</h1><div class="chart-container" style="background:#111; padding:10px; border-radius:12px;"><canvas id="perfChart"></canvas></div></div>
+<div id="view-log" class="view hidden">
+    <h1>LOG</h1><p style="text-align:center;color:#666">Coming Soon in Full Version</p>
+</div>
+<div id="view-stats" class="view hidden">
+    <h1>STATS</h1><div class="chart-container" style="background:#111; padding:10px; border-radius:12px;"><canvas id="perfChart"></canvas></div>
+    <div id="stat-details" style="margin-top:15px; font-size:12px; color:#888; text-align:center;"></div>
+    <div style="margin-top:30px; text-align:center;">
+        <button class="btn btn-sec" onclick="window.exportCSV()">Export Data</button>
+        <div style="margin-top:20px; font-size:9px; color:#444; text-decoration:underline; cursor:pointer;" onclick="localStorage.clear();location.reload()">System Reset</div>
+    </div>
+</div>
 
 <div class="nav">
-    <button class="nav-btn active" onclick="window.goTab('prog', this)">📊<br>PROG</button>
-    <button class="nav-btn" onclick="window.goTab('log', this)">📝<br>LOG</button>
-    <button class="nav-btn" onclick="window.goTab('stats', this)">📈<br>STATS</button>
+    <button class="nav-btn active" onclick="window.goTab('prog', this)"><span>📊</span> PROGRAM</button>
+    <button class="nav-btn" onclick="window.goTab('log', this)"><span>📝</span> LOG</button>
+    <button class="nav-btn" onclick="window.goTab('stats', this)"><span>📈</span> STATS</button>
 </div>
 
 <script>
@@ -189,28 +188,23 @@
 const DB_KEY = 'netgains_v18_db';
 let DATA = { unit:'lbs', inputs:{s:'',b:'',d:''}, progState:{}, history:[] };
 
-// Safe Load
 try {
     const saved = localStorage.getItem(DB_KEY);
     if(saved) DATA = JSON.parse(saved);
 } catch(e) { console.log("Resetting Data"); }
 
-// Defaults
 if(!DATA.unit) DATA.unit = 'lbs';
 if(!DATA.inputs) DATA.inputs = {s:'', b:'', d:''};
 if(!DATA.progState) DATA.progState = {};
 if(!DATA.history) DATA.history = [];
 
-// Apply Data to UI
 function initUI() {
     const sIn = document.getElementById('prog-s');
     const bIn = document.getElementById('prog-b');
     const dIn = document.getElementById('prog-d');
-    
     if(sIn) sIn.value = DATA.inputs.s;
     if(bIn) bIn.value = DATA.inputs.b;
     if(dIn) dIn.value = DATA.inputs.d;
-    
     updateUnitBtn();
     genProgram();
 }
@@ -234,6 +228,7 @@ window.goTab = function(t, btn) {
     document.getElementById('view-'+t).classList.remove('hidden');
     document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
     btn.classList.add('active');
+    if(t === 'stats') window.renderStats();
 }
 
 window.toggleUnit = function() {
@@ -249,7 +244,6 @@ function updateUnitBtn() {
     document.getElementById('prog-s').placeholder = ph;
     document.getElementById('prog-b').placeholder = ph;
     document.getElementById('prog-d').placeholder = ph;
-    
     document.querySelectorAll('.lbl-unit').forEach(e => e.innerText = DATA.unit.toUpperCase());
 }
 
@@ -260,7 +254,7 @@ window.saveProgramInputs = function() {
     window.saveData();
 }
 
-// --- PROGRAM GENERATOR ---
+// --- PROGRAM GENERATOR (FIXED) ---
 window.genProgram = function() {
     const container = document.getElementById('schedule-area');
     const s = parseFloat(DATA.inputs.s);
@@ -276,16 +270,18 @@ window.genProgram = function() {
     const bar = DATA.unit === 'lbs' ? 45 : 20;
     const rnd = n => Math.round(n/step)*step;
 
-    // Baechle Logic (8 Weeks)
+    // Baechle Logic (Fixed Set Counts)
     const s5 = rnd(s * 0.87); const b5 = rnd(b * 0.87); const d5 = rnd(d * 0.87);
     
     const weeks = [
-        {n:1, t:"STRENGTH", m:0.85, r:5}, {n:2, t:"STRENGTH", m:0.90, r:5}, 
-        {n:3, t:"STRENGTH", m:0.95, r:5}, {n:4, t:"STRENGTH", m:1.05, r:5, l_drop:0.80},
-        {n:5, t:"UNLOAD", m:0.85, r:3, l_drop:0.85}, 
-        {n:6, t:"POWER", m:0.92, r:3, base:"1RM", l_drop:0.75}, 
-        {n:7, t:"POWER", m:0.92, r:3, base:"1RM", l_drop:0.85}, 
-        {n:8, t:"POWER", m:0.95, r:2, base:"1RM", l_drop:0.70}
+        {n:1, t:"STRENGTH", m:0.85, s:3, r:5}, 
+        {n:2, t:"STRENGTH", m:0.90, s:3, r:5}, 
+        {n:3, t:"STRENGTH", m:0.95, s:3, r:5}, 
+        {n:4, t:"STRENGTH", m:1.05, s:3, r:5, l_drop:0.80},
+        {n:5, t:"UNLOAD", m:0.85, s:2, r:3, l_drop:0.85}, 
+        {n:6, t:"POWER", m:0.92, s:3, r:3, base:"1RM", l_drop:0.75}, 
+        {n:7, t:"POWER", m:0.92, s:3, r:3, base:"1RM", l_drop:0.85}, 
+        {n:8, t:"POWER", m:0.95, s:3, r:2, base:"1RM", l_drop:0.70}
     ];
 
     const calcRamp = (target) => {
@@ -308,7 +304,6 @@ window.genProgram = function() {
         }
         const isWeekDone = DATA.progState[wKey] === true;
 
-        // Calc Weights
         let sH, bH, dH;
         if(k.base === "1RM"){ sH = rnd(s * k.m); bH = rnd(b * k.m); dH = rnd(d * k.m); }
         else { sH = rnd(s5 * k.m); bH = rnd(b5 * k.m); dH = rnd(d5 * k.m); }
@@ -365,7 +360,7 @@ window.toggleManualWeek = function(wKey, el, e) {
     window.saveData(); window.genProgram();
 }
 
-// --- LOGGING MODAL LOGIC ---
+// --- LOGGING MODAL ---
 let pendingLog = null;
 window.openLogModal = function(s,b,d,r,k,e) {
     e.stopPropagation();
@@ -378,7 +373,21 @@ window.openLogModal = function(s,b,d,r,k,e) {
 
 window.confirmProgramLog = function() {
     if(!pendingLog) return;
-    // Save to history (simplified for brevity)
+    
+    // Read input values
+    const sW = document.getElementById('log-s-w').value;
+    const sR = document.getElementById('log-s-r').value;
+    const bW = document.getElementById('log-b-w').value;
+    const bR = document.getElementById('log-b-r').value;
+    const dW = document.getElementById('log-d-w').value;
+    const dR = document.getElementById('log-d-r').value;
+    const t = new Date().toISOString().split('T')[0];
+
+    // Push to history
+    DATA.history.push({date:t, ex:'Squat', w:sW, r:sR, rm:Math.round(sW*(1+0.033*sR))});
+    DATA.history.push({date:t, ex:'Bench', w:bW, r:bR, rm:Math.round(bW*(1+0.033*bR))});
+    DATA.history.push({date:t, ex:'Deadlift', w:dW, r:dR, rm:Math.round(dW*(1+0.033*dR))});
+
     DATA.progState[pendingLog.key] = true;
     window.saveData();
     document.getElementById('modal-program-log').style.display = 'none';
@@ -426,7 +435,6 @@ window.addPlate = function(w) {
     const bar = (DATA.unit === 'lbs') ? 45 : 20;
     let next;
     if(calcMode === 'bar') {
-        // If current is less than bar, start at bar
         const base = (cur < bar) ? bar : cur;
         next = base + (w*2);
     } else {
@@ -443,8 +451,6 @@ window.setCalcMode = function(m) {
     document.getElementById('mode-bar').style.color = (m==='bar')?'black':'white';
     document.getElementById('mode-single').style.background = (m==='single')?'var(--success)':'#333';
     document.getElementById('mode-single').style.color = (m==='single')?'black':'white';
-    
-    // Reset to base
     const val = (m==='bar') ? bar : 0;
     document.getElementById('calc-total').value = val;
     window.manualCalcUpdate(val);
@@ -481,6 +487,82 @@ function renderPlateViz(weight) {
             rem -= p.w;
         }
     });
+}
+
+// --- STATS LOGIC ---
+window.renderStats = function() {
+    const sel = document.getElementById('stat-select');
+    const ctx = document.getElementById('perfChart').getContext('2d');
+    const det = document.getElementById('stat-details');
+    
+    // Populate Dropdown
+    const uniqueEx = [...new Set(DATA.history.map(l => l.ex))].sort();
+    if(uniqueEx.length === 0) {
+        sel.innerHTML = '<option>No Data</option>';
+        det.innerText = "Log workouts to see stats.";
+        return;
+    }
+    
+    // Keep selection if exists
+    const currentVal = sel.value;
+    sel.innerHTML = uniqueEx.map(e => `<option value="${e}">${e}</option>`).join('');
+    if(uniqueEx.includes(currentVal)) sel.value = currentVal;
+
+    const ex = sel.value;
+    const logs = DATA.history.filter(l => l.ex === ex).sort((a,b) => new Date(a.date) - new Date(b.date));
+    
+    if(logs.length === 0) return;
+
+    // Draw Chart
+    if(window.myChart) window.myChart.destroy();
+    
+    const labels = logs.map(l => l.date.substring(5));
+    const data = logs.map(l => l.rm);
+    const best = Math.max(...data);
+    const last = data[data.length-1];
+    
+    det.innerHTML = `BEST 1RM: <b style="color:#2ed573">${best}</b> | LATEST: <b>${last}</b>`;
+
+    window.myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Est. 1RM',
+                data: data,
+                borderColor: '#2ed573',
+                backgroundColor: 'rgba(46, 213, 115, 0.1)',
+                borderWidth: 2,
+                pointRadius: 4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: {display:false} },
+            scales: {
+                x: { grid:{color:'#333'}, ticks:{color:'#666'} },
+                y: { grid:{color:'#333'}, ticks:{color:'#666'} }
+            }
+        }
+    });
+    
+    // Bind change event
+    sel.onchange = () => window.renderStats();
+}
+
+window.exportCSV = function() {
+    if(DATA.history.length === 0) { window.showToast("No Data"); return; }
+    let csv = "Date,Exercise,Weight,Reps,1RM\n";
+    DATA.history.forEach(l => {
+        csv += `${l.date},${l.ex},${l.w},${l.r},${l.rm}\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = "netgains_data.csv";
+    a.click();
 }
 
 // Start
