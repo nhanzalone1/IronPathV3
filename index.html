@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V18.2</title>
+<title>NetGains V18</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -18,13 +18,16 @@
   .btn { width:100%; padding:14px; border:none; border-radius:10px; font-weight:800; margin-top:10px; cursor:pointer; text-transform:uppercase; font-size:13px; }
   .btn-main { background:linear-gradient(135deg, #ff4757, #ff6b81); color:#fff; }
   .btn-sec { background:#333; color:#fff; border:1px solid #444; }
+  .btn-sm { padding:8px; width:auto; display:inline-block; font-size:11px; margin:0; }
   
   input { background:var(--input); border:1px solid var(--border); color:#fff; padding:12px; border-radius:8px; width:100%; font-size:16px; margin-bottom:5px; text-align:center; }
   .input-wrapper { position:relative; width:100%; }
   .input-unit { position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:10px; color:#666; font-weight:bold; }
 
+  /* TOGGLE */
   #unit-toggle { position:fixed; top:15px; right:15px; background:#222; border:1px solid #444; color:var(--accent); padding:8px 12px; border-radius:20px; font-weight:800; font-size:11px; z-index:9999; cursor:pointer; }
 
+  /* VIEWS */
   .view { padding:20px; max-width:600px; margin:0 auto; }
   h1 { text-align:center; margin:25px 0 5px; font-weight:900; font-size:24px; }
   .sub { text-align:center; color:#666; font-size:11px; letter-spacing:2px; margin-bottom:25px; text-transform:uppercase; }
@@ -35,25 +38,19 @@
   .day-row { padding:15px; border-bottom:1px solid #222; position:relative; }
   
   .day-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-  .day-left-grp { display:flex; align-items:center; gap:10px; }
+  .day-check-area { display:flex; align-items:center; gap:10px; }
   
+  /* CIRCLE CHECKBOX */
   .day-circle { width:26px; height:26px; border:2px solid #555; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; background:#111; z-index:50; }
   .day-circle.checked { background:var(--success); border-color:var(--success); color:#000; font-weight:bold; }
   .day-circle.checked::after { content:'✓'; }
 
   .lift-row { display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px; padding-bottom:5px; border-bottom:1px solid #222; }
-  .lift-nums { font-family:monospace; color:#fff; }
-  .calc-trigger { color:var(--success); text-decoration:underline; cursor:pointer; }
+  .calc-link { color:var(--success); text-decoration:underline; cursor:pointer; font-weight:bold; }
 
   .warmup-box { background:#111; padding:10px; border-top:1px dashed #333; display:none; margin-top:5px; }
-  .warmup-box.open { display:block; animation: slideDown 0.2s; }
-  @keyframes slideDown { from{opacity:0; transform:translateY(-5px)} to{opacity:1; transform:translateY(0)} }
+  .warmup-box.open { display:block; }
   .warmup-line { font-family:monospace; font-size:11px; color:#aaa; margin-bottom:4px; }
-
-  .chk-box { width:20px; height:20px; border:2px solid #444; border-radius:4px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-  .chk-box.checked { background:#444; }
-  .chk-box.checked::after { content:'✓'; color:#888; font-size:12px; font-weight:bold; }
-  .week-content.dimmed { opacity:0.3; filter:grayscale(100%); }
 
   /* MODALS */
   .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; display:none; align-items:center; justify-content:center; }
@@ -67,202 +64,192 @@
   .viz-plate { height:0; border:1px solid rgba(0,0,0,0.3); border-radius:2px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:bold; color:black; }
   
   /* LBS COLORS */
-  .vp-45 { height:70px; width:18px; background:#0984e3; color:white; }
-  .vp-35 { height:60px; width:16px; background:#fdcb6e; }
-  .vp-25 { height:50px; width:14px; background:#00b894; }
-  .vp-10 { height:40px; width:12px; background:#dfe6e9; }
-  .vp-5  { height:30px; width:10px; background:#d63031; color:white; }
-  .vp-2_5{ height:20px; width:8px; background:#636e72; color:white; }
+  .p45 { height:70px; width:18px; background:#0984e3; color:white; }
+  .p35 { height:60px; width:16px; background:#fdcb6e; }
+  .p25 { height:50px; width:14px; background:#00b894; }
+  .p10 { height:40px; width:12px; background:#dfe6e9; }
+  .p5  { height:30px; width:10px; background:#d63031; color:white; }
+  .p2_5{ height:20px; width:8px; background:#636e72; color:white; }
 
   /* KG COLORS */
-  .vp-kg-25 { height:70px; width:18px; background:#ff4757; color:white; } 
-  .vp-kg-20 { height:70px; width:16px; background:#0984e3; color:white; } 
-  .vp-kg-15 { height:60px; width:14px; background:#f1c40f; } 
-  .vp-kg-10 { height:50px; width:12px; background:#2ecc71; } 
-  .vp-kg-5  { height:35px; width:10px; background:#dfe6e9; } 
-  .vp-kg-2_5{ height:25px; width:8px;  background:#2d3436; color:white; } 
-  .vp-kg-1_25{ height:18px; width:6px; background:#b2bec3; } 
+  .kg25 { height:70px; width:18px; background:#ff4757; color:white; } /* Red */
+  .kg20 { height:70px; width:16px; background:#0984e3; color:white; } /* Blue */
+  .kg15 { height:60px; width:14px; background:#f1c40f; } /* Yellow */
+  .kg10 { height:50px; width:12px; background:#2ecc71; } /* Green */
+  .kg5  { height:35px; width:10px; background:#dfe6e9; } /* White */
+  .kg2_5{ height:25px; width:8px;  background:#2d3436; color:white; } /* Black */
+  .kg1_25{ height:18px; width:6px; background:#b2bec3; } /* Silver */
 
   .plate-btn-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:15px; }
   .p-btn { background:#222; border:1px solid #444; color:white; padding:15px 0; border-radius:8px; font-weight:bold; cursor:pointer; }
 
+  /* NAV */
   .nav { position:fixed; bottom:0; left:0; width:100%; height:80px; background:#181818; border-top:1px solid #333; display:grid; grid-template-columns:1fr 1fr 1fr; z-index:1000; padding-bottom:20px; }
   .nav-btn { background:none; border:none; color:#666; font-size:10px; font-weight:bold; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; }
   .nav-btn.active { color:var(--accent); }
 
-  #toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:#222; border:1px solid #333; padding:10px 20px; border-radius:30px; opacity:0; pointer-events:none; transition:0.3s; z-index:3000; font-size:12px; font-weight:bold; }
-  #toast.show { opacity:1; transform:translate(-50%, -10px); }
+  /* LOG STYLES */
+  .day-card { background:var(--card); padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid #333; }
+  .gym-selector { background:#222; padding:10px; border-radius:8px; border:1px solid #333; margin-bottom:20px; display:flex; justify-content:space-between; cursor:pointer; }
 </style>
 </head>
 <body>
 
-<button id="unit-toggle" onclick="window.toggleUnit()">LBS</button>
-<div id="toast">Saved</div>
+<button id="unit-toggle" onclick="toggleUnit()">LBS</button>
+<div id="debug-status" style="position:fixed; bottom:90px; right:10px; font-size:9px; color:#333; z-index:9000;">Loading...</div>
 
 <div id="modal-calc" class="modal-overlay">
   <div class="modal-box">
-    <div class="close-x" onclick="window.closeCalc()">✕</div>
+    <div class="close-x" onclick="closeModal('modal-calc')">✕</div>
     <h3>Plate Math</h3>
     <div class="barbell-viz">
         <div class="sleeve"></div>
-        <div class="plate-stack" id="plate-stack-display"></div>
+        <div class="plate-stack" id="viz-stack"></div>
     </div>
-    <input type="text" inputmode="decimal" id="calc-total" oninput="window.manualCalcUpdate(this.value)">
-    <div style="display:flex; gap:10px; margin-bottom:15px;">
-        <button id="mode-bar" class="btn btn-sm" style="background:var(--success); color:black;" onclick="window.setCalcMode('bar')">BARBELL</button>
-        <button id="mode-single" class="btn btn-sm" style="background:#333;" onclick="window.setCalcMode('single')">SINGLE</button>
-    </div>
-    <div id="plate-btn-grid" class="plate-btn-grid"></div>
+    <input type="number" id="calc-input" oninput="updateCalcViz(this.value)">
+    <div class="plate-btn-grid" id="plate-grid"></div>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-        <button class="btn btn-sec" onclick="window.resetCalc()">Clear</button>
-        <button class="btn btn-main" onclick="window.applyCalc()">Use</button>
+        <button class="btn btn-sec" onclick="resetCalc()">Clear</button>
+        <button class="btn btn-main" onclick="applyCalc()">Use</button>
     </div>
   </div>
 </div>
 
-<div id="modal-program-log" class="modal-overlay">
+<div id="modal-log" class="modal-overlay">
   <div class="modal-box">
-    <div class="close-x" onclick="document.getElementById('modal-program-log').style.display='none'">✕</div>
-    <h3>Log Results</h3>
+    <div class="close-x" onclick="closeModal('modal-log')">✕</div>
+    <h3>Log Workout</h3>
     <p style="font-size:11px; color:#888; margin-bottom:15px;">Adjust actual numbers performed.</p>
-    <div style="margin-bottom:10px;">
-        <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><b style="color:var(--accent); font-size:12px;">SQUAT</b></div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div class="input-wrapper"><input type="number" id="log-s-w"><span class="input-unit lbl-unit">LBS</span></div>
-            <div class="input-wrapper"><input type="number" id="log-s-r"><span class="input-unit">REPS</span></div>
-        </div>
-    </div>
-    <div style="margin-bottom:10px;">
-        <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><b style="color:var(--accent); font-size:12px;">BENCH</b></div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div class="input-wrapper"><input type="number" id="log-b-w"><span class="input-unit lbl-unit">LBS</span></div>
-            <div class="input-wrapper"><input type="number" id="log-b-r"><span class="input-unit">REPS</span></div>
-        </div>
-    </div>
-    <div style="margin-bottom:20px;">
-        <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><b style="color:var(--accent); font-size:12px;">DEADLIFT</b></div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div class="input-wrapper"><input type="number" id="log-d-w"><span class="input-unit lbl-unit">LBS</span></div>
-            <div class="input-wrapper"><input type="number" id="log-d-r"><span class="input-unit">REPS</span></div>
-        </div>
-    </div>
-    <button class="btn btn-main" onclick="window.confirmProgramLog()">Save to History</button>
+    
+    <div id="log-inputs"></div> <button class="btn btn-main" onclick="confirmLog()">Save to History</button>
   </div>
 </div>
 
 <div id="view-prog" class="view">
-  <h1>NETGAINS <span class="brand-span">V18.2</span></h1>
+  <h1>NETGAINS <span class="brand-span">V18</span></h1>
   <p class="sub">BAECHLE ENGINE</p>
+  
   <div style="background:#222; padding:15px; border-radius:12px; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
-        <div><label style="font-size:10px; color:#888">SQUAT</label><input type="number" id="prog-s" placeholder="-" oninput="window.saveProgramInputs()"></div>
-        <div><label style="font-size:10px; color:#888">BENCH</label><input type="number" id="prog-b" placeholder="-" oninput="window.saveProgramInputs()"></div>
-        <div><label style="font-size:10px; color:#888">DEAD</label><input type="number" id="prog-d" placeholder="-" oninput="window.saveProgramInputs()"></div>
+        <div><label style="font-size:10px; color:#888">SQUAT</label><input type="number" id="in-s" placeholder="-" oninput="saveInputs()"></div>
+        <div><label style="font-size:10px; color:#888">BENCH</label><input type="number" id="in-b" placeholder="-" oninput="saveInputs()"></div>
+        <div><label style="font-size:10px; color:#888">DEAD</label><input type="number" id="in-d" placeholder="-" oninput="saveInputs()"></div>
     </div>
-    <button class="btn btn-main" onclick="window.genProgram()">Update Cycle</button>
+    <button class="btn btn-main" onclick="genProgram()">Update Cycle</button>
   </div>
-  <div id="schedule-area"></div>
-  <button class="btn btn-sec" style="margin-top:30px; border-style:dashed; color:#ff4757;" onclick="window.resetProgram()">⚠ Reset Program</button>
+  
+  <div id="prog-container"></div>
+  <button class="btn btn-sec" style="margin-top:30px; border-style:dashed; color:#ff4757;" onclick="hardReset()">⚠ Factory Reset</button>
 </div>
 
 <div id="view-log" class="view hidden">
-    <h1>LOG</h1><p style="text-align:center;color:#666">Coming Soon in Full Version</p>
+  <h1>LOG</h1>
+  <div class="gym-selector" onclick="alert('Gym Switcher coming next')">
+      <div><span style="font-size:10px; color:#888">LOCATION</span><br><b id="gym-name">Main Gym</b></div>
+      <div>▼</div>
+  </div>
+  <div id="folder-list"></div>
+  <button class="btn btn-sec" onclick="addFolder()">+ New Folder</button>
 </div>
+
 <div id="view-stats" class="view hidden">
-    <h1>STATS</h1><div class="chart-container" style="background:#111; padding:10px; border-radius:12px;"><canvas id="perfChart"></canvas></div>
-    <div id="stat-details" style="margin-top:15px; font-size:12px; color:#888; text-align:center;"></div>
-    <div style="margin-top:30px; text-align:center;">
-        <button class="btn btn-sec" onclick="window.exportCSV()">Export Data</button>
-        <div style="margin-top:20px; font-size:9px; color:#444; text-decoration:underline; cursor:pointer;" onclick="localStorage.clear();location.reload()">System Reset</div>
-    </div>
+  <h1>STATS</h1>
+  <div class="chart-container" style="background:#111; padding:10px; border-radius:12px;">
+      <canvas id="myChart"></canvas>
+  </div>
+  <div id="stats-text" style="text-align:center; margin-top:15px; color:#888; font-size:12px;"></div>
+  <button class="btn btn-sec" onclick="exportData()">Export CSV</button>
 </div>
 
 <div class="nav">
-    <button class="nav-btn active" onclick="window.goTab('prog', this)"><span>📊</span> PROGRAM</button>
-    <button class="nav-btn" onclick="window.goTab('log', this)"><span>📝</span> LOG</button>
-    <button class="nav-btn" onclick="window.goTab('stats', this)"><span>📈</span> STATS</button>
+    <button class="nav-btn active" onclick="goTab('prog', this)">📊<br>PROG</button>
+    <button class="nav-btn" onclick="goTab('log', this)">📝<br>LOG</button>
+    <button class="nav-btn" onclick="goTab('stats', this)">📈<br>STATS</button>
 </div>
 
 <script>
-// 1. GLOBAL STATE & INIT
+// --- 1. GLOBAL STATE & INIT ---
 const DB_KEY = 'netgains_v18_db';
-let DATA = { unit:'lbs', inputs:{s:'',b:'',d:''}, progState:{}, history:[] };
+let DATA = {
+    unit: 'lbs',
+    inputs: {s:'', b:'', d:''},
+    progState: {},
+    history: []
+};
 
+// Safe Load
 try {
     const saved = localStorage.getItem(DB_KEY);
     if(saved) DATA = JSON.parse(saved);
-} catch(e) { console.log("Resetting Data"); }
+} catch(e) {
+    console.log("Resetting Data");
+}
 
+// Ensure defaults if missing
 if(!DATA.unit) DATA.unit = 'lbs';
 if(!DATA.inputs) DATA.inputs = {s:'', b:'', d:''};
 if(!DATA.progState) DATA.progState = {};
 if(!DATA.history) DATA.history = [];
 
-function initUI() {
-    const sIn = document.getElementById('prog-s');
-    const bIn = document.getElementById('prog-b');
-    const dIn = document.getElementById('prog-d');
-    if(sIn) sIn.value = DATA.inputs.s;
-    if(bIn) bIn.value = DATA.inputs.b;
-    if(dIn) dIn.value = DATA.inputs.d;
-    updateUnitBtn();
-    genProgram();
-}
+// Apply Data to UI immediately
+document.getElementById('in-s').value = DATA.inputs.s;
+document.getElementById('in-b').value = DATA.inputs.b;
+document.getElementById('in-d').value = DATA.inputs.d;
+updateUnitBtn();
+genProgram(); // Render program if data exists
+document.getElementById('debug-status').innerText = "Status: OK";
 
-// --- CORE FUNCTIONS ---
-window.saveData = function() {
+// --- 2. CORE FUNCTIONS ---
+function saveData() {
     localStorage.setItem(DB_KEY, JSON.stringify(DATA));
 }
 
-window.resetProgram = function() {
-    if(confirm("Clear progress?")) {
-        DATA.progState = {};
-        DATA.inputs = {s:'', b:'', d:''};
-        window.saveData();
+function hardReset() {
+    if(confirm("Wipe everything?")) {
+        localStorage.removeItem(DB_KEY);
         location.reload();
     }
 }
 
-window.goTab = function(t, btn) {
+function goTab(t, btn) {
     document.querySelectorAll('.view').forEach(e => e.classList.add('hidden'));
     document.getElementById('view-'+t).classList.remove('hidden');
     document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
     btn.classList.add('active');
-    if(t === 'stats') window.renderStats();
+    if(t === 'stats') renderStats();
 }
 
-window.toggleUnit = function() {
+function toggleUnit() {
     DATA.unit = (DATA.unit === 'lbs') ? 'kg' : 'lbs';
-    window.saveData();
+    saveData();
     updateUnitBtn();
-    window.genProgram();
+    genProgram();
 }
 
 function updateUnitBtn() {
     document.getElementById('unit-toggle').innerText = DATA.unit.toUpperCase();
     const ph = DATA.unit === 'lbs' ? 'lbs' : 'kg';
-    document.getElementById('prog-s').placeholder = ph;
-    document.getElementById('prog-b').placeholder = ph;
-    document.getElementById('prog-d').placeholder = ph;
-    document.querySelectorAll('.lbl-unit').forEach(e => e.innerText = DATA.unit.toUpperCase());
+    document.getElementById('in-s').placeholder = ph;
+    document.getElementById('in-b').placeholder = ph;
+    document.getElementById('in-d').placeholder = ph;
 }
 
-window.saveProgramInputs = function() {
-    DATA.inputs.s = document.getElementById('prog-s').value;
-    DATA.inputs.b = document.getElementById('prog-b').value;
-    DATA.inputs.d = document.getElementById('prog-d').value;
-    window.saveData();
+function saveInputs() {
+    DATA.inputs.s = document.getElementById('in-s').value;
+    DATA.inputs.b = document.getElementById('in-b').value;
+    DATA.inputs.d = document.getElementById('in-d').value;
+    saveData();
 }
 
-// --- PROGRAM GENERATOR (FIXED) ---
-window.genProgram = function() {
-    const container = document.getElementById('schedule-area');
+// --- 3. PROGRAM GENERATOR ---
+function genProgram() {
+    const container = document.getElementById('prog-container');
     const s = parseFloat(DATA.inputs.s);
     const b = parseFloat(DATA.inputs.b);
     const d = parseFloat(DATA.inputs.d);
     
     if(!s || !b || !d) {
-        container.innerHTML = "<p style='text-align:center; color:#666; margin-top:20px;'>Enter maxes to generate cycle.</p>";
+        container.innerHTML = "<p style='text-align:center; color:#666; margin-top:20px;'>Enter your maxes above to generate cycle.</p>";
         return;
     }
 
@@ -270,303 +257,5 @@ window.genProgram = function() {
     const bar = DATA.unit === 'lbs' ? 45 : 20;
     const rnd = n => Math.round(n/step)*step;
 
-    // Baechle Logic (Fixed Set Counts)
-    const s5 = rnd(s * 0.87); const b5 = rnd(b * 0.87); const d5 = rnd(d * 0.87);
-    
-    const weeks = [
-        {n:1, t:"STRENGTH", m:0.85, s:3, r:5}, 
-        {n:2, t:"STRENGTH", m:0.90, s:3, r:5}, 
-        {n:3, t:"STRENGTH", m:0.95, s:3, r:5}, 
-        {n:4, t:"STRENGTH", m:1.05, s:3, r:5, l_drop:0.80},
-        {n:5, t:"UNLOAD", m:0.85, s:2, r:3, l_drop:0.85}, 
-        {n:6, t:"POWER", m:0.92, s:3, r:3, base:"1RM", l_drop:0.75}, 
-        {n:7, t:"POWER", m:0.92, s:3, r:3, base:"1RM", l_drop:0.85}, 
-        {n:8, t:"POWER", m:0.95, s:3, r:2, base:"1RM", l_drop:0.70}
-    ];
-
-    const calcRamp = (target) => {
-        if(target < (bar + 20)) return `${bar}x10, ${rnd((target-bar)*0.6 + bar)}x5`;
-        const s2 = rnd((target - bar) * 0.4 + bar);
-        const s3 = rnd((target - bar) * 0.7 + bar);
-        const s4 = rnd((target - bar) * 0.85 + bar);
-        return `${bar}x12, ${s2}x5, ${s3}x3, ${s4}x1`;
-    };
-
-    let h = '';
-    weeks.forEach(k => {
-        const wKey = `w${k.n}`;
-        const doneM = DATA.progState[wKey+"_m"] === true;
-        const doneW = DATA.progState[wKey+"_w"] === true;
-        const doneF = DATA.progState[wKey+"_f"] === true;
-        
-        if(doneM && doneW && doneF && !DATA.progState[wKey]) {
-            DATA.progState[wKey] = true; window.saveData();
-        }
-        const isWeekDone = DATA.progState[wKey] === true;
-
-        let sH, bH, dH;
-        if(k.base === "1RM"){ sH = rnd(s * k.m); bH = rnd(b * k.m); dH = rnd(d * k.m); }
-        else { sH = rnd(s5 * k.m); bH = rnd(b5 * k.m); dH = rnd(d5 * k.m); }
-        
-        const l_mult = k.l_drop || 0.85; const m_mult = 0.95;
-        const sL = rnd(sH * l_mult); bL = rnd(bH * l_mult); dL = rnd(dH * l_mult);
-        const sM = rnd(sH * m_mult); bM = rnd(bH * m_mult); dM = rnd(dH * m_mult);
-
-        const buildDay = (dayName, typeLabel, cls, sw, bw, dw, dKey, isDone) => `
-            <div class="day-row" onclick="window.toggleWarmup(this)">
-                <div class="day-header">
-                    <div class="day-left-grp">
-                        <div class="day-circle ${isDone?'checked':''}" onclick="window.openLogModal(${sw},${bw},${dw},${k.r},'${dKey}', event)"></div>
-                        <span style="font-weight:bold">${dayName}</span>
-                    </div>
-                    <span class="day-type" style="font-size:9px; padding:3px; border-radius:4px; font-weight:800; background:${cls==='type-h'?'#ff4757':(cls==='type-l'?'#2ed573':'#ffa502')}; color:${cls==='type-h'?'#fff':'#000'}">${typeLabel}</span>
-                </div>
-                <div class="lift-row"><span>SQ</span><span class="lift-nums"><span class="calc-trigger" onclick="window.openCalc(${sw}, event)">${sw}</span> (${k.s}x${k.r})</span></div>
-                <div class="lift-row"><span>BP</span><span class="lift-nums"><span class="calc-trigger" onclick="window.openCalc(${bw}, event)">${bw}</span> (${k.s}x${k.r})</span></div>
-                <div class="lift-row" style="border:none"><span>DL</span><span class="lift-nums"><span class="calc-trigger" onclick="window.openCalc(${dw}, event)">${dw}</span> (${k.s}x${k.r})</span></div>
-                <div class="warmup-box">
-                    <div style="font-size:10px; color:var(--accent); font-weight:bold; margin-bottom:5px;">WARMUP (${bar} ${DATA.unit})</div>
-                    <div class="warmup-line">SQ: ${calcRamp(sw)}</div>
-                    <div class="warmup-line">BP: ${calcRamp(bw)}</div>
-                    <div class="warmup-line">DL: ${calcRamp(dw)}</div>
-                </div>
-            </div>`;
-
-        h += `<div class="week">
-            <div class="week-head">
-                <span>WEEK ${k.n} <span style="font-size:10px; color:#666">(${k.t})</span></span>
-                <div class="chk-box ${isWeekDone?'checked':''}" onclick="window.toggleManualWeek('${wKey}', this, event)"></div>
-            </div>
-            <div class="week-content ${isWeekDone?'dimmed':''}">
-                ${buildDay("MON", "HEAVY", "type-h", sH, bH, dH, wKey+"_m", doneM)}
-                ${buildDay("WED", "LIGHT", "type-l", sL, bL, dL, wKey+"_w", doneW)}
-                ${buildDay("FRI", "MEDIUM", "type-m", sM, bM, dM, wKey+"_f", doneF)}
-            </div>
-        </div>`;
-    });
-    container.innerHTML = h;
-}
-
-window.toggleWarmup = function(el) {
-    const box = el.querySelector('.warmup-box');
-    if(box) box.classList.toggle('open');
-}
-
-window.toggleManualWeek = function(wKey, el, e) {
-    e.stopPropagation();
-    const done = el.classList.contains('checked');
-    if(done) { el.classList.remove('checked'); DATA.progState[wKey]=false; }
-    else { el.classList.add('checked'); DATA.progState[wKey]=true; }
-    window.saveData(); window.genProgram();
-}
-
-// --- LOGGING MODAL ---
-let pendingLog = null;
-window.openLogModal = function(s,b,d,r,k,e) {
-    e.stopPropagation();
-    pendingLog = { key:k };
-    document.getElementById('log-s-w').value = s; document.getElementById('log-s-r').value = r;
-    document.getElementById('log-b-w').value = b; document.getElementById('log-b-r').value = r;
-    document.getElementById('log-d-w').value = d; document.getElementById('log-d-r').value = r;
-    document.getElementById('modal-program-log').style.display = 'flex';
-}
-
-window.confirmProgramLog = function() {
-    if(!pendingLog) return;
-    
-    // Read input values
-    const sW = document.getElementById('log-s-w').value;
-    const sR = document.getElementById('log-s-r').value;
-    const bW = document.getElementById('log-b-w').value;
-    const bR = document.getElementById('log-b-r').value;
-    const dW = document.getElementById('log-d-w').value;
-    const dR = document.getElementById('log-d-r').value;
-    const t = new Date().toISOString().split('T')[0];
-
-    // Push to history
-    DATA.history.push({date:t, ex:'Squat', w:sW, r:sR, rm:Math.round(sW*(1+0.033*sR))});
-    DATA.history.push({date:t, ex:'Bench', w:bW, r:bR, rm:Math.round(bW*(1+0.033*bR))});
-    DATA.history.push({date:t, ex:'Deadlift', w:dW, r:dR, rm:Math.round(dW*(1+0.033*dR))});
-
-    DATA.progState[pendingLog.key] = true;
-    window.saveData();
-    document.getElementById('modal-program-log').style.display = 'none';
-    window.genProgram();
-    window.showToast("Logged!");
-}
-
-window.showToast = function(m) {
-    const t = document.getElementById('toast');
-    t.innerText = m;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2000);
-}
-
-// --- CALC LOGIC ---
-let calcMode = 'bar';
-window.openCalc = function(w, e) {
-    e.stopPropagation();
-    document.getElementById('calc-total').value = w;
-    window.manualCalcUpdate(w);
-    window.renderPlateButtons();
-    document.getElementById('modal-plate-calc').style.display = 'flex';
-}
-window.closeCalc = function() { document.getElementById('modal-plate-calc').style.display = 'none'; }
-
-window.manualCalcUpdate = function(val) {
-    const w = parseFloat(val);
-    if(isNaN(w)) return;
-    const bar = (DATA.unit === 'lbs') ? 45 : 20;
-    const weight = (calcMode === 'bar') ? (w - bar)/2 : w;
-    renderPlateViz(weight);
-}
-
-window.renderPlateButtons = function() {
-    const grid = document.getElementById('plate-btn-grid');
-    grid.innerHTML = "";
-    const plates = (DATA.unit === 'lbs') ? [45,35,25,10,5,2.5] : [25,20,15,10,5,2.5];
-    plates.forEach(p => {
-        grid.innerHTML += `<button class="p-btn" onclick="window.addPlate(${p})">${p}</button>`;
-    });
-}
-
-window.addPlate = function(w) {
-    const cur = parseFloat(document.getElementById('calc-total').value) || 0;
-    const bar = (DATA.unit === 'lbs') ? 45 : 20;
-    let next;
-    if(calcMode === 'bar') {
-        const base = (cur < bar) ? bar : cur;
-        next = base + (w*2);
-    } else {
-        next = cur + w;
-    }
-    document.getElementById('calc-total').value = next;
-    window.manualCalcUpdate(next);
-}
-
-window.setCalcMode = function(m) {
-    calcMode = m;
-    const bar = (DATA.unit === 'lbs') ? 45 : 20;
-    document.getElementById('mode-bar').style.background = (m==='bar')?'var(--success)':'#333';
-    document.getElementById('mode-bar').style.color = (m==='bar')?'black':'white';
-    document.getElementById('mode-single').style.background = (m==='single')?'var(--success)':'#333';
-    document.getElementById('mode-single').style.color = (m==='single')?'black':'white';
-    const val = (m==='bar') ? bar : 0;
-    document.getElementById('calc-total').value = val;
-    window.manualCalcUpdate(val);
-}
-
-window.resetCalc = function() {
-    const bar = (DATA.unit === 'lbs') ? 45 : 20;
-    const val = (calcMode==='bar') ? bar : 0;
-    document.getElementById('calc-total').value = val;
-    window.manualCalcUpdate(val);
-}
-
-function renderPlateViz(weight) {
-    const viz = document.getElementById('plate-stack-display');
-    viz.innerHTML = "";
-    let rem = weight;
-    
-    const lbsPlates = [
-        {w:45, c:'vp-45', t:'45'}, {w:35, c:'vp-35', t:'35'},
-        {w:25, c:'vp-25', t:'25'}, {w:10, c:'vp-10', t:'10'},
-        {w:5, c:'vp-5', t:'5'}, {w:2.5, c:'vp-2_5', t:'2.5'}
-    ];
-    const kgPlates = [
-        {w:25, c:'vp-kg-25', t:'25'}, {w:20, c:'vp-kg-20', t:'20'},
-        {w:15, c:'vp-kg-15', t:'15'}, {w:10, c:'vp-kg-10', t:'10'},
-        {w:5, c:'vp-kg-5', t:'5'}, {w:2.5, c:'vp-kg-2_5', t:'2.5'}
-    ];
-    
-    const plates = (DATA.unit === 'lbs') ? lbsPlates : kgPlates;
-    
-    plates.forEach(p => {
-        while(rem >= p.w - 0.01) {
-            viz.innerHTML += `<div class="viz-plate ${p.c}">${p.t}</div>`;
-            rem -= p.w;
-        }
-    });
-}
-
-// --- STATS LOGIC ---
-window.renderStats = function() {
-    const sel = document.getElementById('stat-select');
-    const ctx = document.getElementById('perfChart').getContext('2d');
-    const det = document.getElementById('stat-details');
-    
-    // Populate Dropdown
-    const uniqueEx = [...new Set(DATA.history.map(l => l.ex))].sort();
-    if(uniqueEx.length === 0) {
-        sel.innerHTML = '<option>No Data</option>';
-        det.innerText = "Log workouts to see stats.";
-        return;
-    }
-    
-    // Keep selection if exists
-    const currentVal = sel.value;
-    sel.innerHTML = uniqueEx.map(e => `<option value="${e}">${e}</option>`).join('');
-    if(uniqueEx.includes(currentVal)) sel.value = currentVal;
-
-    const ex = sel.value;
-    const logs = DATA.history.filter(l => l.ex === ex).sort((a,b) => new Date(a.date) - new Date(b.date));
-    
-    if(logs.length === 0) return;
-
-    // Draw Chart
-    if(window.myChart) window.myChart.destroy();
-    
-    const labels = logs.map(l => l.date.substring(5));
-    const data = logs.map(l => l.rm);
-    const best = Math.max(...data);
-    const last = data[data.length-1];
-    
-    det.innerHTML = `BEST 1RM: <b style="color:#2ed573">${best}</b> | LATEST: <b>${last}</b>`;
-
-    window.myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Est. 1RM',
-                data: data,
-                borderColor: '#2ed573',
-                backgroundColor: 'rgba(46, 213, 115, 0.1)',
-                borderWidth: 2,
-                pointRadius: 4,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: {display:false} },
-            scales: {
-                x: { grid:{color:'#333'}, ticks:{color:'#666'} },
-                y: { grid:{color:'#333'}, ticks:{color:'#666'} }
-            }
-        }
-    });
-    
-    // Bind change event
-    sel.onchange = () => window.renderStats();
-}
-
-window.exportCSV = function() {
-    if(DATA.history.length === 0) { window.showToast("No Data"); return; }
-    let csv = "Date,Exercise,Weight,Reps,1RM\n";
-    DATA.history.forEach(l => {
-        csv += `${l.date},${l.ex},${l.w},${l.r},${l.rm}\n`;
-    });
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = "netgains_data.csv";
-    a.click();
-}
-
-// Start
-initUI();
-</script>
-</body>
-</html>
+    // Baechle Logic
+    const s5 = rnd(s * 0.87); const
