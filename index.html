@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V26</title>
+<title>NetGains V27</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -146,7 +146,7 @@
         <button id="mode-bar" class="btn btn-sm" style="background:var(--success); color:black;" onclick="window.setCalcMode('bar')">BARBELL</button>
         <button id="mode-single" class="btn btn-sm" style="background:#333;" onclick="window.setCalcMode('single')">SINGLE</button>
     </div>
-    <div id="plate-btn-grid" class="plate-grid"></div>
+    <div id="plate-btn-grid" class="plate-btn-grid"></div>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
         <button class="btn btn-sec" onclick="window.resetCalc()">Clear</button>
         <button class="btn btn-main" onclick="window.applyCalc()">Use</button>
@@ -189,7 +189,10 @@
     <h3>New Exercise</h3>
     <input type="text" id="new-ex-name" placeholder="Name...">
     <div id="tag-area" class="tag-grid"></div>
-    <button class="btn btn-main" onclick="window.confirmNewEx('str')">Create</button>
+    <div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <button class="btn btn-main" onclick="window.confirmNewEx('str')">STRENGTH</button>
+        <button class="btn btn-sec" style="border-color:var(--cardio); color:var(--cardio);" onclick="window.confirmNewEx('cardio')">CARDIO</button>
+    </div>
   </div>
 </div>
 
@@ -243,7 +246,7 @@
 </div>
 
 <div id="view-prog" class="view">
-  <h1>NETGAINS <span class="brand-span">V26</span></h1>
+  <h1>NETGAINS <span class="brand-span">V27</span></h1>
   <p class="sub">BAECHLE ENGINE</p>
   <div style="background:#222; padding:15px; border-radius:12px; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
@@ -314,7 +317,7 @@
 
 <script>
 // --- GLOBAL INIT ---
-const DB_KEY = 'netgains_v26_db';
+const DB_KEY = 'netgains_v27_db';
 let DATA = { 
     unit:'lbs', 
     inputs:{s:'',b:'',d:''}, 
@@ -462,6 +465,17 @@ window.toggleManualWeek = function(wKey, el, event){
     window.saveData(); window.genProgram();
 }
 
+window.toggleDayCheck = function(dKey, event, sw, bw, dw, r) {
+    event.stopPropagation();
+    if(DATA.progState[dKey]) {
+        delete DATA.progState[dKey];
+        window.saveData();
+        window.genProgram();
+    } else {
+        window.openProgramLogModal(sw, bw, dw, r, r, r, dKey, event);
+    }
+}
+
 window.genProgram = function(){
     const container = document.getElementById('schedule-area');
     const s = parseFloat(DATA.inputs.s);
@@ -520,7 +534,7 @@ window.genProgram = function(){
             <div class="day-row" onclick="window.toggleWarmup(this)">
                 <div class="day-title-row">
                     <div class="day-left-grp">
-                        <div class="day-check ${isDone?'checked':''}" onclick="window.openProgramLogModal(${sw},${bw},${dw},${k.r},'${dKey}', event)"></div>
+                        <div class="day-circle ${isDone?'checked':''}" onclick="window.toggleDayCheck('${dKey}', event, ${sw}, ${bw}, ${dw}, ${k.r})"></div>
                         <span style="font-weight:bold">${dayName}</span>
                     </div>
                     <span class="day-type ${cls}">${typeLabel}</span>
@@ -538,13 +552,13 @@ window.genProgram = function(){
         };
         h+=`<div class="week">
             <div class="week-head">
-                <span>Week ${k.n} <span style="color:#666;font-size:11px">(${k.t})</span></span>
+                <span>WEEK ${k.n} <span style="color:#666;font-size:11px">(${k.t})</span></span>
                 <div class="chk-box ${isWeekDone?'checked':''}" onclick="window.toggleManualWeek('${wKey}', this, event)"></div>
             </div>
             <div class="week-content ${isWeekDone?'dimmed':''}">
-                ${buildDay("MON", `HEAVY (${Math.round(k.m*100)}% ${k.base})`, "type-h", sH, bH, dH, k.r, wKey+"_m", doneM)}
-                ${buildDay("WED", `LIGHT (${Math.round(l_mult*100)}%)`, "type-l", sL, bL, dL, k.r, wKey+"_w", doneW)}
-                ${buildDay("FRI", `MEDIUM (${Math.round(m_mult*100)}%)`, "type-m", sM, bM, dM, k.r, wKey+"_f", doneF)}
+                ${buildDay("MON", `HEAVY (${Math.round(k.m*100)}% ${k.base})`, "type-h", sH, bH, dH, wKey+"_m", doneM)}
+                ${buildDay("WED", `LIGHT (${Math.round(l_mult*100)}%)`, "type-l", sL, bL, dL, wKey+"_w", doneW)}
+                ${buildDay("FRI", `MEDIUM (${Math.round(m_mult*100)}%)`, "type-m", sM, bM, dM, wKey+"_f", doneF)}
             </div>
         </div>`;
     });
