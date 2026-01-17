@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V36</title>
+<title>NetGains V37</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -71,7 +71,10 @@
   .set-num { text-align: center; font-weight: 700; color: #666; font-size: 12px; } 
   .cardio-row { display: grid; grid-template-columns: 30px 1fr 1fr 1fr 30px; gap: 6px; align-items: center; margin-bottom: 8px; }
   
-  .calc-btn { background: #222; border: 1px solid #444; color: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; height: 42px; font-size: 14px; }
+  /* FIXED CALC BUTTON - HIGH Z-INDEX */
+  .calc-btn { background: #222; border: 1px solid #444; color: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; height: 42px; font-size: 14px; position: relative; z-index: 50; }
+  .calc-btn:active { background: #333; transform: scale(0.95); }
+  
   .del-btn { background: none; border: none; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   
   .toggle-lr { font-size: 11px; background: #222; color: #aaa; padding: 8px 12px; border-radius: 6px; border: 1px solid #444; cursor: pointer; font-weight: 800; display: inline-block; transition: 0.1s; }
@@ -81,7 +84,6 @@
 
   /* --- FLASHY SET TAGS --- */
   .set-group-box { padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333; }
-  /* Increased opacity for that "Flashy" look */
   .set-group-drop { background: rgba(255, 107, 129, 0.15); border: 1px solid var(--drop); }
   .set-group-super { background: rgba(162, 155, 254, 0.15); border: 1px solid var(--super); }
   .set-group-assist { background: rgba(0, 210, 211, 0.15); border: 1px solid var(--assist); }
@@ -158,13 +160,11 @@
   .lift-name { color: #888; width: 40px; font-weight: bold; }
   .lift-nums { color: white; font-family: monospace; letter-spacing: -0.5px; }
   .calc-trigger { color: var(--success); cursor: pointer; border-bottom: 1px dashed #444; }
-  
   .warmup-drop { background: #111; padding: 10px; border-top: 1px dashed #333; display: none; margin-top:10px; }
   .warmup-drop.open { display: block; animation: slideDown 0.2s ease-out; }
   .warmup-header { font-size: 10px; color: var(--accent); font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
   .warmup-line { font-size: 11px; color: #aaa; margin-bottom: 3px; font-family: monospace; }
   @keyframes slideDown { from{opacity:0; transform:translateY(-5px)} to{opacity:1; transform:translateY(0)} }
-  
   .chk-box { width: 20px; height: 20px; border: 2px solid #444; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
   .chk-box.checked { background: #444; border-color: #444; }
   .chk-box.checked::after { content: '✓'; color: #888; font-weight: bold; font-size: 12px; }
@@ -311,7 +311,7 @@
 </div>
 
 <div id="view-prog" class="view">
-  <h1>NETGAINS <span class="brand-span">V36</span></h1>
+  <h1>NETGAINS <span class="brand-span">V37</span></h1>
   <p class="sub">BAECHLE ENGINE</p>
   <div style="background:#222; padding:15px; border-radius:12px; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
@@ -382,7 +382,7 @@
 
 <script>
 // --- GLOBAL INIT ---
-const DB_KEY = 'netgains_v36_db';
+const DB_KEY = 'netgains_v37_db';
 let DATA = { 
     unit:'lbs', 
     inputs:{s:'',b:'',d:''}, 
@@ -412,7 +412,7 @@ function initUI() {
     if(sIn) sIn.value = DATA.inputs.s;
     if(bIn) bIn.value = DATA.inputs.b;
     if(dIn) dIn.value = DATA.inputs.d;
-    updateUnitBtn();
+    // Removed unit toggle button logic (hardcoded to LBS)
     genProgram();
     renderDays(); 
 }
@@ -427,18 +427,6 @@ window.goTab = function(t, btn) {
     document.getElementById('view-'+t).classList.remove('hidden');
     document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
     btn.classList.add('active');
-}
-
-function updateUnitBtn() {
-    // Locked to LBS
-    const ph = "LBS";
-    document.getElementById('prog-s').placeholder = ph;
-    document.getElementById('prog-b').placeholder = ph;
-    document.getElementById('prog-d').placeholder = ph;
-    document.querySelectorAll('.lbl-unit').forEach(e => e.innerText = ph);
-    document.querySelectorAll('.input-unit').forEach(e => {
-        if(e.innerText === 'LBS' || e.innerText === 'KG') e.innerText = ph;
-    });
 }
 
 // --- PROGRAM ENGINE ---
@@ -656,7 +644,7 @@ window.deleteLibItem = function(e){ window.showConfirm(`Delete "${e}"?`, () => {
 window.addToCart = function(e){if(!DATA.activeCart.includes(e)){DATA.activeCart.push(e);if(!DATA.sessionData[e])DATA.sessionData[e]=[{w:'',r:''}];window.saveData();window.renderCart()}}
 window.removeExFromCart = function(e){DATA.activeCart=DATA.activeCart.filter(x=>x!==e);delete DATA.sessionData[e];window.saveData();window.renderCart()}
 
-// HELPER: Get Best Lift (FIXED)
+// HELPER: Get Best Lift (FIXED: RETURNS WEIGHT x REPS)
 window.getBestLift = function(exName) {
     const logs = DATA.history.filter(l => l.ex === exName);
     if(logs.length === 0) return null;
@@ -673,7 +661,7 @@ window.getBestLift = function(exName) {
     } else {
         logs.sort((a,b) => b.rm - a.rm);
         const best = logs[0];
-        return `${best.w} LBS x ${best.r}`; // FIXED LABEL
+        return `${best.w} LBS x ${best.r} REPS`;
     }
 }
 
@@ -702,7 +690,7 @@ window.renderCart = function(){
                     <div class="set-row">
                         <div class="set-num">${lab}</div>
                         <div class="input-wrapper"><input type="text" inputmode="decimal" value="${st.w}" onchange="window.updateSet('${safeEx}',${idx},'w',this.value)"><span class="input-unit">LBS</span></div>
-                        <button class="calc-btn" onclick="window.launchCalc(${exIdx},${idx})">🧮</button>
+                        <button class="calc-btn" onclick="window.launchCalc(${exIdx},${idx}, event)">🧮</button>
                         <div class="input-wrapper"><input type="text" inputmode="decimal" value="${st.r}" onchange="window.updateSet('${safeEx}',${idx},'r',this.value)"><span class="input-unit">REPS</span></div>
                         <button class="menu-btn" onclick="window.openSetOpt('${safeEx}',${idx})">...</button>
                         <button class="del-btn" onclick="window.removeSet('${safeEx}',${idx})">✕</button>
@@ -743,9 +731,17 @@ window.applySetType = function(type) {
 
 // --- CALC ---
 let calcTarget = null; let calcSide=0, calcBar=45, calcMode='bar';
-window.openQuickCalc = function(weight, event) { if(event) event.stopPropagation(); calcTarget = null; window.setCalcMode('bar'); document.getElementById('calc-total').value = weight; window.manualCalcUpdate(weight); document.getElementById('modal-plate-calc').style.display='flex'; }
-// FIXED: Renamed to launchCalc to avoid conflict
-window.launchCalc = function(exIdx, setIdx) { 
+window.openQuickCalc = function(weight, event) {
+    if(event) event.stopPropagation();
+    calcTarget = null; // No target, just visual
+    window.setCalcMode('bar');
+    document.getElementById('calc-total').value = weight;
+    window.manualCalcUpdate(weight);
+    document.getElementById('modal-plate-calc').style.display='flex';
+}
+
+window.launchCalc = function(exIdx, setIdx, event) { 
+    if(event) event.stopPropagation();
     const exName = DATA.activeCart[exIdx]; calcTarget = {ex: exName, idx: setIdx}; 
     const currentVal = DATA.sessionData[exName][setIdx].w || 45; 
     window.setCalcMode('bar'); document.getElementById('calc-total').value = currentVal; 
