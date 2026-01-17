@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V36</title>
+<title>NetGains V39</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -22,7 +22,7 @@
   body { margin: 0; padding: 0; background-color: var(--bg); color: var(--text); overflow-x: hidden; padding-bottom: 90px; }
   .hidden { display: none !important; }
   
-  /* BUTTONS (CHUNKY STYLE) */
+  /* BUTTONS */
   .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 13px; margin-top: 10px; transition: 0.1s; letter-spacing: 0.5px; }
   .btn:active { transform: scale(0.98); }
   .btn-main { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3); }
@@ -38,11 +38,11 @@
   .sub { text-align: center; color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; font-weight: 700; }
   
   /* INPUTS */
-  input { background: var(--input-bg); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 8px; width: 100%; font-size: 16px; margin-bottom: 5px; font-weight: 600; text-align: center; }
+  input { background: var(--input-bg); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 8px; width: 100%; font-size: 16px; margin-bottom: 5px; font-weight: 600; text-align: center; position: relative; z-index: 1; }
   input:focus { outline:none; border-color: var(--accent); }
   .input-wrapper { position: relative; width: 100%; }
   .input-wrapper input { padding-right: 35px; } 
-  .input-unit { position: absolute; right: 8px; top: 42%; transform: translateY(-50%); color: #555; font-size: 9px; pointer-events: none; font-weight: 800; text-transform: uppercase; }
+  .input-unit { position: absolute; right: 8px; top: 42%; transform: translateY(-50%); color: #555; font-size: 9px; pointer-events: none; font-weight: 800; text-transform: uppercase; z-index: 2; }
 
   /* VIEWS */
   .view { padding: 20px; max-width: 600px; margin: 0 auto; animation: fade 0.3s; }
@@ -67,24 +67,22 @@
   .ex-hist { font-size: 10px; color: var(--success); margin-bottom: 10px; display: flex; gap: 10px; font-weight: 700; }
   .hist-badge { background: rgba(46, 213, 115, 0.1); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(46, 213, 115, 0.3); letter-spacing: 0.5px; font-family: monospace; font-size: 10px; }
   
-  .set-row { display: grid; grid-template-columns: 35px 1fr 40px 1fr 30px 30px; gap: 6px; align-items: center; margin-bottom: 8px; }
+  .set-row { display: grid; grid-template-columns: 35px 1fr 1fr 45px 35px; gap: 8px; align-items: center; margin-bottom: 8px; }
   .set-num { text-align: center; font-weight: 700; color: #666; font-size: 12px; } 
   .cardio-row { display: grid; grid-template-columns: 30px 1fr 1fr 1fr 30px; gap: 6px; align-items: center; margin-bottom: 8px; }
   
-  .calc-btn { background: #222; border: 1px solid #444; color: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; height: 42px; font-size: 14px; }
   .del-btn { background: none; border: none; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   
   .toggle-lr { font-size: 11px; background: #222; color: #aaa; padding: 8px 12px; border-radius: 6px; border: 1px solid #444; cursor: pointer; font-weight: 800; display: inline-block; transition: 0.1s; }
   .toggle-lr.active { background: var(--accent); color: white; border-color: var(--accent); }
   
-  .menu-btn { background: #222; border: 1px solid #444; color: #888; border-radius: 6px; height: 42px; width: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; padding-bottom: 5px; }
+  .menu-btn { background: #222; border: 1px solid #444; color: #888; border-radius: 6px; height: 42px; width: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; padding-bottom: 5px; font-weight: 900; letter-spacing: 2px; }
 
-  /* --- FLASHY SET TAGS --- */
+  /* FLASHY SET TAGS (High Opacity) */
   .set-group-box { padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333; }
-  /* Increased opacity for that "Flashy" look */
-  .set-group-drop { background: rgba(255, 107, 129, 0.15); border: 1px solid var(--drop); }
-  .set-group-super { background: rgba(162, 155, 254, 0.15); border: 1px solid var(--super); }
-  .set-group-assist { background: rgba(0, 210, 211, 0.15); border: 1px solid var(--assist); }
+  .set-group-drop { background: rgba(255, 107, 129, 0.20); border: 1px solid var(--drop); }
+  .set-group-super { background: rgba(162, 155, 254, 0.20); border: 1px solid var(--super); }
+  .set-group-assist { background: rgba(0, 210, 211, 0.20); border: 1px solid var(--assist); }
 
   .label-drop { color: var(--drop); font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
   .label-super { color: var(--super); font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
@@ -103,9 +101,6 @@
 
   /* GRAPH */
   .chart-container { position: relative; height: 300px; width: 100%; background: #111; border: 1px solid #333; border-radius: 12px; padding: 10px; margin-top: 15px; }
-  .stat-toggle { display: flex; gap: 10px; margin-bottom: 10px; }
-  .st-btn { flex: 1; padding: 8px; background: #222; border: 1px solid #333; color: #666; font-size: 11px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-  .st-btn.active { background: var(--success); color: black; border-color: var(--success); }
   
   /* MODALS */
   .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
@@ -147,9 +142,12 @@
   .day-row { padding: 15px; border-bottom: 1px solid #222; position: relative; cursor: pointer; }
   .day-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .day-left-grp { display: flex; align-items: center; gap: 10px; }
-  .day-check { width: 24px; height: 24px; border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; z-index: 10; cursor: pointer; background: #111; }
+  
+  /* CHECKBOX - High Z-Index */
+  .day-check { width: 24px; height: 24px; border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; z-index: 50; cursor: pointer; background: #111; }
   .day-check.checked { background: var(--success); border-color: var(--success); }
   .day-check.checked::after { content: '✓'; color: black; font-weight: bold; font-size: 14px; }
+  
   .day-type { font-size: 9px; padding: 3px 6px; border-radius: 4px; font-weight: 800; text-transform: uppercase; }
   .type-h { background: #ff4757; color: white; } 
   .type-l { background: #2ed573; color: black; } 
@@ -158,7 +156,6 @@
   .lift-name { color: #888; width: 40px; font-weight: bold; }
   .lift-nums { color: white; font-family: monospace; letter-spacing: -0.5px; }
   .calc-trigger { color: var(--success); cursor: pointer; border-bottom: 1px dashed #444; }
-  
   .warmup-drop { background: #111; padding: 10px; border-top: 1px dashed #333; display: none; margin-top:10px; }
   .warmup-drop.open { display: block; animation: slideDown 0.2s ease-out; }
   .warmup-header { font-size: 10px; color: var(--accent); font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
@@ -176,6 +173,8 @@
   .btn-drop { background: var(--drop); color: white; border: none; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
   .btn-super { background: var(--super); color: white; border: none; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
   .btn-assist { background: var(--assist); color: black; border: none; font-weight: 800; }
+  
+  .btn-calc-menu { background: #111; color: var(--success); border: 1px solid #333; font-weight: 800; }
 
   .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: #181818; border-top: 1px solid #333; display: grid; grid-template-columns: 1fr 1fr 1fr; z-index: 1000; padding-bottom: 20px; }
   .nav-btn { background: none; border: none; color: #666; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
@@ -262,7 +261,9 @@
 
 <div id="modal-set-opt" class="modal-overlay">
   <div class="modal-box">
-    <h3 style="margin-bottom:15px;">Link Set</h3>
+    <h3 style="margin-bottom:15px;">Set Options</h3>
+    <button class="btn btn-calc-menu" style="width:100%; margin-bottom:10px; padding:12px;" onclick="window.launchCalcFromMenu()">🧮 PLATE CALCULATOR</button>
+    <div style="height:1px; background:#333; margin:10px 0;"></div>
     <button class="btn btn-drop" style="width:100%; margin-bottom:10px; padding:12px;" onclick="window.applySetType('drop')">💧 Drop Set</button>
     <button class="btn btn-super" style="width:100%; margin-bottom:10px; padding:12px;" onclick="window.applySetType('super')">🔗 Superset</button>
     <button class="btn btn-assist" style="width:100%; margin-bottom:10px; padding:12px;" onclick="window.applySetType('assist')">🤝 Assisted</button>
@@ -311,7 +312,7 @@
 </div>
 
 <div id="view-prog" class="view">
-  <h1>NETGAINS <span class="brand-span">V36</span></h1>
+  <h1>NETGAINS <span class="brand-span">V39</span></h1>
   <p class="sub">BAECHLE ENGINE</p>
   <div style="background:#222; padding:15px; border-radius:12px; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
@@ -382,7 +383,7 @@
 
 <script>
 // --- GLOBAL INIT ---
-const DB_KEY = 'netgains_v36_db';
+const DB_KEY = 'netgains_v39_db';
 let DATA = { 
     unit:'lbs', 
     inputs:{s:'',b:'',d:''}, 
@@ -412,7 +413,6 @@ function initUI() {
     if(sIn) sIn.value = DATA.inputs.s;
     if(bIn) bIn.value = DATA.inputs.b;
     if(dIn) dIn.value = DATA.inputs.d;
-    updateUnitBtn();
     genProgram();
     renderDays(); 
 }
@@ -427,18 +427,6 @@ window.goTab = function(t, btn) {
     document.getElementById('view-'+t).classList.remove('hidden');
     document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
     btn.classList.add('active');
-}
-
-function updateUnitBtn() {
-    // Locked to LBS
-    const ph = "LBS";
-    document.getElementById('prog-s').placeholder = ph;
-    document.getElementById('prog-b').placeholder = ph;
-    document.getElementById('prog-d').placeholder = ph;
-    document.querySelectorAll('.lbl-unit').forEach(e => e.innerText = ph);
-    document.querySelectorAll('.input-unit').forEach(e => {
-        if(e.innerText === 'LBS' || e.innerText === 'KG') e.innerText = ph;
-    });
 }
 
 // --- PROGRAM ENGINE ---
@@ -656,7 +644,7 @@ window.deleteLibItem = function(e){ window.showConfirm(`Delete "${e}"?`, () => {
 window.addToCart = function(e){if(!DATA.activeCart.includes(e)){DATA.activeCart.push(e);if(!DATA.sessionData[e])DATA.sessionData[e]=[{w:'',r:''}];window.saveData();window.renderCart()}}
 window.removeExFromCart = function(e){DATA.activeCart=DATA.activeCart.filter(x=>x!==e);delete DATA.sessionData[e];window.saveData();window.renderCart()}
 
-// HELPER: Get Best Lift (FIXED)
+// HELPER: Get Best Lift (FIXED: RETURNS WEIGHT x REPS)
 window.getBestLift = function(exName) {
     const logs = DATA.history.filter(l => l.ex === exName);
     if(logs.length === 0) return null;
@@ -673,11 +661,11 @@ window.getBestLift = function(exName) {
     } else {
         logs.sort((a,b) => b.rm - a.rm);
         const best = logs[0];
-        return `${best.w} LBS x ${best.r}`; // FIXED LABEL
+        return `${best.w} LBS x ${best.r} REPS`;
     }
 }
 
-// RENDER CART - FIXED CALCULATOR BUTTON
+// RENDER CART
 window.renderCart = function(){
     const area=document.getElementById('active-workout-area'); area.innerHTML=""; 
     if(DATA.activeCart.length===0){ area.innerHTML="<div style='text-align:center;padding:30px;color:#555;'>Empty Workout</div>"; return; } 
@@ -698,11 +686,11 @@ window.renderCart = function(){
                 let s = sets[i]; let ns = sets[i+1];
                 const safeEx = ex.replace(/'/g, "\\'");
                 
+                // NO CALCULATOR BUTTON IN ROW
                 const row = (idx, st, lab) => `
                     <div class="set-row">
                         <div class="set-num">${lab}</div>
                         <div class="input-wrapper"><input type="text" inputmode="decimal" value="${st.w}" onchange="window.updateSet('${safeEx}',${idx},'w',this.value)"><span class="input-unit">LBS</span></div>
-                        <button class="calc-btn" onclick="window.launchCalc(${exIdx},${idx})">🧮</button>
                         <div class="input-wrapper"><input type="text" inputmode="decimal" value="${st.r}" onchange="window.updateSet('${safeEx}',${idx},'r',this.value)"><span class="input-unit">REPS</span></div>
                         <button class="menu-btn" onclick="window.openSetOpt('${safeEx}',${idx})">...</button>
                         <button class="del-btn" onclick="window.removeSet('${safeEx}',${idx})">✕</button>
@@ -743,15 +731,29 @@ window.applySetType = function(type) {
 
 // --- CALC ---
 let calcTarget = null; let calcSide=0, calcBar=45, calcMode='bar';
-window.openQuickCalc = function(weight, event) { if(event) event.stopPropagation(); calcTarget = null; window.setCalcMode('bar'); document.getElementById('calc-total').value = weight; window.manualCalcUpdate(weight); document.getElementById('modal-plate-calc').style.display='flex'; }
-// FIXED: Renamed to launchCalc to avoid conflict
-window.launchCalc = function(exIdx, setIdx) { 
-    const exName = DATA.activeCart[exIdx]; calcTarget = {ex: exName, idx: setIdx}; 
-    const currentVal = DATA.sessionData[exName][setIdx].w || 45; 
+window.openQuickCalc = function(weight, event) {
+    if(event) event.stopPropagation();
+    calcTarget = null; // No target, just visual
+    window.setCalcMode('bar');
+    document.getElementById('calc-total').value = weight;
+    window.manualCalcUpdate(weight);
+    document.getElementById('modal-plate-calc').style.display='flex';
+}
+
+// LAUNCH FROM MENU
+window.launchCalcFromMenu = function() {
+    if(!optTarget) return;
+    const {ex, i} = optTarget;
+    // Close menu first
+    document.getElementById('modal-set-opt').style.display = 'none';
+    
+    calcTarget = {ex: ex, idx: i}; 
+    const currentVal = DATA.sessionData[ex][i].w || 45; 
     window.setCalcMode('bar'); document.getElementById('calc-total').value = currentVal; 
     window.manualCalcUpdate(currentVal); window.renderPlateButtons(); 
     document.getElementById('modal-plate-calc').style.display='flex'; 
 }
+
 window.closeCalc = function(){ document.getElementById('modal-plate-calc').style.display='none'; }
 window.renderPlateButtons = function(){ const grid = document.getElementById('plate-btn-grid'); grid.innerHTML = ""; [45,35,25,10,5,2.5].forEach(w => { grid.innerHTML += `<button class="p-btn" onclick="window.addPlate(${w})">${w}</button>`; }); }
 window.setCalcMode = function(m){ calcMode=m; const stdBar = 45; calcBar=(m==='bar')?stdBar:0; document.getElementById('mode-bar').style.background=(m==='bar')?'var(--success)':'#333'; document.getElementById('mode-bar').style.color=(m==='bar')?'black':'white'; document.getElementById('mode-single').style.background=(m==='single')?'var(--success)':'#333'; document.getElementById('mode-single').style.color=(m==='single')?'black':'white'; window.updateCalcDisplay(); }
