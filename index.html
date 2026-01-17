@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V35</title>
+<title>NetGains V36</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -22,7 +22,7 @@
   body { margin: 0; padding: 0; background-color: var(--bg); color: var(--text); overflow-x: hidden; padding-bottom: 90px; }
   .hidden { display: none !important; }
   
-  /* BUTTONS (CHUNKY V22 STYLE) */
+  /* BUTTONS (CHUNKY STYLE) */
   .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 13px; margin-top: 10px; transition: 0.1s; letter-spacing: 0.5px; }
   .btn:active { transform: scale(0.98); }
   .btn-main { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3); }
@@ -30,13 +30,8 @@
   .btn-ghost { background: transparent; border: 1px dashed #444; color: #666; font-size: 10px; padding: 6px 10px; width: auto; display: inline-block; cursor: pointer; border-radius: 6px; font-weight: 700; text-transform: uppercase; }
   .btn-sm { padding: 8px; font-size: 11px; width: auto; display: inline-block; margin: 0; }
   
-  /* UNIT TOGGLE - FIXED Z-INDEX */
-  #unit-toggle { 
-      position: fixed; top: 15px; right: 15px; 
-      background: #222; border: 1px solid #444; color: var(--accent); 
-      padding: 8px 12px; border-radius: 20px; font-weight: 800; font-size: 11px; 
-      cursor: pointer; z-index: 99999; box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
-  }
+  /* STATIC LBS BADGE */
+  #lbs-badge { position: fixed; top: 15px; right: 15px; background: #222; border: 1px solid #444; color: #666; padding: 6px 10px; border-radius: 20px; font-weight: 800; font-size: 10px; z-index: 9999; pointer-events: none; }
 
   h1 { text-align: center; margin: 25px 0 5px; font-size: 26px; letter-spacing: -1px; font-weight: 900; color: white; text-transform: uppercase; }
   .brand-span { color: var(--accent); }
@@ -55,19 +50,20 @@
 
   /* COMPONENTS */
   .gym-selector { background: #222; border: 1px solid var(--border); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; transition: 0.1s; }
+  .gym-selector:active { background: #2a2a2a; transform: scale(0.99); }
   .gym-label { font-size: 10px; color: #666; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px; }
   .gym-name { font-weight: 900; font-size: 18px; color: var(--accent); text-transform: uppercase; letter-spacing: -0.5px; }
   .gym-arrow { color: #555; font-size: 12px; font-weight: bold; }
 
   .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 16px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); transition: 0.1s; }
+  .day-card:active { transform: scale(0.99); border-color: #555; }
   .icon-btn { background: #222; border: 1px solid #444; color: #ccc; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
 
   /* WORKOUT ROWS */
   .ex-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border); }
   .ex-top { display: flex; justify-content: space-between; margin-bottom: 10px; align-items: flex-start; }
-  .ex-name { font-weight: 800; font-size: 16px; flex-grow: 1; letter-spacing: -0.3px; }
-  /* FIXED X POSITION */
-  .ex-tools { display: flex; gap: 10px; align-items: center; flex-shrink: 0; margin-left: 10px; } 
+  .ex-name { font-weight: 800; font-size: 16px; margin-right: 10px; flex-grow: 1; letter-spacing: -0.3px; }
+  .ex-tools { display: flex; gap: 10px; align-items: center; flex-shrink: 0; margin-left: 10px; }
   .ex-hist { font-size: 10px; color: var(--success); margin-bottom: 10px; display: flex; gap: 10px; font-weight: 700; }
   .hist-badge { background: rgba(46, 213, 115, 0.1); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(46, 213, 115, 0.3); letter-spacing: 0.5px; font-family: monospace; font-size: 10px; }
   
@@ -80,6 +76,19 @@
   
   .toggle-lr { font-size: 11px; background: #222; color: #aaa; padding: 8px 12px; border-radius: 6px; border: 1px solid #444; cursor: pointer; font-weight: 800; display: inline-block; transition: 0.1s; }
   .toggle-lr.active { background: var(--accent); color: white; border-color: var(--accent); }
+  
+  .menu-btn { background: #222; border: 1px solid #444; color: #888; border-radius: 6px; height: 42px; width: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; padding-bottom: 5px; }
+
+  /* --- FLASHY SET TAGS --- */
+  .set-group-box { padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333; }
+  /* Increased opacity for that "Flashy" look */
+  .set-group-drop { background: rgba(255, 107, 129, 0.15); border: 1px solid var(--drop); }
+  .set-group-super { background: rgba(162, 155, 254, 0.15); border: 1px solid var(--super); }
+  .set-group-assist { background: rgba(0, 210, 211, 0.15); border: 1px solid var(--assist); }
+
+  .label-drop { color: var(--drop); font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
+  .label-super { color: var(--super); font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
+  .label-assist { color: var(--assist); font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
 
   /* SHELF */
   .shelf-header { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; border-top: 1px solid #333; padding-top: 20px; margin-bottom: 15px; }
@@ -94,6 +103,9 @@
 
   /* GRAPH */
   .chart-container { position: relative; height: 300px; width: 100%; background: #111; border: 1px solid #333; border-radius: 12px; padding: 10px; margin-top: 15px; }
+  .stat-toggle { display: flex; gap: 10px; margin-bottom: 10px; }
+  .st-btn { flex: 1; padding: 8px; background: #222; border: 1px solid #333; color: #666; font-size: 11px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+  .st-btn.active { background: var(--success); color: black; border-color: var(--success); }
   
   /* MODALS */
   .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
@@ -118,13 +130,6 @@
   .vp-10 { height: 50px; width: 14px; background: #dfe6e9; } 
   .vp-5  { height: 40px; width: 12px; background: #d63031; color: white; } 
   .vp-2_5{ height: 30px; width: 10px; background: #636e72; color: white; }
-  .vp-kg-25 { height: 90px; width: 22px; background: #ff4757; color: white; } 
-  .vp-kg-20 { height: 90px; width: 20px; background: #0984e3; color: white; } 
-  .vp-kg-15 { height: 60px; width: 14px; background: #f1c40f; color: black; } 
-  .vp-kg-10 { height: 50px; width: 12px; background: #2ecc71; color: white; } 
-  .vp-kg-5  { height: 45px; width: 14px; background: #dfe6e9; color: black; } 
-  .vp-kg-2_5{ height: 35px; width: 12px; background: #2d3436; color: white; } 
-  .vp-kg-1_25{ height: 25px; width: 10px; background: #b2bec3; color: black; } 
   .plate-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
   .p-btn { background: #222; border: 1px solid #444; color: white; padding: 15px 0; border-radius: 8px; font-weight: bold; cursor: pointer; }
   .p-btn:active { background: #444; }
@@ -136,7 +141,7 @@
   .picker-item:active { background: var(--accent); color: black; }
   .folder-tag { font-size: 9px; padding: 3px 6px; background: #333; border-radius: 4px; color: #aaa; margin-left: 10px; }
 
-  /* PROGRAM CSS - FIXED WARMUPS */
+  /* PROGRAM CSS */
   .week { background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; overflow: hidden; transition: 0.3s; }
   .week-head { display: flex; justify-content: space-between; padding: 15px; background: #222; border-bottom: 1px solid #333; font-weight: bold; }
   .day-row { padding: 15px; border-bottom: 1px solid #222; position: relative; cursor: pointer; }
@@ -154,23 +159,23 @@
   .lift-nums { color: white; font-family: monospace; letter-spacing: -0.5px; }
   .calc-trigger { color: var(--success); cursor: pointer; border-bottom: 1px dashed #444; }
   
-  /* FIXED WARMUP FONTS */
   .warmup-drop { background: #111; padding: 10px; border-top: 1px dashed #333; display: none; margin-top:10px; }
   .warmup-drop.open { display: block; animation: slideDown 0.2s ease-out; }
-  .warmup-header { font-size: 10px; color: var(--accent); font-weight: 800; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .warmup-line { font-family: -apple-system, system-ui, sans-serif; font-weight: 600; font-size: 11px; color: #aaa; margin-bottom: 3px; }
+  .warmup-header { font-size: 10px; color: var(--accent); font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
+  .warmup-line { font-size: 11px; color: #aaa; margin-bottom: 3px; font-family: monospace; }
   @keyframes slideDown { from{opacity:0; transform:translateY(-5px)} to{opacity:1; transform:translateY(0)} }
   
   .chk-box { width: 20px; height: 20px; border: 2px solid #444; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
   .chk-box.checked { background: #444; border-color: #444; }
   .chk-box.checked::after { content: '✓'; color: #888; font-weight: bold; font-size: 12px; }
   .week-content.dimmed { opacity: 0.3; pointer-events: none; filter: grayscale(100%); text-decoration: line-through; }
+  .log-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .log-lbl { font-size: 10px; color: #888; text-align: center; }
 
   /* SET BUTTONS */
   .btn-drop { background: var(--drop); color: white; border: none; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
   .btn-super { background: var(--super); color: white; border: none; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
   .btn-assist { background: var(--assist); color: black; border: none; font-weight: 800; }
-  .menu-btn { background: #222; border: 1px solid #444; color: #888; border-radius: 6px; height: 42px; width: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; padding-bottom: 5px; }
 
   .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: #181818; border-top: 1px solid #333; display: grid; grid-template-columns: 1fr 1fr 1fr; z-index: 1000; padding-bottom: 20px; }
   .nav-btn { background: none; border: none; color: #666; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
@@ -182,7 +187,7 @@
 </head>
 <body>
 
-<button id="unit-toggle" onclick="window.toggleUnit()">LBS</button>
+<div id="lbs-badge">LBS</div>
 <div id="debug-status" style="position:fixed; bottom:90px; right:10px; font-size:9px; color:#333; z-index:9000;">System: Active</div>
 <div id="toast">Saved</div>
 
@@ -276,10 +281,7 @@
 
 <div id="modal-stats-picker" class="modal-overlay">
     <div class="modal-box modal-full">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <button class="btn btn-sec btn-sm" onclick="document.getElementById('modal-stats-picker').style.display='none'">← BACK</button>
-            <div class="close-x" onclick="document.getElementById('modal-stats-picker').style.display='none'">✕</div>
-        </div>
+        <div class="close-x" onclick="document.getElementById('modal-stats-picker').style.display='none'">✕</div>
         <h3 style="margin-bottom:15px;">Select Data</h3>
         <input type="text" id="picker-search" placeholder="Search..." oninput="window.renderPickerItems(this.value)" style="margin-bottom:20px; font-size:18px; width:100%; padding:15px;">
         <div id="picker-content"></div>
@@ -309,7 +311,7 @@
 </div>
 
 <div id="view-prog" class="view">
-  <h1>NETGAINS <span class="brand-span">V35</span></h1>
+  <h1>NETGAINS <span class="brand-span">V36</span></h1>
   <p class="sub">BAECHLE ENGINE</p>
   <div style="background:#222; padding:15px; border-radius:12px; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
@@ -380,8 +382,19 @@
 
 <script>
 // --- GLOBAL INIT ---
-const DB_KEY = 'netgains_v35_db';
-let DATA = { unit:'lbs', inputs:{s:'',b:'',d:''}, progState:{}, history:[], currentGym: 'Main Gym', gyms: { 'Main Gym': {folders:[], library:{}} }, activeCart: [], sessionData: {}, customTags: [], exTypes: {} };
+const DB_KEY = 'netgains_v36_db';
+let DATA = { 
+    unit:'lbs', 
+    inputs:{s:'',b:'',d:''}, 
+    progState:{}, 
+    history:[], 
+    currentGym: 'Main Gym', 
+    gyms: { 'Main Gym': {folders:[], library:{}} }, 
+    activeCart: [], 
+    sessionData: {},
+    customTags: [],
+    exTypes: {}
+};
 
 try {
     const saved = localStorage.getItem(DB_KEY);
@@ -393,75 +406,218 @@ try {
 } catch(e) { console.log("Resetting Data"); }
 
 function initUI() {
-    const sIn = document.getElementById('prog-s'); const bIn = document.getElementById('prog-b'); const dIn = document.getElementById('prog-d');
-    if(sIn) sIn.value = DATA.inputs.s; if(bIn) bIn.value = DATA.inputs.b; if(dIn) dIn.value = DATA.inputs.d;
-    updateUnitBtn(); genProgram(); renderDays();
+    const sIn = document.getElementById('prog-s');
+    const bIn = document.getElementById('prog-b');
+    const dIn = document.getElementById('prog-d');
+    if(sIn) sIn.value = DATA.inputs.s;
+    if(bIn) bIn.value = DATA.inputs.b;
+    if(dIn) dIn.value = DATA.inputs.d;
+    updateUnitBtn();
+    genProgram();
+    renderDays(); 
 }
 
 // --- CORE ---
 window.saveData = function() { localStorage.setItem(DB_KEY,JSON.stringify(DATA)); }
 window.saveSession = function() { localStorage.setItem('activeCart',JSON.stringify(activeCart)); localStorage.setItem('sessionData',JSON.stringify(sessionData)); }
-window.goTab = function(t, btn) { document.querySelectorAll('.view').forEach(e => e.classList.add('hidden')); document.getElementById('view-'+t).classList.remove('hidden'); document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active')); btn.classList.add('active'); }
 
-window.toggleUnit = function() {
-    const toKG = DATA.unit === 'lbs';
-    const factor = toKG ? 0.453592 : 2.20462;
-    // Program Conversion
-    if(DATA.inputs.s) DATA.inputs.s = Math.round(DATA.inputs.s * factor);
-    if(DATA.inputs.b) DATA.inputs.b = Math.round(DATA.inputs.b * factor);
-    if(DATA.inputs.d) DATA.inputs.d = Math.round(DATA.inputs.d * factor);
-    // Session Conversion
-    Object.keys(DATA.sessionData).forEach(ex => {
-        DATA.sessionData[ex].forEach(set => {
-            if(set.w && set.w !== 'BW') set.w = Math.round(set.w * factor);
-        });
-    });
-    DATA.unit = toKG ? 'kg' : 'lbs';
-    window.saveData(); window.updateUnitUI(); window.genProgram(); window.renderCart(); 
+// --- NAV ---
+window.goTab = function(t, btn) {
+    document.querySelectorAll('.view').forEach(e => e.classList.add('hidden'));
+    document.getElementById('view-'+t).classList.remove('hidden');
+    document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
+    btn.classList.add('active');
 }
 
 function updateUnitBtn() {
-    document.getElementById('unit-toggle').innerText = DATA.unit.toUpperCase();
-    const ph = DATA.unit.toUpperCase();
-    document.getElementById('prog-s').placeholder = ph; document.getElementById('prog-b').placeholder = ph; document.getElementById('prog-d').placeholder = ph;
+    // Locked to LBS
+    const ph = "LBS";
+    document.getElementById('prog-s').placeholder = ph;
+    document.getElementById('prog-b').placeholder = ph;
+    document.getElementById('prog-d').placeholder = ph;
     document.querySelectorAll('.lbl-unit').forEach(e => e.innerText = ph);
-    document.querySelectorAll('.input-unit').forEach(e => { if(e.innerText === 'LBS' || e.innerText === 'KG') e.innerText = ph; });
-    const sIn = document.getElementById('prog-s'); const bIn = document.getElementById('prog-b'); const dIn = document.getElementById('prog-d');
-    if(sIn) sIn.value = DATA.inputs.s; if(bIn) bIn.value = DATA.inputs.b; if(dIn) dIn.value = DATA.inputs.d;
+    document.querySelectorAll('.input-unit').forEach(e => {
+        if(e.innerText === 'LBS' || e.innerText === 'KG') e.innerText = ph;
+    });
 }
 
-// --- PROGRAM ---
-window.saveProgramInputs = function(){ DATA.inputs.s = document.getElementById('prog-s').value; DATA.inputs.b = document.getElementById('prog-b').value; DATA.inputs.d = document.getElementById('prog-d').value; window.saveData(); }
-window.resetProgram = function(){ window.showConfirm("Reset Cycle?", ()=>{ DATA.progState = {}; document.getElementById('prog-s').value = ""; document.getElementById('prog-b').value = ""; document.getElementById('prog-d').value = ""; DATA.inputs = {}; window.saveData(); document.getElementById('schedule-area').innerHTML = ""; }); }
-window.toggleWarmup = function(el){ el.querySelector('.warmup-drop').classList.toggle('open'); }
-window.openQuickCalc = function(weight, event) { if(event) event.stopPropagation(); calcTarget = null; window.setCalcMode('bar'); document.getElementById('calc-total').value = weight; window.manualCalcUpdate(weight); document.getElementById('modal-plate-calc').style.display='flex'; }
+// --- PROGRAM ENGINE ---
+window.saveProgramInputs = function(){
+    DATA.inputs.s = document.getElementById('prog-s').value;
+    DATA.inputs.b = document.getElementById('prog-b').value;
+    DATA.inputs.d = document.getElementById('prog-d').value;
+    window.saveData();
+}
+
+window.loadProgramInputs = function(){
+    if(DATA.inputs.s && DATA.inputs.b && DATA.inputs.d) window.genProgram();
+}
+
+window.resetProgram = function(){
+    window.showConfirm("Reset Cycle?", ()=>{
+        DATA.progState = {};
+        document.getElementById('prog-s').value = "";
+        document.getElementById('prog-b').value = "";
+        document.getElementById('prog-d').value = "";
+        DATA.inputs = {};
+        window.saveData();
+        document.getElementById('schedule-area').innerHTML = "";
+    });
+}
+
+window.toggleWarmup = function(el){
+    const drop = el.querySelector('.warmup-drop');
+    if(drop) { drop.classList.toggle('open'); }
+}
+
+window.openQuickCalc = function(weight, event) {
+    if(event) event.stopPropagation(); 
+    calcTarget = null; 
+    window.setCalcMode('bar'); 
+    document.getElementById('calc-total').value = weight;
+    window.manualCalcUpdate(weight); 
+    document.getElementById('modal-plate-calc').style.display='flex';
+}
+
 let pendingLog = null;
-window.openProgramLogModal = function(sW, bW, dW, sR, bR, dR, dayKey, event){ if(event) event.stopPropagation(); pendingLog = { dayKey }; document.getElementById('log-s-w').value = sW; document.getElementById('log-s-r').value = sR; document.getElementById('log-b-w').value = bW; document.getElementById('log-b-r').value = bR; document.getElementById('log-d-w').value = dW; document.getElementById('log-d-r').value = dR; const u = DATA.unit.toUpperCase(); document.querySelectorAll('.lbl-unit').forEach(e => e.innerText = u); document.getElementById('modal-program-log').style.display = 'flex'; }
-window.confirmProgramLog = function(){ if(!pendingLog) return; const sW = parseFloat(document.getElementById('log-s-w').value); const sR = parseFloat(document.getElementById('log-s-r').value); const bW = parseFloat(document.getElementById('log-b-w').value); const bR = parseFloat(document.getElementById('log-b-r').value); const dW = parseFloat(document.getElementById('log-d-w').value); const dR = parseFloat(document.getElementById('log-d-r').value); const t=new Date().toISOString().split('T')[0]; DATA.history.push({date:t, ex:"Squat", w:sW, r:sR, rm:Math.round(sW*(1+0.033*sR))}); DATA.history.push({date:t, ex:"Bench Press", w:bW, r:bR, rm:Math.round(bW*(1+0.033*bR))}); DATA.history.push({date:t, ex:"Deadlift", w:dW, r:dR, rm:Math.round(dW*(1+0.033*dR))}); DATA.progState[pendingLog.dayKey] = true; window.saveData(); document.getElementById('modal-program-log').style.display = 'none'; window.genProgram(); window.showToast("Logged!"); }
-window.toggleManualWeek = function(wKey, el, event){ if(event) event.stopPropagation(); const done = el.classList.contains('checked'); if(done) { el.classList.remove('checked'); DATA.progState[wKey]=false; } else { el.classList.add('checked'); DATA.progState[wKey]=true; } window.saveData(); window.genProgram(); }
-window.toggleDayCheck = function(dKey, event, sw, bw, dw, r) { if(event) event.stopPropagation(); if(DATA.progState[dKey] === true) { delete DATA.progState[dKey]; window.saveData(); window.genProgram(); } else { window.openProgramLogModal(sw, bw, dw, r, r, r, dKey, event); } }
+window.openProgramLogModal = function(sW, bW, dW, sR, bR, dR, dayKey, event){
+    event.stopPropagation(); 
+    pendingLog = { dayKey };
+    document.getElementById('log-s-w').value = sW; document.getElementById('log-s-r').value = sR;
+    document.getElementById('log-b-w').value = bW; document.getElementById('log-b-r').value = bR;
+    document.getElementById('log-d-w').value = dW; document.getElementById('log-d-r').value = dR;
+    const u = DATA.unit.toUpperCase();
+    document.querySelectorAll('.lbl-unit').forEach(e => e.innerText = u);
+    document.getElementById('modal-program-log').style.display = 'flex';
+}
+
+window.confirmProgramLog = function(){
+    if(!pendingLog) return;
+    const sW = parseFloat(document.getElementById('log-s-w').value); const sR = parseFloat(document.getElementById('log-s-r').value);
+    const bW = parseFloat(document.getElementById('log-b-w').value); const bR = parseFloat(document.getElementById('log-b-r').value);
+    const dW = parseFloat(document.getElementById('log-d-w').value); const dR = parseFloat(document.getElementById('log-d-r').value);
+    const t=new Date().toISOString().split('T')[0];
+    
+    DATA.history.push({date:t, ex:"Squat", w:sW, r:sR, rm:Math.round(sW*(1+0.033*sR))});
+    DATA.history.push({date:t, ex:"Bench Press", w:bW, r:bR, rm:Math.round(bW*(1+0.033*bR))});
+    DATA.history.push({date:t, ex:"Deadlift", w:dW, r:dR, rm:Math.round(dW*(1+0.033*dR))});
+    
+    DATA.progState[pendingLog.dayKey] = true;
+    window.saveData();
+    document.getElementById('modal-program-log').style.display = 'none';
+    window.genProgram();
+    window.showToast("Logged!");
+}
+
+window.toggleManualWeek = function(wKey, el, event){
+    event.stopPropagation();
+    const done = el.classList.contains('checked');
+    if(done) { el.classList.remove('checked'); DATA.progState[wKey]=false; }
+    else { el.classList.add('checked'); DATA.progState[wKey]=true; }
+    window.saveData(); window.genProgram();
+}
+
+window.toggleDayCheck = function(dKey, event, sw, bw, dw, r) {
+    event.stopPropagation();
+    if(DATA.progState[dKey] === true) {
+        delete DATA.progState[dKey];
+        window.saveData();
+        window.genProgram();
+    } else {
+        window.openProgramLogModal(sw, bw, dw, r, r, r, dKey, event);
+    }
+}
+
 window.genProgram = function(){
-    const container = document.getElementById('schedule-area'); const s = parseFloat(DATA.inputs.s); const b = parseFloat(DATA.inputs.b); const d = parseFloat(DATA.inputs.d);
-    if(!s || !b || !d) { container.innerHTML = "<p style='text-align:center; color:#666; margin-top:20px;'>Enter maxes to generate cycle.</p>"; return; }
-    const step = DATA.unit === 'lbs' ? 5 : 2.5; const bar = DATA.unit === 'lbs' ? 45 : 20; const rnd=n=>Math.round(n/step)*step;
+    const container = document.getElementById('schedule-area');
+    const s = parseFloat(DATA.inputs.s);
+    const b = parseFloat(DATA.inputs.b);
+    const d = parseFloat(DATA.inputs.d);
+    
+    if(!s || !b || !d) {
+        container.innerHTML = "<p style='text-align:center; color:#666; margin-top:20px;'>Enter maxes to generate cycle.</p>";
+        return;
+    }
+
+    const step = 5; // Fixed to LBS
+    const bar = 45; // Fixed to LBS
+    const rnd=n=>Math.round(n/step)*step;
+    
     const s5RM = rnd(s * 0.87); const b5RM = rnd(b * 0.87); const d5RM = rnd(d * 0.87);
-    const weeks=[ {n:1, t:"STRENGTH", m:0.85, s:3, r:5, base:"5RM"}, {n:2, t:"STRENGTH", m:0.90, s:3, r:5, base:"5RM"}, {n:3, t:"STRENGTH", m:0.95, s:3, r:5, base:"5RM"}, {n:4, t:"STRENGTH", m:1.05, s:3, r:5, base:"5RM", l_drop:0.80}, {n:5, t:"UNLOAD", m:0.85, s:2, r:3, base:"5RM", l_drop:0.85}, {n:6, t:"POWER", m:0.92, s:3, r:3, base:"1RM", l_drop:0.75}, {n:7, t:"POWER", m:0.92, s:3, r:3, base:"1RM", l_drop:0.85}, {n:8, t:"POWER", m:0.95, s:3, r:2, base:"1RM", l_drop:0.70} ];
-    const calcRamp = (target) => { if(target < (bar + 20)) return `${bar}x10, ${rnd((target-bar)*0.6 + bar)}x5`; const s2 = rnd((target - bar) * 0.4 + bar); const s3 = rnd((target - bar) * 0.7 + bar); const s4 = rnd((target - bar) * 0.85 + bar); return `${bar}x12, ${s2}x5, ${s3}x3, ${s4}x1`; };
+    const weeks=[
+        {n:1, t:"STRENGTH", m:0.85, s:3, r:5, base:"5RM"},
+        {n:2, t:"STRENGTH", m:0.90, s:3, r:5, base:"5RM"},
+        {n:3, t:"STRENGTH", m:0.95, s:3, r:5, base:"5RM"},
+        {n:4, t:"STRENGTH", m:1.05, s:3, r:5, base:"5RM", l_drop:0.80},
+        {n:5, t:"UNLOAD", m:0.85, s:2, r:3, base:"5RM", l_drop:0.85}, 
+        {n:6, t:"POWER", m:0.92, s:3, r:3, base:"1RM", l_drop:0.75}, 
+        {n:7, t:"POWER", m:0.92, s:3, r:3, base:"1RM", l_drop:0.85}, 
+        {n:8, t:"POWER", m:0.95, s:3, r:2, base:"1RM", l_drop:0.70}  
+    ];
+    
+    const calcRamp = (target) => {
+        if(target < (bar + 20)) return `${bar}x10, ${rnd((target-bar)*0.6 + bar)}x5`;
+        const s2 = rnd((target - bar) * 0.4 + bar); 
+        const s3 = rnd((target - bar) * 0.7 + bar);
+        const s4 = rnd((target - bar) * 0.85 + bar);
+        return `${bar}x12, ${s2}x5, ${s3}x3, ${s4}x1`;
+    };
+
     let h=``;
     weeks.forEach((k, idx)=>{
-        const wKey = `w${k.n}`; const doneM = DATA.progState[wKey+"_m"] === true; const doneW = DATA.progState[wKey+"_w"] === true; const doneF = DATA.progState[wKey+"_f"] === true;
-        if(doneM && doneW && doneF && !DATA.progState[wKey]) { DATA.progState[wKey] = true; window.saveData(); }
+        const wKey = `w${k.n}`;
+        const doneM = DATA.progState[wKey+"_m"] === true;
+        const doneW = DATA.progState[wKey+"_w"] === true;
+        const doneF = DATA.progState[wKey+"_f"] === true;
+        if(doneM && doneW && doneF && !DATA.progState[wKey]) {
+            DATA.progState[wKey] = true;
+            window.saveData();
+        }
         const isWeekDone = DATA.progState[wKey] === true;
-        let sH, bH, dH; if(k.base === "5RM"){ sH = rnd(s5RM * k.m); bH = rnd(b5RM * k.m); dH = rnd(d5RM * k.m); } else { sH = rnd(s * k.m); bH = rnd(b * k.m); dH = rnd(d * k.m); }
-        let l_mult = k.l_drop || 0.85; let m_mult = 0.95; const sL = rnd(sH * l_mult); bL = rnd(bH * l_mult); dL = rnd(dH * l_mult); const sM = rnd(sH * m_mult); bM = rnd(bH * m_mult); dM = rnd(dH * m_mult);
-        const buildDay = (dayName, typeLabel, cls, sw, bw, dw, dKey, isDone) => ` <div class="day-row" onclick="window.toggleWarmup(this)"> <div class="day-title-row"> <div class="day-left-grp"> <div class="day-check ${isDone?'checked':''}" onclick="window.toggleDayCheck('${dKey}', event, ${sw}, ${bw}, ${dw}, ${k.r})"></div> <span style="font-weight:bold">${dayName}</span> </div> <span class="day-type ${cls}">${typeLabel}</span> </div> <div class="lift-row"><span class="lift-name">SQ</span> <span class="lift-nums"><span class="calc-trigger" onclick="window.openQuickCalc(${sw}, event)">${sw}</span> (${k.s}x${k.r})</span></div> <div class="lift-row"><span class="lift-name">BP</span> <span class="lift-nums"><span class="calc-trigger" onclick="window.openQuickCalc(${bw}, event)">${bw}</span> (${k.s}x${k.r})</span></div> <div class="lift-row" style="border:none"><span class="lift-name">DL</span> <span class="lift-nums"><span class="calc-trigger" onclick="window.openQuickCalc(${dw}, event)">${dw}</span> (${k.s}x${k.r})</span></div> <div class="warmup-drop"> <div class="warmup-header">WARMUP SETS (${bar} ${DATA.unit})</div> <div class="warmup-line">SQ: ${calcRamp(sw)}</div> <div class="warmup-line">BP: ${calcRamp(bw)}</div> <div class="warmup-line">DL: ${calcRamp(dw)}</div> </div> </div>`;
-        h+=`<div class="week"> <div class="week-head"> <span>WEEK ${k.n} <span style="color:#666;font-size:11px">(${k.t})</span></span> <div class="chk-box ${isWeekDone?'checked':''}" onclick="window.toggleManualWeek('${wKey}', this, event)"></div> </div> <div class="week-content ${isWeekDone?'dimmed':''}"> ${buildDay("MON", `HEAVY (${Math.round(k.m*100)}% ${k.base})`, "type-h", sH, bH, dH, wKey+"_m", doneM)} ${buildDay("WED", `LIGHT (${Math.round(l_mult*100)}%)`, "type-l", sL, bL, dL, wKey+"_w", doneW)} ${buildDay("FRI", `MEDIUM (${Math.round(m_mult*100)}%)`, "type-m", sM, bM, dM, wKey+"_f", doneF)} </div> </div>`;
+        let sH, bH, dH;
+        if(k.base === "5RM"){ sH = rnd(s5RM * k.m); bH = rnd(b5RM * k.m); dH = rnd(d5RM * k.m); } 
+        else { sH = rnd(s * k.m); bH = rnd(b * k.m); dH = rnd(d * k.m); }
+        let l_mult = k.l_drop || 0.85; let m_mult = 0.95;
+        const sL = rnd(sH * l_mult); bL = rnd(bH * l_mult); dL = rnd(dH * l_mult);
+        const sM = rnd(sH * m_mult); bM = rnd(bH * m_mult); dM = rnd(dH * m_mult);
+
+        const buildDay = (dayName, typeLabel, cls, sw, bw, dw, dKey, isDone) => {
+            return `
+            <div class="day-row" onclick="window.toggleWarmup(this)">
+                <div class="day-title-row">
+                    <div class="day-left-grp">
+                        <div class="day-check ${isDone?'checked':''}" onclick="window.toggleDayCheck('${dKey}', event, ${sw}, ${bw}, ${dw}, ${k.r})"></div>
+                        <span style="font-weight:bold">${dayName}</span>
+                    </div>
+                    <span class="day-type ${cls}">${typeLabel}</span>
+                </div>
+                <div class="lift-row"><span class="lift-name">SQ</span> <span class="lift-nums"><span class="calc-trigger" onclick="window.openQuickCalc(${sw}, event)">${sw}</span> (${k.s}x${k.r})</span></div>
+                <div class="lift-row"><span class="lift-name">BP</span> <span class="lift-nums"><span class="calc-trigger" onclick="window.openQuickCalc(${bw}, event)">${bw}</span> (${k.s}x${k.r})</span></div>
+                <div class="lift-row" style="border:none"><span class="lift-name">DL</span> <span class="lift-nums"><span class="calc-trigger" onclick="window.openQuickCalc(${dw}, event)">${dw}</span> (${k.s}x${k.r})</span></div>
+                <div class="warmup-drop">
+                    <div class="warmup-header">WARMUP SETS (${bar} LBS)</div>
+                    <div class="warmup-line">SQ: ${calcRamp(sw)}</div>
+                    <div class="warmup-line">BP: ${calcRamp(bw)}</div>
+                    <div class="warmup-line">DL: ${calcRamp(dw)}</div>
+                </div>
+            </div>`;
+        };
+        h+=`<div class="week">
+            <div class="week-head">
+                <span>WEEK ${k.n} <span style="color:#666;font-size:11px">(${k.t})</span></span>
+                <div class="chk-box ${isWeekDone?'checked':''}" onclick="window.toggleManualWeek('${wKey}', this, event)"></div>
+            </div>
+            <div class="week-content ${isWeekDone?'dimmed':''}">
+                ${buildDay("MON", `HEAVY (${Math.round(k.m*100)}% ${k.base})`, "type-h", sH, bH, dH, wKey+"_m", doneM)}
+                ${buildDay("WED", `LIGHT (${Math.round(l_mult*100)}%)`, "type-l", sL, bL, dL, wKey+"_w", doneW)}
+                ${buildDay("FRI", `MEDIUM (${Math.round(m_mult*100)}%)`, "type-m", sM, bM, dM, wKey+"_f", doneF)}
+            </div>
+        </div>`;
     });
     container.innerHTML=h;
 }
 
-// --- LOG TAB ---
-let currentFolder = '';
+// --- GYM SWITCHER ---
 window.getCurrentGymData = function(){if(!DATA.gyms[DATA.currentGym])DATA.gyms[DATA.currentGym]={folders:[],library:{}};return DATA.gyms[DATA.currentGym]}
 window.showGymManager = function(){document.getElementById('split-manager').classList.add('hidden');document.getElementById('gym-manager').classList.remove('hidden');window.renderGymList()}
 window.closeGymManager = function(){document.getElementById('gym-manager').classList.add('hidden');document.getElementById('split-manager').classList.remove('hidden')}
@@ -469,6 +625,9 @@ window.renderGymList = function(){const d=document.getElementById('gym-list');d.
 window.selectGym = function(n){ DATA.currentGym=n; window.saveData(); window.renderDays(); window.closeGymManager(); window.showToast("Switched to "+n); }
 window.promptAddGym = function(){window.openInputModal("New Gym","Name",v=>{if(v){DATA.gyms[v]={folders:[],library:{}};window.selectGym(v)}})}
 window.delGym = function(n,e){ e.stopPropagation(); if(Object.keys(DATA.gyms).length<=1)return;window.showConfirm("Delete?",()=>{delete DATA.gyms[n];window.selectGym(Object.keys(DATA.gyms)[0])})}
+
+// --- LOG TAB LOGIC ---
+let currentFolder = '';
 window.renderDays = function(){const g=window.getCurrentGymData();document.getElementById('current-gym-display').innerText=DATA.currentGym;const l=document.getElementById('my-split-list');l.innerHTML="";g.folders.forEach(d=>{const c=(g.library[d]||[]).length;l.innerHTML+=`<div class="day-card"><div style="flex-grow:1;cursor:pointer;" onclick="window.openSession('${d}')"><b>${d}</b><br><span style="font-size:11px;color:#666;">${c} Ex</span></div><div style="display:flex;gap:5px;"><button class="icon-btn" onclick="window.shareFolder('${d}')">➦</button><button class="icon-btn" onclick="window.renameFolder('${d}')">✎</button><button class="icon-btn" onclick="window.delFolder('${d}')">✕</button></div></div>`})}
 window.promptAddDay = function(){window.openInputModal("Folder","Name",v=>{if(v){const g=window.getCurrentGymData();if(!g.folders.includes(v))g.folders.push(v);window.saveData();window.renderDays()}})}
 window.openSession = function(d){currentFolder=d;document.getElementById('split-manager').classList.add('hidden');document.getElementById('session-logger').classList.remove('hidden');document.getElementById('session-title').innerText=d;window.renderCart();window.renderShelf()}
@@ -478,7 +637,18 @@ window.promptNewEx = function(){ document.getElementById('new-ex-name').value=""
 window.renderTagGrid = function(){const area = document.getElementById('tag-area'); const defaults = ['Barbell', 'Dumbbell', 'Cable', 'Machine', 'Smith']; const all = [...defaults, ...DATA.customTags]; let h = ''; all.forEach(t => { h += `<div class="chip" onclick="window.appendTag(' (${t})')">${t}</div>`; }); h += `<div class="chip chip-add" onclick="window.promptCustomTag()">+</div>`; area.innerHTML = h;}
 window.appendTag = function(t){ document.getElementById('new-ex-name').value += t; }
 window.promptCustomTag = function(){ window.openInputModal("Custom Tag", "E.g. Hoist", (val) => { if(val){ window.appendTag(` (${val})`); if(!DATA.customTags.includes(val)){ DATA.customTags.push(val); window.saveData(); window.renderTagGrid(); } } }); }
-window.confirmNewEx = function(t){ const v=document.getElementById('new-ex-name').value; if(v){ const g=window.getCurrentGymData(); if(!g.library[currentFolder]) g.library[currentFolder]=[]; g.library[currentFolder].push(v); if(!DATA.exTypes) DATA.exTypes={}; DATA.exTypes[v]=t; window.saveData(); window.renderShelf(); window.addToCart(v); } document.getElementById('modal-new-ex').style.display='none'; }
+window.confirmNewEx = function(t){ 
+    const v=document.getElementById('new-ex-name').value; 
+    if(v){ 
+        const g=window.getCurrentGymData(); 
+        if(!g.library[currentFolder]) g.library[currentFolder]=[]; 
+        g.library[currentFolder].push(v); 
+        if(!DATA.exTypes) DATA.exTypes={};
+        DATA.exTypes[v]=t; 
+        window.saveData(); window.renderShelf(); window.addToCart(v); 
+    } 
+    document.getElementById('modal-new-ex').style.display='none'; 
+}
 window.renderShelf = function(){const a=document.getElementById('tile-area');const g=window.getCurrentGymData();const l=g.library[currentFolder]||[]; a.innerHTML=`<button class="tile tile-add" onclick="window.promptNewEx()">+ NEW</button>`; l.forEach(e=>{const cls = isEditing ? 'tile deleting' : 'tile'; const action = isEditing ? `window.deleteLibItem('${e}')` : `window.addToCart('${e}')`; const content = isEditing ? `✕ ${e}` : e; a.innerHTML+=`<div class="${cls}" onclick="${action}">${content}</div>`;});}
 let isEditing = false;
 window.toggleEditMode = function(){ isEditing = !isEditing; document.getElementById('edit-lib-btn').innerText = isEditing ? 'DONE' : '✎ EDIT'; window.renderShelf(); }
@@ -486,31 +656,28 @@ window.deleteLibItem = function(e){ window.showConfirm(`Delete "${e}"?`, () => {
 window.addToCart = function(e){if(!DATA.activeCart.includes(e)){DATA.activeCart.push(e);if(!DATA.sessionData[e])DATA.sessionData[e]=[{w:'',r:''}];window.saveData();window.renderCart()}}
 window.removeExFromCart = function(e){DATA.activeCart=DATA.activeCart.filter(x=>x!==e);delete DATA.sessionData[e];window.saveData();window.renderCart()}
 
-// HELPER: Get Best Lift (Pace for Cardio, Weight for Strength)
+// HELPER: Get Best Lift (FIXED)
 window.getBestLift = function(exName) {
     const logs = DATA.history.filter(l => l.ex === exName);
     if(logs.length === 0) return null;
     const isC = DATA.exTypes[exName] === 'cardio';
     
     if(isC) {
-        let bestLog = logs[0];
-        let bestPace = 9999;
+        let bestLog = logs[0]; let bestPace = 9999;
         logs.forEach(l => {
             const time = parseFloat(l.w); const dist = parseFloat(l.r);
-            if(time && dist) {
-                const pace = time / dist;
-                if(pace < bestPace) { bestPace = pace; bestLog = l; }
-            }
+            if(time && dist) { const pace = time / dist; if(pace < bestPace) { bestPace = pace; bestLog = l; } }
         });
         if(bestPace === 9999) return null;
         return `${bestPace.toFixed(2)}/mi`;
     } else {
         logs.sort((a,b) => b.rm - a.rm);
         const best = logs[0];
-        return `${best.w} ${DATA.unit.toUpperCase()} x ${best.r}`;
+        return `${best.w} LBS x ${best.r}`; // FIXED LABEL
     }
 }
 
+// RENDER CART - FIXED CALCULATOR BUTTON
 window.renderCart = function(){
     const area=document.getElementById('active-workout-area'); area.innerHTML=""; 
     if(DATA.activeCart.length===0){ area.innerHTML="<div style='text-align:center;padding:30px;color:#555;'>Empty Workout</div>"; return; } 
@@ -521,12 +688,36 @@ window.renderCart = function(){
         const best = window.getBestLift(ex);
         let histHTML = best ? `<div class="hist-badge">BEST: ${best}</div>` : '';
         let h=`<div class="ex-card"><div class="ex-top"><div class="ex-name">${ex}<div class="ex-hist">${histHTML}</div></div><div class="ex-tools">${!isC?`<div class="toggle-lr ${isLR?'active':''}" onclick="window.toggleLR('${ex}')">L+R</div>`:''}<button onclick="window.removeExFromCart('${ex}')" style="background:none;border:none;color:#555;">✕</button></div></div>`; 
-        let r=""; const u = DATA.unit.toUpperCase(); 
+        let r=""; 
         
         if(isC){ 
-            sets.forEach((s,i)=>{ r+=`<div class="cardio-row"><span class="set-num">${i+1}</span><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.w}" placeholder="MIN" onchange="window.updateSet('${ex}',${i},'w',this.value)"></div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.r}" placeholder="DIST" onchange="window.updateSet('${ex}',${i},'r',this.value)"></div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.hr||''}" placeholder="HR" onchange="window.updateSet('${ex}',${i},'hr',this.value)"></div><button class="del-btn" onclick="window.removeSet('${ex}',${i})">✕</button></div>` }); 
+            sets.forEach((s,i)=>{ r+=`<div class="cardio-row"><span class="set-num">${i+1}</span><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.w}" placeholder="MIN" onchange="window.updateSet('${ex}',${i},'w',this.value)"></div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.r}" placeholder="MI" onchange="window.updateSet('${ex}',${i},'r',this.value)"></div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.hr||''}" placeholder="HR" onchange="window.updateSet('${ex}',${i},'hr',this.value)"></div><button class="del-btn" onclick="window.removeSet('${ex}',${i})">✕</button></div>` }); 
         } else { 
-            let i=0; while(i < sets.length) { let s = sets[i]; let ns = sets[i+1]; const safeEx = ex.replace(/'/g, "\\'"); const row = (idx, st, lab) => `<div class="set-row"><div class="set-num">${lab}</div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${st.w}" onchange="window.updateSet('${safeEx}',${idx},'w',this.value)"><span class="input-unit">${u}</span></div><button class="calc-btn" onclick="window.openSessionCalc(${exIdx},${idx})">🧮</button><div class="input-wrapper"><input type="text" inputmode="decimal" value="${st.r}" onchange="window.updateSet('${safeEx}',${idx},'r',this.value)"><span class="input-unit">REPS</span></div><button class="menu-btn" onclick="window.openSetOpt('${safeEx}',${idx})">...</button><button class="del-btn" onclick="window.removeSet('${safeEx}',${idx})">✕</button></div>`; if(s.type === 'drop_parent' && ns && ns.type === 'drop_child') { r += `<div class="set-group-box set-group-drop">${row(i,s,i+1)}${row(i+1,ns,'<span class="label-drop">DROP</span>')}</div>`; i += 2; } else if(s.type === 'super_parent' && ns && ns.type === 'super_child') { r += `<div class="set-group-box set-group-super">${row(i,s,i+1)}${row(i+1,ns,'<span class="label-super">SUPER</span>')}</div>`; i += 2; } else if(s.type === 'assist_parent' && ns && ns.type === 'assist_child') { r += `<div class="set-group-box set-group-assist">${row(i,s,i+1)}${row(i+1,ns,'<span class="label-assist">ASST</span>')}</div>`; i += 2; } else { r += row(i,s,i+1); i++; } }
+            let i=0;
+            while(i < sets.length) {
+                let s = sets[i]; let ns = sets[i+1];
+                const safeEx = ex.replace(/'/g, "\\'");
+                
+                const row = (idx, st, lab) => `
+                    <div class="set-row">
+                        <div class="set-num">${lab}</div>
+                        <div class="input-wrapper"><input type="text" inputmode="decimal" value="${st.w}" onchange="window.updateSet('${safeEx}',${idx},'w',this.value)"><span class="input-unit">LBS</span></div>
+                        <button class="calc-btn" onclick="window.launchCalc(${exIdx},${idx})">🧮</button>
+                        <div class="input-wrapper"><input type="text" inputmode="decimal" value="${st.r}" onchange="window.updateSet('${safeEx}',${idx},'r',this.value)"><span class="input-unit">REPS</span></div>
+                        <button class="menu-btn" onclick="window.openSetOpt('${safeEx}',${idx})">...</button>
+                        <button class="del-btn" onclick="window.removeSet('${safeEx}',${idx})">✕</button>
+                    </div>`;
+                
+                if(s.type === 'drop_parent' && ns && ns.type === 'drop_child') {
+                    r += `<div class="set-group-box set-group-drop">${row(i,s,i+1)}${row(i+1,ns,'<span class="label-drop">DROP</span>')}</div>`; i += 2;
+                } else if(s.type === 'super_parent' && ns && ns.type === 'super_child') {
+                    r += `<div class="set-group-box set-group-super">${row(i,s,i+1)}${row(i+1,ns,'<span class="label-super">SUPER</span>')}</div>`; i += 2;
+                } else if(s.type === 'assist_parent' && ns && ns.type === 'assist_child') {
+                    r += `<div class="set-group-box set-group-assist">${row(i,s,i+1)}${row(i+1,ns,'<span class="label-assist">ASST</span>')}</div>`; i += 2;
+                } else {
+                    r += row(i,s,i+1); i++;
+                }
+            }
         } 
         area.innerHTML+=`${h}<div id="sets-${ex}">${r}</div><button class="btn btn-sec btn-sm" onclick="window.addSet('${ex}')">+ ADD SET</button></div>` 
     }); 
@@ -553,17 +744,24 @@ window.applySetType = function(type) {
 // --- CALC ---
 let calcTarget = null; let calcSide=0, calcBar=45, calcMode='bar';
 window.openQuickCalc = function(weight, event) { if(event) event.stopPropagation(); calcTarget = null; window.setCalcMode('bar'); document.getElementById('calc-total').value = weight; window.manualCalcUpdate(weight); document.getElementById('modal-plate-calc').style.display='flex'; }
-window.openSessionCalc = function(exIdx, setIdx) { const exName = DATA.activeCart[exIdx]; calcTarget = {ex: exName, idx: setIdx}; const currentVal = DATA.sessionData[exName][setIdx].w || 45; window.setCalcMode('bar'); document.getElementById('calc-total').value = currentVal; window.manualCalcUpdate(currentVal); window.renderPlateButtons(); document.getElementById('modal-plate-calc').style.display='flex'; }
+// FIXED: Renamed to launchCalc to avoid conflict
+window.launchCalc = function(exIdx, setIdx) { 
+    const exName = DATA.activeCart[exIdx]; calcTarget = {ex: exName, idx: setIdx}; 
+    const currentVal = DATA.sessionData[exName][setIdx].w || 45; 
+    window.setCalcMode('bar'); document.getElementById('calc-total').value = currentVal; 
+    window.manualCalcUpdate(currentVal); window.renderPlateButtons(); 
+    document.getElementById('modal-plate-calc').style.display='flex'; 
+}
 window.closeCalc = function(){ document.getElementById('modal-plate-calc').style.display='none'; }
-window.renderPlateButtons = function(){ const grid = document.getElementById('plate-btn-grid'); grid.innerHTML = ""; if(DATA.unit === 'lbs'){ [45,35,25,10,5,2.5].forEach(w => { grid.innerHTML += `<button class="p-btn" onclick="window.addPlate(${w})">${w}</button>`; }); } else { [25,20,15,10,5,2.5,1.25].forEach(w => { grid.innerHTML += `<button class="p-btn" onclick="window.addPlate(${w})">${w}</button>`; }); } }
-window.setCalcMode = function(m){ calcMode=m; const stdBar = (DATA.unit === 'lbs') ? 45 : 20; calcBar=(m==='bar')?stdBar:0; document.getElementById('mode-bar').style.background=(m==='bar')?'var(--success)':'#333'; document.getElementById('mode-bar').style.color=(m==='bar')?'black':'white'; document.getElementById('mode-single').style.background=(m==='single')?'var(--success)':'#333'; document.getElementById('mode-single').style.color=(m==='single')?'black':'white'; window.updateCalcDisplay(); }
+window.renderPlateButtons = function(){ const grid = document.getElementById('plate-btn-grid'); grid.innerHTML = ""; [45,35,25,10,5,2.5].forEach(w => { grid.innerHTML += `<button class="p-btn" onclick="window.addPlate(${w})">${w}</button>`; }); }
+window.setCalcMode = function(m){ calcMode=m; const stdBar = 45; calcBar=(m==='bar')?stdBar:0; document.getElementById('mode-bar').style.background=(m==='bar')?'var(--success)':'#333'; document.getElementById('mode-bar').style.color=(m==='bar')?'black':'white'; document.getElementById('mode-single').style.background=(m==='single')?'var(--success)':'#333'; document.getElementById('mode-single').style.color=(m==='single')?'black':'white'; window.updateCalcDisplay(); }
 window.addPlate = function(w){ calcSide+=w; window.updateCalcDisplay(); }
 window.resetCalc = function(){ calcSide=0; window.updateCalcDisplay(); }
 window.updateCalcDisplay = function(){ let t=0; if(calcMode==='bar') t=(calcSide*2)+calcBar; else t=calcSide; document.getElementById('calc-total').value = t; window.renderPlateViz(calcSide); }
 window.manualCalcUpdate = function(v){ const n=parseFloat(v); if(!isNaN(n)){ if(calcMode==='bar') calcSide=(n-calcBar)/2; else calcSide=n; window.renderPlateViz(calcSide); } }
 window.applyCalc = function(){ if(calcTarget){ const val = document.getElementById('calc-total').value; if(DATA.sessionData[calcTarget.ex] && DATA.sessionData[calcTarget.ex][calcTarget.idx]){ DATA.sessionData[calcTarget.ex][calcTarget.idx].w = val; window.saveData(); window.renderCart(); } } window.closeCalc(); }
 window.useBW = function(){ if(calcTarget){ DATA.sessionData[calcTarget.ex][calcTarget.idx].w = "BW"; window.saveData(); window.renderCart(); } window.closeCalc(); }
-window.renderPlateViz = function(weight){ const viz = document.getElementById('plate-stack-display'); viz.innerHTML = ""; let rem = weight; const plates = (DATA.unit === 'lbs') ? [{w:45, c:'vp-45', t:'45'}, {w:35, c:'vp-35', t:'35'}, {w:25, c:'vp-25', t:'25'}, {w:10, c:'vp-10', t:'10'}, {w:5, c:'vp-5', t:'5'}, {w:2.5, c:'vp-2_5', t:'2.5'}] : [{w:25, c:'vp-kg-25', t:'25'}, {w:20, c:'vp-kg-20', t:'20'}, {w:15, c:'vp-kg-15', t:'15'}, {w:10, c:'vp-kg-10', t:'10'}, {w:5, c:'vp-kg-5', t:'5'}, {w:2.5, c:'vp-kg-2_5', t:'2.5'}, {w:1.25, c:'vp-kg-1_25', t:'1.25'}]; plates.forEach(p => { while(rem >= p.w - 0.01){ viz.innerHTML += `<div class="viz-plate ${p.c}">${p.t}</div>`; rem -= p.w; } }); }
+window.renderPlateViz = function(weight){ const viz = document.getElementById('plate-stack-display'); viz.innerHTML = ""; let rem = weight; const plates = [{w:45, c:'vp-45', t:'45'}, {w:35, c:'vp-35', t:'35'}, {w:25, c:'vp-25', t:'25'}, {w:10, c:'vp-10', t:'10'}, {w:5, c:'vp-5', t:'5'}, {w:2.5, c:'vp-2_5', t:'2.5'}]; plates.forEach(p => { while(rem >= p.w - 0.01){ viz.innerHTML += `<div class="viz-plate ${p.c}">${p.t}</div>`; rem -= p.w; } }); }
 
 // --- STATS ---
 window.openStatsPicker = function(){
@@ -577,17 +775,17 @@ window.renderPickerItems = function(query){ const q = query.toLowerCase(); docum
 window.selectStatsTarget = function(mode, target){ statsMode = mode; statsTarget = target; document.getElementById('stats-current-label').innerText = target; document.getElementById('modal-stats-picker').style.display = 'none'; window.renderGraph(); }
 window.renderGraph = function(){
     const ctx = document.getElementById('perfChart').getContext('2d'); const det = document.getElementById('stat-details'); if(window.myChart) window.myChart.destroy();
-    let datasets = []; let allLabels = new Set(); const multiplier = (DATA.unit === 'kg') ? 0.453592 : 1;
+    let datasets = []; let allLabels = new Set();
     try {
         if(statsMode === 'exercise'){
             const logs = DATA.history.filter(l => l.ex === statsTarget && l.type!=='cardio').sort((a,b) => new Date(a.date) - new Date(b.date));
             if(logs.length === 0) { det.innerText="No Strength Data"; return; }
-            const dataPoints = logs.map(l => ({x: l.date, y: Math.round(l.rm * multiplier)})); logs.forEach(l => allLabels.add(l.date));
+            const dataPoints = logs.map(l => ({x: l.date, y: l.rm})); logs.forEach(l => allLabels.add(l.date));
             datasets.push({ label: statsTarget, data: dataPoints, borderColor: '#2ed573', backgroundColor: 'rgba(46, 213, 115, 0.1)', borderWidth: 2, pointRadius: 3, tension: 0.3 });
-            det.innerText = `BEST 1RM: ${Math.round(Math.max(...logs.map(l=>l.rm)) * multiplier)} ${DATA.unit.toUpperCase()}`;
+            det.innerText = `BEST 1RM: ${Math.max(...logs.map(l=>l.rm))} LBS`;
         } else {
             const gym = DATA.gyms[DATA.currentGym]; const exercises = gym.library[statsTarget] || []; const colors = ['#ff4757', '#2ed573', '#ffa502', '#a29bfe', '#00d2d3'];
-            exercises.forEach((ex, idx) => { const logs = DATA.history.filter(l => l.ex === ex && l.type!=='cardio').sort((a,b) => new Date(a.date) - new Date(b.date)); if(logs.length > 0){ logs.forEach(l => allLabels.add(l.date)); datasets.push({ label: ex, data: logs.map(l => ({x: l.date, y: Math.round(l.rm * multiplier)})), borderColor: colors[idx % colors.length], borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false }); } });
+            exercises.forEach((ex, idx) => { const logs = DATA.history.filter(l => l.ex === ex && l.type!=='cardio').sort((a,b) => new Date(a.date) - new Date(b.date)); if(logs.length > 0){ logs.forEach(l => allLabels.add(l.date)); datasets.push({ label: ex, data: logs.map(l => ({x: l.date, y: l.rm})), borderColor: colors[idx % colors.length], borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false }); } });
             det.innerText = `${datasets.length} Exercises in Group`;
         }
         if(datasets.length === 0) { det.innerText="No Data"; return; }
