@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V29</title>
+<title>NetGains V30</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -22,7 +22,7 @@
   body { margin: 0; padding: 0; background-color: var(--bg); color: var(--text); overflow-x: hidden; padding-bottom: 90px; }
   .hidden { display: none !important; }
   
-  /* BUTTONS (V22 CHUNKY STYLE) */
+  /* BUTTONS (CHUNKY STYLE) */
   .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 13px; margin-top: 10px; transition: 0.1s; letter-spacing: 0.5px; }
   .btn:active { transform: scale(0.98); }
   .btn-main { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3); }
@@ -49,10 +49,8 @@
   @keyframes fade { from{opacity:0; transform:translateY(5px)} to{opacity:1; transform:translateY(0)} }
 
   /* COMPONENTS */
-  /* GYM SELECTOR - FIXED CSS CLASS NAME */
   .gym-selector { background: #222; border: 1px solid var(--border); padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; transition: 0.1s; }
   .gym-selector:active { background: #2a2a2a; }
-  .gym-label { font-size: 10px; color: #888; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
   .gym-name { font-weight: 900; font-size: 15px; color: var(--accent); margin-top: 2px; }
 
   .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 16px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); transition: 0.1s; }
@@ -90,9 +88,6 @@
 
   /* GRAPH */
   .chart-container { position: relative; height: 300px; width: 100%; background: #111; border: 1px solid #333; border-radius: 12px; padding: 10px; margin-top: 15px; }
-  .stat-toggle { display: flex; gap: 10px; margin-bottom: 10px; }
-  .st-btn { flex: 1; padding: 8px; background: #222; border: 1px solid #333; color: #666; font-size: 11px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-  .st-btn.active { background: var(--success); color: black; border-color: var(--success); }
   
   /* MODALS */
   .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
@@ -117,13 +112,6 @@
   .vp-10 { height: 50px; width: 14px; background: #dfe6e9; } 
   .vp-5  { height: 40px; width: 12px; background: #d63031; color: white; } 
   .vp-2_5{ height: 30px; width: 10px; background: #636e72; color: white; }
-  .vp-kg-25 { height: 90px; width: 22px; background: #ff4757; color: white; } 
-  .vp-kg-20 { height: 90px; width: 20px; background: #0984e3; color: white; } 
-  .vp-kg-15 { height: 60px; width: 14px; background: #f1c40f; color: black; } 
-  .vp-kg-10 { height: 50px; width: 12px; background: #2ecc71; color: white; } 
-  .vp-kg-5  { height: 45px; width: 14px; background: #dfe6e9; color: black; } 
-  .vp-kg-2_5{ height: 35px; width: 12px; background: #2d3436; color: white; } 
-  .vp-kg-1_25{ height: 25px; width: 10px; background: #b2bec3; color: black; } 
   .plate-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
   .p-btn { background: #222; border: 1px solid #444; color: white; padding: 15px 0; border-radius: 8px; font-weight: bold; cursor: pointer; }
   .p-btn:active { background: #444; }
@@ -135,18 +123,16 @@
   .picker-item:active { background: var(--accent); color: black; }
   .folder-tag { font-size: 9px; padding: 3px 6px; background: #333; border-radius: 4px; color: #aaa; margin-left: 10px; }
 
-  /* PROGRAM CSS - FIXED CHECKBOXES */
+  /* PROGRAM CSS */
   .week { background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; overflow: hidden; transition: 0.3s; }
   .week-head { display: flex; justify-content: space-between; padding: 15px; background: #222; border-bottom: 1px solid #333; font-weight: bold; }
-  .day-row { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; position: relative; }
-  .day-row:active { background: #222; }
+  .day-row { padding: 15px; border-bottom: 1px solid #222; position: relative; cursor: pointer; }
   .day-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .day-left-grp { display: flex; align-items: center; gap: 10px; }
   
-  /* THIS IS THE MISSING CHECKBOX CLASS */
-  .day-check { width: 24px; height: 24px; border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; z-index: 10; cursor: pointer; background: #111; }
-  .day-check.checked { background: var(--success); border-color: var(--success); }
-  .day-check.checked::after { content: '✓'; color: black; font-weight: bold; font-size: 14px; }
+  .day-circle { width: 24px; height: 24px; border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; z-index: 10; cursor: pointer; background: #111; }
+  .day-circle.checked { background: var(--success); border-color: var(--success); }
+  .day-circle.checked::after { content: '✓'; color: black; font-weight: bold; font-size: 14px; }
   
   .day-type { font-size: 9px; padding: 3px 6px; border-radius: 4px; font-weight: 800; text-transform: uppercase; }
   .type-h { background: #ff4757; color: white; } 
@@ -157,7 +143,6 @@
   .lift-nums { color: white; font-family: monospace; letter-spacing: -0.5px; }
   .calc-trigger { color: var(--success); cursor: pointer; border-bottom: 1px dashed #444; }
   
-  /* WARMUP ACCORDION */
   .warmup-drop { background: #111; padding: 10px; border-top: 1px dashed #333; display: none; margin-top:10px; }
   .warmup-drop.open { display: block; animation: slideDown 0.2s ease-out; }
   .warmup-header { font-size: 10px; color: var(--accent); font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
@@ -167,10 +152,7 @@
   .chk-box { width: 20px; height: 20px; border: 2px solid #444; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
   .chk-box.checked { background: #444; border-color: #444; }
   .chk-box.checked::after { content: '✓'; color: #888; font-weight: bold; font-size: 12px; }
-  .week-content { transition: 0.3s; }
   .week-content.dimmed { opacity: 0.3; pointer-events: none; filter: grayscale(100%); text-decoration: line-through; }
-  .log-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-  .log-lbl { font-size: 10px; color: #888; text-align: center; }
 
   .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: #181818; border-top: 1px solid #333; display: grid; grid-template-columns: 1fr 1fr 1fr; z-index: 1000; padding-bottom: 20px; }
   .nav-btn { background: none; border: none; color: #666; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
@@ -296,7 +278,7 @@
 </div>
 
 <div id="view-prog" class="view">
-  <h1>NETGAINS <span class="brand-span">V29</span></h1>
+  <h1>NETGAINS <span class="brand-span">V30</span></h1>
   <p class="sub">BAECHLE ENGINE</p>
   <div style="background:#222; padding:15px; border-radius:12px; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
@@ -367,7 +349,7 @@
 
 <script>
 // --- GLOBAL INIT ---
-const DB_KEY = 'netgains_v29_db';
+const DB_KEY = 'netgains_v30_db';
 let DATA = { 
     unit:'lbs', 
     inputs:{s:'',b:'',d:''}, 
@@ -517,7 +499,7 @@ window.toggleManualWeek = function(wKey, el, event){
 
 window.toggleDayCheck = function(dKey, event, sw, bw, dw, r) {
     event.stopPropagation();
-    if(DATA.progState[dKey]) {
+    if(DATA.progState[dKey] === true) {
         delete DATA.progState[dKey];
         window.saveData();
         window.genProgram();
@@ -584,7 +566,7 @@ window.genProgram = function(){
             <div class="day-row" onclick="window.toggleWarmup(this)">
                 <div class="day-title-row">
                     <div class="day-left-grp">
-                        <div class="day-check ${isDone?'checked':''}" onclick="window.toggleDayCheck('${dKey}', event, ${sw}, ${bw}, ${dw}, ${k.r})"></div>
+                        <div class="day-circle ${isDone?'checked':''}" onclick="window.toggleDayCheck('${dKey}', event, ${sw}, ${bw}, ${dw}, ${k.r})"></div>
                         <span style="font-weight:bold">${dayName}</span>
                     </div>
                     <span class="day-type ${cls}">${typeLabel}</span>
@@ -654,12 +636,14 @@ window.deleteLibItem = function(e){ window.showConfirm(`Delete "${e}"?`, () => {
 window.addToCart = function(e){if(!DATA.activeCart.includes(e)){DATA.activeCart.push(e);if(!DATA.sessionData[e])DATA.sessionData[e]=[{w:'',r:''}];window.saveData();window.renderCart()}}
 window.removeExFromCart = function(e){DATA.activeCart=DATA.activeCart.filter(x=>x!==e);delete DATA.sessionData[e];window.saveData();window.renderCart()}
 
-// HELPER: Get Best Lift
+// HELPER: Get Best Lift (FIXED: RETURNS WEIGHT x REPS)
 window.getBestLift = function(exName) {
     const logs = DATA.history.filter(l => l.ex === exName);
     if(logs.length === 0) return null;
-    const max = Math.max(...logs.map(l => l.rm));
-    return max;
+    // Sort by RM
+    logs.sort((a,b) => b.rm - a.rm);
+    const best = logs[0];
+    return `${best.w} x ${best.r}`;
 }
 
 window.renderCart = function(){
@@ -670,9 +654,7 @@ window.renderCart = function(){
     DATA.activeCart.forEach((ex, exIdx)=>{ 
         const isC=DATA.exTypes[ex]==='cardio';
         const sets=DATA.sessionData[ex]||[];
-        const isLR=DATA.sessionData[ex+'_LR']===true; 
         
-        // Fix: Calculate Best on fly
         const best = window.getBestLift(ex);
         let histHTML = best ? `<div class="hist-badge">BEST: ${best}</div>` : '';
         if(isC && best) histHTML = `<div class="hist-badge" style="background:rgba(255,165,2,0.1); border-color:rgba(255,165,2,0.3);">BEST: ${best}</div>`; 
@@ -776,7 +758,7 @@ window.selectStatsTarget = function(mode, target){
 window.renderGraph = function(){
     const ctx = document.getElementById('perfChart').getContext('2d');
     const det = document.getElementById('stat-details');
-    if(myChart) myChart.destroy();
+    if(window.myChart) window.myChart.destroy();
 
     let datasets = [];
     let allLabels = new Set();
@@ -790,7 +772,7 @@ window.renderGraph = function(){
             datasets.push({
                 label: statsTarget, data: dataPoints, borderColor: '#2ed573', backgroundColor: 'rgba(46, 213, 115, 0.1)', borderWidth: 2, pointRadius: 3, tension: 0.3
             });
-            det.innerText = `BEST: ${Math.max(...logs.map(l=>l.rm))}`;
+            det.innerText = `BEST 1RM: ${Math.max(...logs.map(l=>l.rm))}`;
         } else {
             const gym = DATA.gyms[DATA.currentGym];
             const exercises = gym.library[statsTarget] || [];
@@ -810,7 +792,7 @@ window.renderGraph = function(){
         if(datasets.length === 0) { det.innerText="No Data in Folder"; return; }
         const sortedLabels = Array.from(allLabels).sort();
 
-        myChart = new Chart(ctx, {
+        window.myChart = new Chart(ctx, {
             type: 'line',
             data: { labels: sortedLabels, datasets: datasets },
             options: {
@@ -819,7 +801,7 @@ window.renderGraph = function(){
                 scales: { x: { grid:{color:'#333'}, ticks:{color:'#666'} }, y: { grid:{color:'#333'}, ticks:{color:'#666'} } }
             }
         });
-    } catch(err) { det.innerText = "Error loading graph."; }
+    } catch(err) { console.error(err); det.innerText = "Error loading graph."; }
 }
 
 // --- UTILS ---
