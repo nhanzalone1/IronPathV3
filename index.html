@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V39</title>
+<title>NetGains V41</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -76,7 +76,8 @@
   .toggle-lr { font-size: 11px; background: #222; color: #aaa; padding: 8px 12px; border-radius: 6px; border: 1px solid #444; cursor: pointer; font-weight: 800; display: inline-block; transition: 0.1s; }
   .toggle-lr.active { background: var(--accent); color: white; border-color: var(--accent); }
   
-  .menu-btn { background: #222; border: 1px solid #444; color: #888; border-radius: 6px; height: 42px; width: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; padding-bottom: 5px; font-weight: 900; letter-spacing: 2px; }
+  .menu-btn { background: #222; border: 1px solid #444; color: #888; border-radius: 6px; height: 42px; width: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; padding-bottom: 5px; font-weight: 900; letter-spacing: 2px; position: relative; z-index: 100; }
+  .menu-btn:active { background: #333; color: white; }
 
   /* FLASHY SET TAGS (High Opacity) */
   .set-group-box { padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333; }
@@ -85,8 +86,8 @@
   .set-group-assist { background: rgba(0, 210, 211, 0.20); border: 1px solid var(--assist); }
 
   .label-drop { color: var(--drop); font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
-  .label-super { color: var(--super); font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
-  .label-assist { color: var(--assist); font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
+  .label-super { color: white; font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
+  .label-assist { color: black; font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
 
   /* SHELF */
   .shelf-header { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; border-top: 1px solid #333; padding-top: 20px; margin-bottom: 15px; }
@@ -101,6 +102,9 @@
 
   /* GRAPH */
   .chart-container { position: relative; height: 300px; width: 100%; background: #111; border: 1px solid #333; border-radius: 12px; padding: 10px; margin-top: 15px; }
+  .stat-toggle { display: flex; gap: 10px; margin-bottom: 10px; }
+  .st-btn { flex: 1; padding: 8px; background: #222; border: 1px solid #333; color: #666; font-size: 11px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+  .st-btn.active { background: var(--success); color: black; border-color: var(--success); }
   
   /* MODALS */
   .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
@@ -113,21 +117,6 @@
   .chip { padding: 8px 14px; background: #222; border: 1px solid #444; border-radius: 20px; font-size: 11px; color: #ccc; cursor: pointer; font-weight: 600; }
   .chip:active { background: var(--accent); color: white; }
   .chip-add { border-style: dashed; color: #888; }
-
-  /* PLATE VIZ */
-  .barbell-viz { display: flex; align-items: center; justify-content: center; height: 100px; background: #111; margin-bottom: 15px; border-radius: 8px; overflow-x: auto; border: 1px solid #333; position: relative; }
-  .sleeve { height: 10px; width: 90%; background: #555; position: absolute; border-radius: 5px; z-index: 1; }
-  .plate-stack { display: flex; align-items: center; gap: 2px; z-index: 2; }
-  .viz-plate { display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; color: black; border-radius: 2px; height: 0; transition: 0.2s; border: 1px solid rgba(0,0,0,0.3); }
-  .vp-45 { height: 90px; width: 20px; background: #0984e3; color: white; } 
-  .vp-35 { height: 80px; width: 18px; background: #fdcb6e; } 
-  .vp-25 { height: 70px; width: 16px; background: #00b894; } 
-  .vp-10 { height: 50px; width: 14px; background: #dfe6e9; } 
-  .vp-5  { height: 40px; width: 12px; background: #d63031; color: white; } 
-  .vp-2_5{ height: 30px; width: 10px; background: #636e72; color: white; }
-  .plate-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-  .p-btn { background: #222; border: 1px solid #444; color: white; padding: 15px 0; border-radius: 8px; font-weight: bold; cursor: pointer; }
-  .p-btn:active { background: #444; }
 
   /* PICKER */
   .picker-section { margin-bottom: 25px; }
@@ -142,12 +131,9 @@
   .day-row { padding: 15px; border-bottom: 1px solid #222; position: relative; cursor: pointer; }
   .day-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .day-left-grp { display: flex; align-items: center; gap: 10px; }
-  
-  /* CHECKBOX - High Z-Index */
   .day-check { width: 24px; height: 24px; border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; z-index: 50; cursor: pointer; background: #111; }
   .day-check.checked { background: var(--success); border-color: var(--success); }
   .day-check.checked::after { content: '✓'; color: black; font-weight: bold; font-size: 14px; }
-  
   .day-type { font-size: 9px; padding: 3px 6px; border-radius: 4px; font-weight: 800; text-transform: uppercase; }
   .type-h { background: #ff4757; color: white; } 
   .type-l { background: #2ed573; color: black; } 
@@ -155,13 +141,11 @@
   .lift-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; border-bottom: 1px solid #222; padding-bottom: 4px; }
   .lift-name { color: #888; width: 40px; font-weight: bold; }
   .lift-nums { color: white; font-family: monospace; letter-spacing: -0.5px; }
-  .calc-trigger { color: var(--success); cursor: pointer; border-bottom: 1px dashed #444; }
   .warmup-drop { background: #111; padding: 10px; border-top: 1px dashed #333; display: none; margin-top:10px; }
   .warmup-drop.open { display: block; animation: slideDown 0.2s ease-out; }
   .warmup-header { font-size: 10px; color: var(--accent); font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
   .warmup-line { font-size: 11px; color: #aaa; margin-bottom: 3px; font-family: monospace; }
   @keyframes slideDown { from{opacity:0; transform:translateY(-5px)} to{opacity:1; transform:translateY(0)} }
-  
   .chk-box { width: 20px; height: 20px; border: 2px solid #444; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
   .chk-box.checked { background: #444; border-color: #444; }
   .chk-box.checked::after { content: '✓'; color: #888; font-weight: bold; font-size: 12px; }
@@ -173,8 +157,6 @@
   .btn-drop { background: var(--drop); color: white; border: none; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
   .btn-super { background: var(--super); color: white; border: none; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
   .btn-assist { background: var(--assist); color: black; border: none; font-weight: 800; }
-  
-  .btn-calc-menu { background: #111; color: var(--success); border: 1px solid #333; font-weight: 800; }
 
   .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: #181818; border-top: 1px solid #333; display: grid; grid-template-columns: 1fr 1fr 1fr; z-index: 1000; padding-bottom: 20px; }
   .nav-btn { background: none; border: none; color: #666; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
@@ -189,24 +171,6 @@
 <div id="lbs-badge">LBS</div>
 <div id="debug-status" style="position:fixed; bottom:90px; right:10px; font-size:9px; color:#333; z-index:9000;">System: Active</div>
 <div id="toast">Saved</div>
-
-<div id="modal-calc" class="modal-overlay">
-  <div class="modal-box">
-    <div class="close-x" onclick="window.closeCalc()">✕</div>
-    <h3>Plate Math</h3>
-    <div class="barbell-viz"><div class="sleeve"></div><div class="plate-stack" id="plate-stack-display"></div></div>
-    <input type="text" inputmode="decimal" id="calc-total" oninput="window.manualCalcUpdate(this.value)">
-    <div style="display:flex; gap:10px; margin-bottom:15px;">
-        <button id="mode-bar" class="btn btn-sm" style="background:var(--success); color:black;" onclick="window.setCalcMode('bar')">BARBELL</button>
-        <button id="mode-single" class="btn btn-sm" style="background:#333;" onclick="window.setCalcMode('single')">SINGLE</button>
-    </div>
-    <div id="plate-btn-grid" class="plate-grid"></div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-        <button class="btn btn-sec" onclick="window.resetCalc()">Clear</button>
-        <button class="btn btn-main" onclick="window.applyCalc()">Use</button>
-    </div>
-  </div>
-</div>
 
 <div id="modal-program-log" class="modal-overlay">
   <div class="modal-box">
@@ -261,9 +225,7 @@
 
 <div id="modal-set-opt" class="modal-overlay">
   <div class="modal-box">
-    <h3 style="margin-bottom:15px;">Set Options</h3>
-    <button class="btn btn-calc-menu" style="width:100%; margin-bottom:10px; padding:12px;" onclick="window.launchCalcFromMenu()">🧮 PLATE CALCULATOR</button>
-    <div style="height:1px; background:#333; margin:10px 0;"></div>
+    <h3 style="margin-bottom:15px;">Link Set</h3>
     <button class="btn btn-drop" style="width:100%; margin-bottom:10px; padding:12px;" onclick="window.applySetType('drop')">💧 Drop Set</button>
     <button class="btn btn-super" style="width:100%; margin-bottom:10px; padding:12px;" onclick="window.applySetType('super')">🔗 Superset</button>
     <button class="btn btn-assist" style="width:100%; margin-bottom:10px; padding:12px;" onclick="window.applySetType('assist')">🤝 Assisted</button>
@@ -312,7 +274,7 @@
 </div>
 
 <div id="view-prog" class="view">
-  <h1>NETGAINS <span class="brand-span">V39</span></h1>
+  <h1>NETGAINS <span class="brand-span">V41</span></h1>
   <p class="sub">BAECHLE ENGINE</p>
   <div style="background:#222; padding:15px; border-radius:12px; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
@@ -383,7 +345,7 @@
 
 <script>
 // --- GLOBAL INIT ---
-const DB_KEY = 'netgains_v39_db';
+const DB_KEY = 'netgains_v41_db';
 let DATA = { 
     unit:'lbs', 
     inputs:{s:'',b:'',d:''}, 
@@ -413,6 +375,7 @@ function initUI() {
     if(sIn) sIn.value = DATA.inputs.s;
     if(bIn) bIn.value = DATA.inputs.b;
     if(dIn) dIn.value = DATA.inputs.d;
+    updateUnitBtn();
     genProgram();
     renderDays(); 
 }
@@ -427,6 +390,17 @@ window.goTab = function(t, btn) {
     document.getElementById('view-'+t).classList.remove('hidden');
     document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
     btn.classList.add('active');
+}
+
+function updateUnitBtn() {
+    const ph = "LBS";
+    document.getElementById('prog-s').placeholder = ph;
+    document.getElementById('prog-b').placeholder = ph;
+    document.getElementById('prog-d').placeholder = ph;
+    document.querySelectorAll('.lbl-unit').forEach(e => e.innerText = ph);
+    document.querySelectorAll('.input-unit').forEach(e => {
+        if(e.innerText === 'LBS' || e.innerText === 'KG') e.innerText = ph;
+    });
 }
 
 // --- PROGRAM ENGINE ---
@@ -456,15 +430,6 @@ window.resetProgram = function(){
 window.toggleWarmup = function(el){
     const drop = el.querySelector('.warmup-drop');
     if(drop) { drop.classList.toggle('open'); }
-}
-
-window.openQuickCalc = function(weight, event) {
-    if(event) event.stopPropagation(); 
-    calcTarget = null; 
-    window.setCalcMode('bar'); 
-    document.getElementById('calc-total').value = weight;
-    window.manualCalcUpdate(weight); 
-    document.getElementById('modal-plate-calc').style.display='flex';
 }
 
 let pendingLog = null;
@@ -579,9 +544,9 @@ window.genProgram = function(){
                     </div>
                     <span class="day-type ${cls}">${typeLabel}</span>
                 </div>
-                <div class="lift-row"><span class="lift-name">SQ</span> <span class="lift-nums"><span class="calc-trigger" onclick="window.openQuickCalc(${sw}, event)">${sw}</span> (${k.s}x${k.r})</span></div>
-                <div class="lift-row"><span class="lift-name">BP</span> <span class="lift-nums"><span class="calc-trigger" onclick="window.openQuickCalc(${bw}, event)">${bw}</span> (${k.s}x${k.r})</span></div>
-                <div class="lift-row" style="border:none"><span class="lift-name">DL</span> <span class="lift-nums"><span class="calc-trigger" onclick="window.openQuickCalc(${dw}, event)">${dw}</span> (${k.s}x${k.r})</span></div>
+                <div class="lift-row"><span class="lift-name">SQ</span> <span class="lift-nums">${sw} (${k.s}x${k.r})</span></div>
+                <div class="lift-row"><span class="lift-name">BP</span> <span class="lift-nums">${bw} (${k.s}x${k.r})</span></div>
+                <div class="lift-row" style="border:none"><span class="lift-name">DL</span> <span class="lift-nums">${dw} (${k.s}x${k.r})</span></div>
                 <div class="warmup-drop">
                     <div class="warmup-header">WARMUP SETS (${bar} LBS)</div>
                     <div class="warmup-line">SQ: ${calcRamp(sw)}</div>
@@ -686,13 +651,12 @@ window.renderCart = function(){
                 let s = sets[i]; let ns = sets[i+1];
                 const safeEx = ex.replace(/'/g, "\\'");
                 
-                // NO CALCULATOR BUTTON IN ROW
                 const row = (idx, st, lab) => `
                     <div class="set-row">
                         <div class="set-num">${lab}</div>
                         <div class="input-wrapper"><input type="text" inputmode="decimal" value="${st.w}" onchange="window.updateSet('${safeEx}',${idx},'w',this.value)"><span class="input-unit">LBS</span></div>
                         <div class="input-wrapper"><input type="text" inputmode="decimal" value="${st.r}" onchange="window.updateSet('${safeEx}',${idx},'r',this.value)"><span class="input-unit">REPS</span></div>
-                        <button class="menu-btn" onclick="window.openSetOpt('${safeEx}',${idx})">...</button>
+                        <button class="menu-btn" onclick="window.openSetOpt('${safeEx}',${idx}, event)">...</button>
                         <button class="del-btn" onclick="window.removeSet('${safeEx}',${idx})">✕</button>
                     </div>`;
                 
@@ -719,7 +683,12 @@ window.finishSession = function(){const t=new Date().toISOString().split('T')[0]
 
 // --- SET OPTIONS ---
 let optTarget = null;
-window.openSetOpt = function(ex, i) { optTarget = {ex, i}; document.getElementById('modal-set-opt').style.display = 'flex'; }
+window.openSetOpt = function(ex, i, event) { 
+    if(event) event.stopPropagation();
+    optTarget = {ex, i}; 
+    document.getElementById('modal-set-opt').style.display = 'flex'; 
+}
+
 window.applySetType = function(type) {
     if(optTarget) {
         const {ex, i} = optTarget; const s = DATA.sessionData[ex][i]; s.type = type + '_parent';
@@ -728,42 +697,6 @@ window.applySetType = function(type) {
         DATA.sessionData[ex].splice(i+1, 0, ns); window.saveData(); window.renderCart();
     } document.getElementById('modal-set-opt').style.display = 'none';
 }
-
-// --- CALC ---
-let calcTarget = null; let calcSide=0, calcBar=45, calcMode='bar';
-window.openQuickCalc = function(weight, event) {
-    if(event) event.stopPropagation();
-    calcTarget = null; // No target, just visual
-    window.setCalcMode('bar');
-    document.getElementById('calc-total').value = weight;
-    window.manualCalcUpdate(weight);
-    document.getElementById('modal-plate-calc').style.display='flex';
-}
-
-// LAUNCH FROM MENU
-window.launchCalcFromMenu = function() {
-    if(!optTarget) return;
-    const {ex, i} = optTarget;
-    // Close menu first
-    document.getElementById('modal-set-opt').style.display = 'none';
-    
-    calcTarget = {ex: ex, idx: i}; 
-    const currentVal = DATA.sessionData[ex][i].w || 45; 
-    window.setCalcMode('bar'); document.getElementById('calc-total').value = currentVal; 
-    window.manualCalcUpdate(currentVal); window.renderPlateButtons(); 
-    document.getElementById('modal-plate-calc').style.display='flex'; 
-}
-
-window.closeCalc = function(){ document.getElementById('modal-plate-calc').style.display='none'; }
-window.renderPlateButtons = function(){ const grid = document.getElementById('plate-btn-grid'); grid.innerHTML = ""; [45,35,25,10,5,2.5].forEach(w => { grid.innerHTML += `<button class="p-btn" onclick="window.addPlate(${w})">${w}</button>`; }); }
-window.setCalcMode = function(m){ calcMode=m; const stdBar = 45; calcBar=(m==='bar')?stdBar:0; document.getElementById('mode-bar').style.background=(m==='bar')?'var(--success)':'#333'; document.getElementById('mode-bar').style.color=(m==='bar')?'black':'white'; document.getElementById('mode-single').style.background=(m==='single')?'var(--success)':'#333'; document.getElementById('mode-single').style.color=(m==='single')?'black':'white'; window.updateCalcDisplay(); }
-window.addPlate = function(w){ calcSide+=w; window.updateCalcDisplay(); }
-window.resetCalc = function(){ calcSide=0; window.updateCalcDisplay(); }
-window.updateCalcDisplay = function(){ let t=0; if(calcMode==='bar') t=(calcSide*2)+calcBar; else t=calcSide; document.getElementById('calc-total').value = t; window.renderPlateViz(calcSide); }
-window.manualCalcUpdate = function(v){ const n=parseFloat(v); if(!isNaN(n)){ if(calcMode==='bar') calcSide=(n-calcBar)/2; else calcSide=n; window.renderPlateViz(calcSide); } }
-window.applyCalc = function(){ if(calcTarget){ const val = document.getElementById('calc-total').value; if(DATA.sessionData[calcTarget.ex] && DATA.sessionData[calcTarget.ex][calcTarget.idx]){ DATA.sessionData[calcTarget.ex][calcTarget.idx].w = val; window.saveData(); window.renderCart(); } } window.closeCalc(); }
-window.useBW = function(){ if(calcTarget){ DATA.sessionData[calcTarget.ex][calcTarget.idx].w = "BW"; window.saveData(); window.renderCart(); } window.closeCalc(); }
-window.renderPlateViz = function(weight){ const viz = document.getElementById('plate-stack-display'); viz.innerHTML = ""; let rem = weight; const plates = [{w:45, c:'vp-45', t:'45'}, {w:35, c:'vp-35', t:'35'}, {w:25, c:'vp-25', t:'25'}, {w:10, c:'vp-10', t:'10'}, {w:5, c:'vp-5', t:'5'}, {w:2.5, c:'vp-2_5', t:'2.5'}]; plates.forEach(p => { while(rem >= p.w - 0.01){ viz.innerHTML += `<div class="viz-plate ${p.c}">${p.t}</div>`; rem -= p.w; } }); }
 
 // --- STATS ---
 window.openStatsPicker = function(){
