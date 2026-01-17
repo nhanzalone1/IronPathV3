@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V37</title>
+<title>NetGains V38</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -52,7 +52,8 @@
   .gym-selector { background: #222; border: 1px solid var(--border); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; transition: 0.1s; }
   .gym-label { font-size: 10px; color: #666; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px; }
   .gym-name { font-weight: 900; font-size: 18px; color: var(--accent); text-transform: uppercase; letter-spacing: -0.5px; }
-  
+  .gym-arrow { color: #555; font-size: 12px; font-weight: bold; }
+
   .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 16px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); transition: 0.1s; }
   .icon-btn { background: #222; border: 1px solid #444; color: #ccc; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
 
@@ -68,8 +69,8 @@
   .set-num { text-align: center; font-weight: 700; color: #666; font-size: 12px; } 
   .cardio-row { display: grid; grid-template-columns: 30px 1fr 1fr 1fr 30px; gap: 6px; align-items: center; margin-bottom: 8px; }
   
-  /* CALC BUTTON - Z-INDEX 100 TO FIX CLICK ISSUE */
-  .calc-btn { background: #222; border: 1px solid #444; color: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; height: 42px; font-size: 14px; position: relative; z-index: 100; }
+  /* CALC BUTTON - THE FIX */
+  .calc-btn { background: #222; border: 1px solid #444; color: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; height: 42px; font-size: 14px; position: relative; z-index: 200; pointer-events: auto; }
   .calc-btn:active { background: #333; transform: scale(0.95); }
   
   .del-btn { background: none; border: none; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -77,11 +78,11 @@
   .toggle-lr.active { background: var(--accent); color: white; border-color: var(--accent); }
   .menu-btn { background: #222; border: 1px solid #444; color: #888; border-radius: 6px; height: 42px; width: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; padding-bottom: 5px; }
 
-  /* FLASHY SET TAGS (RESTORED COLOR) */
+  /* FLASHY SET TAGS */
   .set-group-box { padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333; }
-  .set-group-drop { background: rgba(255, 107, 129, 0.25); border: 1px solid var(--drop); }
-  .set-group-super { background: rgba(162, 155, 254, 0.25); border: 1px solid var(--super); }
-  .set-group-assist { background: rgba(0, 210, 211, 0.25); border: 1px solid var(--assist); }
+  .set-group-drop { background: rgba(255, 107, 129, 0.20); border: 1px solid var(--drop); }
+  .set-group-super { background: rgba(162, 155, 254, 0.20); border: 1px solid var(--super); }
+  .set-group-assist { background: rgba(0, 210, 211, 0.20); border: 1px solid var(--assist); }
 
   .label-drop { color: var(--drop); font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
   .label-super { color: white; font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
@@ -142,7 +143,6 @@
   .day-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .day-left-grp { display: flex; align-items: center; gap: 10px; }
   
-  /* CHECKBOX */
   .day-check { width: 24px; height: 24px; border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; z-index: 10; cursor: pointer; background: #111; }
   .day-check.checked { background: var(--success); border-color: var(--success); }
   .day-check.checked::after { content: '✓'; color: black; font-weight: bold; font-size: 14px; }
@@ -306,7 +306,7 @@
 </div>
 
 <div id="view-prog" class="view">
-  <h1>NETGAINS <span class="brand-span">V37</span></h1>
+  <h1>NETGAINS <span class="brand-span">V38</span></h1>
   <p class="sub">BAECHLE ENGINE</p>
   <div style="background:#222; padding:15px; border-radius:12px; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
@@ -377,7 +377,7 @@
 
 <script>
 // --- GLOBAL INIT ---
-const DB_KEY = 'netgains_v37_db';
+const DB_KEY = 'netgains_v38_db';
 let DATA = { 
     unit:'lbs', 
     inputs:{s:'',b:'',d:''}, 
@@ -672,7 +672,7 @@ window.getBestLift = function(exName) {
     }
 }
 
-// RENDER CART - FIXED CALCULATOR BUTTON & EVENT HANDLER
+// RENDER CART - FIXED CALCULATOR BUTTON
 window.renderCart = function(){
     const area=document.getElementById('active-workout-area'); area.innerHTML=""; 
     if(DATA.activeCart.length===0){ area.innerHTML="<div style='text-align:center;padding:30px;color:#555;'>Empty Workout</div>"; return; } 
@@ -747,15 +747,27 @@ window.openQuickCalc = function(weight, event) {
     document.getElementById('modal-plate-calc').style.display='flex';
 }
 
-// FIXED LAUNCH FUNCTION WITH EVENT HANDLING
+// FIXED LAUNCH FUNCTION WITH SAFEGUARDS
 window.launchCalc = function(exIdx, setIdx, event) { 
     if(event) event.stopPropagation();
-    const exName = DATA.activeCart[exIdx]; calcTarget = {ex: exName, idx: setIdx}; 
+    const exName = DATA.activeCart[exIdx];
+    
+    // SAFETY CHECK: If array is messed up, abort to prevent crash
+    if (!DATA.sessionData[exName] || !DATA.sessionData[exName][setIdx]) {
+        console.warn("Set data missing for calc launch");
+        return;
+    }
+
+    calcTarget = {ex: exName, idx: setIdx}; 
     const currentVal = DATA.sessionData[exName][setIdx].w || 45; 
-    window.setCalcMode('bar'); document.getElementById('calc-total').value = currentVal; 
-    window.manualCalcUpdate(currentVal); window.renderPlateButtons(); 
+    
+    window.setCalcMode('bar'); 
+    document.getElementById('calc-total').value = currentVal; 
+    window.manualCalcUpdate(currentVal); 
+    window.renderPlateButtons(); 
     document.getElementById('modal-plate-calc').style.display='flex'; 
 }
+
 window.closeCalc = function(){ document.getElementById('modal-plate-calc').style.display='none'; }
 window.renderPlateButtons = function(){ const grid = document.getElementById('plate-btn-grid'); grid.innerHTML = ""; [45,35,25,10,5,2.5].forEach(w => { grid.innerHTML += `<button class="p-btn" onclick="window.addPlate(${w})">${w}</button>`; }); }
 window.setCalcMode = function(m){ calcMode=m; const stdBar = 45; calcBar=(m==='bar')?stdBar:0; document.getElementById('mode-bar').style.background=(m==='bar')?'var(--success)':'#333'; document.getElementById('mode-bar').style.color=(m==='bar')?'black':'white'; document.getElementById('mode-single').style.background=(m==='single')?'var(--success)':'#333'; document.getElementById('mode-single').style.color=(m==='single')?'black':'white'; window.updateCalcDisplay(); }
