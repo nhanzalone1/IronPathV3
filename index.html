@@ -6,91 +6,107 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V28</title>
+<title>NetGains V29</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-  :root { --bg:#0f0f13; --card:#1a1a24; --text:#fff; --accent:#ff4757; --success:#2ed573; --input:#121212; --border:#333; --drop:#ff6b81; --super:#a29bfe; --assist:#00d2d3; }
-  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; font-family:-apple-system, system-ui, Roboto, sans-serif; }
-  body { margin:0; padding:0; background:var(--bg); color:var(--text); padding-bottom:90px; }
+  /* --- 1. VARIABLES & RESET --- */
+  :root { 
+    --bg: #0f0f13; --card: #1a1a24; --text: #ffffff; 
+    --accent: #ff4757; --success: #2ed573; --danger: #ff4757;
+    --drop: #ff6b81; --super: #a29bfe; --assist: #00d2d3; --cardio: #ffa502; 
+    --input-bg: #121212; --border: #333;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important; }
   
-  .hidden { display:none !important; }
-  .btn { width:100%; padding:14px; border:none; border-radius:10px; font-weight:800; margin-top:10px; cursor:pointer; text-transform:uppercase; font-size:13px; }
-  .btn-main { background:linear-gradient(135deg, #ff4757, #ff6b81); color:#fff; }
-  .btn-sec { background:#333; color:#fff; border:1px solid #444; }
-  .btn-sm { padding:8px; width:auto; display:inline-block; font-size:11px; margin:0; }
+  body { margin: 0; padding: 0; background-color: var(--bg); color: var(--text); overflow-x: hidden; padding-bottom: 90px; }
+  .hidden { display: none !important; }
   
-  input { background:var(--input); border:1px solid var(--border); color:#fff; padding:12px; border-radius:8px; width:100%; font-size:16px; margin-bottom:5px; text-align:center; }
-  .input-wrapper { position:relative; width:100%; }
-  .input-unit { position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:10px; color:#666; font-weight:bold; }
-
-  #unit-toggle { position:fixed; top:15px; right:15px; background:#222; border:1px solid #444; color:var(--accent); padding:8px 12px; border-radius:20px; font-weight:800; font-size:11px; z-index:9999; cursor:pointer; }
-
-  .view { padding:20px; max-width:600px; margin:0 auto; }
-  h1 { text-align:center; margin:25px 0 5px; font-weight:900; font-size:24px; }
-  .sub { text-align:center; color:#666; font-size:11px; letter-spacing:2px; margin-bottom:25px; text-transform:uppercase; }
-
-  /* PROGRAM STYLES (RESTORED V22) */
-  .week { background:var(--card); border-radius:12px; margin-bottom:15px; border:1px solid #333; overflow:hidden; }
-  .week-head { display:flex; justify-content:space-between; padding:15px; background:#222; border-bottom:1px solid #333; font-weight:bold; }
-  .day-row { padding:15px; border-bottom:1px solid #222; position:relative; cursor: pointer; }
+  /* BUTTONS (V22 CHUNKY STYLE) */
+  .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 13px; margin-top: 10px; transition: 0.1s; letter-spacing: 0.5px; }
+  .btn:active { transform: scale(0.98); }
+  .btn-main { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3); }
+  .btn-sec { background: #333; color: white; border: 1px solid #444; }
+  .btn-ghost { background: transparent; border: 1px dashed #444; color: #666; font-size: 10px; padding: 6px 10px; width: auto; display: inline-block; cursor: pointer; border-radius: 6px; font-weight: 700; text-transform: uppercase; }
+  .btn-sm { padding: 8px; font-size: 11px; width: auto; display: inline-block; margin: 0; }
   
-  .day-title-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-  .day-left-grp { display:flex; align-items:center; gap:10px; }
+  /* UNIT TOGGLE */
+  #unit-toggle { position: fixed; top: 15px; right: 15px; background: #222; border: 1px solid #444; color: var(--accent); padding: 8px 12px; border-radius: 20px; font-weight: 800; font-size: 11px; cursor: pointer; z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+  h1 { text-align: center; margin: 25px 0 5px; font-size: 26px; letter-spacing: -1px; font-weight: 900; color: white; text-transform: uppercase; }
+  .brand-span { color: var(--accent); }
+  .sub { text-align: center; color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; font-weight: 700; }
   
-  .day-check { width:24px; height:24px; border:2px solid #555; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; background:#111; z-index:50; }
-  .day-check.checked { background:var(--success); border-color:var(--success); }
-  .day-check.checked::after { content:'✓'; color:#000; font-weight:bold; }
+  /* INPUTS */
+  input { background: var(--input-bg); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 8px; width: 100%; font-size: 16px; margin-bottom: 5px; font-weight: 600; text-align: center; }
+  input:focus { outline:none; border-color: var(--accent); }
+  .input-wrapper { position: relative; width: 100%; }
+  .input-wrapper input { padding-right: 35px; } 
+  .input-unit { position: absolute; right: 8px; top: 42%; transform: translateY(-50%); color: #555; font-size: 9px; pointer-events: none; font-weight: 800; text-transform: uppercase; }
 
-  .day-type { font-size:9px; padding:3px 6px; border-radius:4px; font-weight:800; text-transform:uppercase; }
-  .type-h { background:#ff4757; color:white; } 
-  .type-l { background:#2ed573; color:black; } 
-  .type-m { background:#ffa502; color:black; }
+  /* VIEWS */
+  .view { padding: 20px; max-width: 600px; margin: 0 auto; animation: fade 0.3s; }
+  @keyframes fade { from{opacity:0; transform:translateY(5px)} to{opacity:1; transform:translateY(0)} }
 
-  .lift-row { display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; padding-bottom:6px; border-bottom:1px solid #222; }
-  .lift-name { color:#888; width:40px; font-weight:bold; }
-  .lift-nums { font-family:monospace; color:#fff; }
-  .calc-trigger { color:var(--success); text-decoration:underline; cursor:pointer; }
+  /* COMPONENTS */
+  /* GYM SELECTOR - FIXED CSS CLASS NAME */
+  .gym-selector { background: #222; border: 1px solid var(--border); padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; transition: 0.1s; }
+  .gym-selector:active { background: #2a2a2a; }
+  .gym-label { font-size: 10px; color: #888; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+  .gym-name { font-weight: 900; font-size: 15px; color: var(--accent); margin-top: 2px; }
 
-  /* WARMUP ACCORDION (RESTORED) */
-  .warmup-drop { background:#111; padding:10px; border-top:1px dashed #333; display:none; margin-top:10px; }
-  .warmup-drop.open { display:block; animation: slideDown 0.2s ease-out; }
-  .warmup-header { font-size:10px; color:var(--accent); font-weight:bold; margin-bottom:5px; text-transform:uppercase; }
-  .warmup-line { font-family:monospace; font-size:11px; color:#aaa; margin-bottom:3px; }
-  @keyframes slideDown { from{opacity:0; transform:translateY(-5px)} to{opacity:1; transform:translateY(0)} }
+  .day-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 16px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border); transition: 0.1s; }
+  .day-card:active { transform: scale(0.99); border-color: #555; }
+  .icon-btn { background: #222; border: 1px solid #444; color: #ccc; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
 
-  .chk-box { width:20px; height:20px; border:2px solid #444; border-radius:4px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-  .chk-box.checked { background:#444; }
-  .chk-box.checked::after { content:'✓'; color:#888; font-size:12px; font-weight:bold; }
-  .week-content.dimmed { opacity:0.3; filter:grayscale(100%); pointer-events:none; }
-
-  /* LOG TAB STYLES */
-  .day-card { background:var(--card); padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid #333; }
-  .gym-selector { background:#222; padding:10px; border-radius:8px; border:1px solid #333; margin-bottom:20px; display:flex; justify-content:space-between; cursor:pointer; }
-  .icon-btn { background:#222; border:1px solid #444; color:#ccc; width:30px; height:30px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; cursor:pointer; }
+  /* WORKOUT ROWS */
+  .ex-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border); }
+  .ex-top { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: flex-start; }
+  .ex-name { font-weight: 800; font-size: 16px; margin-right: 10px; flex-grow: 1; letter-spacing: -0.3px; }
+  .ex-tools { display: flex; gap: 15px; align-items: center; flex-shrink: 0; }
+  .ex-hist { font-size: 10px; color: var(--success); margin-bottom: 10px; display: flex; gap: 10px; font-weight: 600; }
+  .hist-badge { background: rgba(46, 213, 115, 0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(46, 213, 115, 0.3); }
   
-  .ex-card { background:var(--card); padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #333; }
-  .ex-top { display:flex; justify-content:space-between; margin-bottom:10px; align-items:center; }
-  .ex-name { font-weight:bold; font-size:16px; }
-  .set-row { display:grid; grid-template-columns:30px 1fr 40px 1fr 30px 30px; gap:5px; align-items:center; margin-bottom:8px; }
-  .calc-btn { background:#222; border:1px solid #444; color:var(--accent); border-radius:6px; height:42px; cursor:pointer; }
-  .del-btn { background:transparent; border:none; color:#555; font-size:16px; cursor:pointer; }
+  .set-row { display: grid; grid-template-columns: 35px 1fr 40px 1fr 30px 30px; gap: 6px; align-items: center; margin-bottom: 8px; }
+  .set-num { text-align: center; font-weight: 700; color: #666; font-size: 12px; } 
+  .cardio-row { display: grid; grid-template-columns: 30px 1fr 1fr 1fr 30px; gap: 6px; align-items: center; margin-bottom: 8px; }
   
-  /* LIBRARY SHELF */
-  .shelf-header { display:flex; justify-content:space-between; align-items:center; margin-top:20px; border-top:1px solid #333; padding-top:20px; margin-bottom:10px; }
-  .tile-grid { display:flex; flex-wrap:wrap; gap:8px; }
-  .tile { background:#222; border:1px solid #444; padding:10px 14px; border-radius:8px; font-size:13px; cursor:pointer; }
-  .tile:active { background:var(--accent); color:#000; }
-  .tile-add { border:1px dashed #666; color:#888; background:transparent; }
-  .tile.deleting { border-color:var(--accent); color:var(--accent); }
+  .calc-btn { background: #222; border: 1px solid #444; color: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; height: 42px; font-size: 14px; }
+  .del-btn { background: none; border: none; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  
+  .toggle-lr { font-size: 11px; background: #222; color: #aaa; padding: 8px 12px; border-radius: 6px; border: 1px solid #444; cursor: pointer; font-weight: 800; display: inline-block; transition: 0.1s; }
+  .toggle-lr.active { background: var(--accent); color: white; border-color: var(--accent); }
 
+  /* SHELF */
+  .shelf-header { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; border-top: 1px solid #333; padding-top: 20px; margin-bottom: 15px; }
+  .shelf-title { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; }
+  .edit-btn { font-size: 10px; font-weight: 800; color: var(--accent); background: none; border: none; cursor: pointer; padding: 5px; text-transform: uppercase; letter-spacing: 1px; }
+  
+  .tile-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tile { display: inline-flex; align-items: center; justify-content: center; background: #222; border: 1px solid #333; color: #ccc; padding: 12px 18px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 700; transition: 0.1s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+  .tile:active { background: var(--accent); color: white; border-color: var(--accent); transform: translateY(1px); }
+  .tile.deleting { border-color: var(--danger); color: var(--danger); background: rgba(255, 71, 87, 0.1); }
+  .tile-add { border: 1px dashed #666; color: #888; background: transparent; box-shadow: none; }
+
+  /* GRAPH */
+  .chart-container { position: relative; height: 300px; width: 100%; background: #111; border: 1px solid #333; border-radius: 12px; padding: 10px; margin-top: 15px; }
+  .stat-toggle { display: flex; gap: 10px; margin-bottom: 10px; }
+  .st-btn { flex: 1; padding: 8px; background: #222; border: 1px solid #333; color: #666; font-size: 11px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+  .st-btn.active { background: var(--success); color: black; border-color: var(--success); }
+  
   /* MODALS */
-  .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; display:none; align-items:center; justify-content:center; }
-  .modal-box { background:#1e1e1e; padding:25px; border-radius:15px; width:85%; max-width:350px; border:1px solid #444; position:relative; }
+  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+  .modal-box { background: #1e1e1e; padding: 25px; border-radius: 15px; width: 85%; max-width: 350px; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
   .modal-full { background: #0f0f13; width: 100%; height: 100%; max-width: none; border-radius: 0; padding: 20px; overflow-y: auto; }
-  .close-x { position:absolute; top:15px; right:15px; font-size:20px; color:#666; cursor:pointer; }
+  .close-x { position: absolute; top: 15px; right: 15px; color: #666; font-size: 20px; cursor: pointer; font-weight: bold; }
+  
+  /* TAGS */
+  .tag-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .chip { padding: 8px 14px; background: #222; border: 1px solid #444; border-radius: 20px; font-size: 11px; color: #ccc; cursor: pointer; font-weight: 600; }
+  .chip:active { background: var(--accent); color: white; }
+  .chip-add { border-style: dashed; color: #888; }
 
-  /* PLATE CALC VISUALS */
+  /* PLATE VIZ */
   .barbell-viz { display: flex; align-items: center; justify-content: center; height: 100px; background: #111; margin-bottom: 15px; border-radius: 8px; overflow-x: auto; border: 1px solid #333; position: relative; }
   .sleeve { height: 10px; width: 90%; background: #555; position: absolute; border-radius: 5px; z-index: 1; }
   .plate-stack { display: flex; align-items: center; gap: 2px; z-index: 2; }
@@ -119,14 +135,49 @@
   .picker-item:active { background: var(--accent); color: black; }
   .folder-tag { font-size: 9px; padding: 3px 6px; background: #333; border-radius: 4px; color: #aaa; margin-left: 10px; }
 
-  .chart-container { position: relative; height: 300px; width: 100%; background: #111; border: 1px solid #333; border-radius: 12px; padding: 10px; margin-top: 15px; }
+  /* PROGRAM CSS - FIXED CHECKBOXES */
+  .week { background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; overflow: hidden; transition: 0.3s; }
+  .week-head { display: flex; justify-content: space-between; padding: 15px; background: #222; border-bottom: 1px solid #333; font-weight: bold; }
+  .day-row { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; position: relative; }
+  .day-row:active { background: #222; }
+  .day-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .day-left-grp { display: flex; align-items: center; gap: 10px; }
+  
+  /* THIS IS THE MISSING CHECKBOX CLASS */
+  .day-check { width: 24px; height: 24px; border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; z-index: 10; cursor: pointer; background: #111; }
+  .day-check.checked { background: var(--success); border-color: var(--success); }
+  .day-check.checked::after { content: '✓'; color: black; font-weight: bold; font-size: 14px; }
+  
+  .day-type { font-size: 9px; padding: 3px 6px; border-radius: 4px; font-weight: 800; text-transform: uppercase; }
+  .type-h { background: #ff4757; color: white; } 
+  .type-l { background: #2ed573; color: black; } 
+  .type-m { background: #ffa502; color: black; }
+  .lift-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; border-bottom: 1px solid #222; padding-bottom: 4px; }
+  .lift-name { color: #888; width: 40px; font-weight: bold; }
+  .lift-nums { color: white; font-family: monospace; letter-spacing: -0.5px; }
+  .calc-trigger { color: var(--success); cursor: pointer; border-bottom: 1px dashed #444; }
+  
+  /* WARMUP ACCORDION */
+  .warmup-drop { background: #111; padding: 10px; border-top: 1px dashed #333; display: none; margin-top:10px; }
+  .warmup-drop.open { display: block; animation: slideDown 0.2s ease-out; }
+  .warmup-header { font-size: 10px; color: var(--accent); font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
+  .warmup-line { font-size: 11px; color: #aaa; margin-bottom: 3px; font-family: monospace; }
+  @keyframes slideDown { from{opacity:0; transform:translateY(-5px)} to{opacity:1; transform:translateY(0)} }
+  
+  .chk-box { width: 20px; height: 20px; border: 2px solid #444; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+  .chk-box.checked { background: #444; border-color: #444; }
+  .chk-box.checked::after { content: '✓'; color: #888; font-weight: bold; font-size: 12px; }
+  .week-content { transition: 0.3s; }
+  .week-content.dimmed { opacity: 0.3; pointer-events: none; filter: grayscale(100%); text-decoration: line-through; }
+  .log-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .log-lbl { font-size: 10px; color: #888; text-align: center; }
 
-  .nav { position:fixed; bottom:0; left:0; width:100%; height:80px; background:#181818; border-top:1px solid #333; display:grid; grid-template-columns:1fr 1fr 1fr; z-index:1000; padding-bottom:20px; }
-  .nav-btn { background:none; border:none; color:#666; font-size:10px; font-weight:bold; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; }
-  .nav-btn.active { color:var(--accent); }
-
-  #toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:#222; border:1px solid #333; padding:10px 20px; border-radius:30px; opacity:0; pointer-events:none; transition:0.3s; z-index:3000; font-size:12px; font-weight:bold; }
-  #toast.show { opacity:1; transform:translate(-50%, -10px); }
+  .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: #181818; border-top: 1px solid #333; display: grid; grid-template-columns: 1fr 1fr 1fr; z-index: 1000; padding-bottom: 20px; }
+  .nav-btn { background: none; border: none; color: #666; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+  .nav-btn.active { color: var(--accent); }
+  
+  #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #222; border: 1px solid #333; padding: 10px 20px; border-radius: 30px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 3000; font-size: 12px; font-weight: bold; }
+  #toast.show { opacity: 1; transform: translate(-50%, -10px); }
 </style>
 </head>
 <body>
@@ -145,7 +196,7 @@
         <button id="mode-bar" class="btn btn-sm" style="background:var(--success); color:black;" onclick="window.setCalcMode('bar')">BARBELL</button>
         <button id="mode-single" class="btn btn-sm" style="background:#333;" onclick="window.setCalcMode('single')">SINGLE</button>
     </div>
-    <div id="plate-btn-grid" class="plate-btn-grid"></div>
+    <div id="plate-btn-grid" class="plate-grid"></div>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
         <button class="btn btn-sec" onclick="window.resetCalc()">Clear</button>
         <button class="btn btn-main" onclick="window.applyCalc()">Use</button>
@@ -245,7 +296,7 @@
 </div>
 
 <div id="view-prog" class="view">
-  <h1>NETGAINS <span class="brand-span">V28</span></h1>
+  <h1>NETGAINS <span class="brand-span">V29</span></h1>
   <p class="sub">BAECHLE ENGINE</p>
   <div style="background:#222; padding:15px; border-radius:12px; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
@@ -262,7 +313,7 @@
 <div id="view-log" class="view hidden">
   <h1>LOG</h1>
   <div id="split-manager">
-      <div class="gym-selector-header" onclick="window.showGymManager()">
+      <div class="gym-selector" onclick="window.showGymManager()">
           <div><div class="gym-label">CURRENT LOCATION</div><div class="gym-name" id="current-gym-display">Main Gym</div></div>
           <div style="color:#666">▼</div>
       </div>
@@ -316,7 +367,7 @@
 
 <script>
 // --- GLOBAL INIT ---
-const DB_KEY = 'netgains_v28_db';
+const DB_KEY = 'netgains_v29_db';
 let DATA = { 
     unit:'lbs', 
     inputs:{s:'',b:'',d:''}, 
@@ -466,14 +517,11 @@ window.toggleManualWeek = function(wKey, el, event){
 
 window.toggleDayCheck = function(dKey, event, sw, bw, dw, r) {
     event.stopPropagation();
-    // Toggle Logic
-    if(DATA.progState[dKey] === true) {
-        // If checked, uncheck it
+    if(DATA.progState[dKey]) {
         delete DATA.progState[dKey];
         window.saveData();
         window.genProgram();
     } else {
-        // If unchecked, open modal to log
         window.openProgramLogModal(sw, bw, dw, r, r, r, dKey, event);
     }
 }
@@ -536,7 +584,7 @@ window.genProgram = function(){
             <div class="day-row" onclick="window.toggleWarmup(this)">
                 <div class="day-title-row">
                     <div class="day-left-grp">
-                        <div class="day-circle ${isDone?'checked':''}" onclick="window.toggleDayCheck('${dKey}', event, ${sw}, ${bw}, ${dw}, ${k.r})"></div>
+                        <div class="day-check ${isDone?'checked':''}" onclick="window.toggleDayCheck('${dKey}', event, ${sw}, ${bw}, ${dw}, ${k.r})"></div>
                         <span style="font-weight:bold">${dayName}</span>
                     </div>
                     <span class="day-type ${cls}">${typeLabel}</span>
@@ -605,11 +653,50 @@ window.toggleEditMode = function(){ isEditing = !isEditing; document.getElementB
 window.deleteLibItem = function(e){ window.showConfirm(`Delete "${e}"?`, () => { const g=window.getCurrentGymData(); g.library[currentFolder] = g.library[currentFolder].filter(x => x !== e); window.saveData(); window.renderShelf(); }); }
 window.addToCart = function(e){if(!DATA.activeCart.includes(e)){DATA.activeCart.push(e);if(!DATA.sessionData[e])DATA.sessionData[e]=[{w:'',r:''}];window.saveData();window.renderCart()}}
 window.removeExFromCart = function(e){DATA.activeCart=DATA.activeCart.filter(x=>x!==e);delete DATA.sessionData[e];window.saveData();window.renderCart()}
-window.renderCart = function(){const area=document.getElementById('active-workout-area'); area.innerHTML=""; if(DATA.activeCart.length===0){ area.innerHTML="<div style='text-align:center;padding:30px;color:#555;'>Empty Workout</div>"; return; } DATA.activeCart.forEach((ex, exIdx)=>{ const isC=DATA.exTypes[ex]==='cardio', sets=DATA.sessionData[ex]||[], isLR=DATA.sessionData[ex+'_LR']===true; let histHTML = history[ex] ? `<div class="hist-badge">BEST: ${history[ex]}</div>` : ''; if(isC && history[ex]) histHTML = `<div class="hist-badge" style="background:rgba(255,165,2,0.1); border-color:rgba(255,165,2,0.3);">${history[ex]}</div>`; let h=`<div class="ex-card"><div class="ex-top"><div class="ex-name">${ex}<div class="ex-hist">${histHTML}</div></div><div class="ex-tools"><button onclick="window.removeExFromCart('${ex}')" style="background:none;border:none;color:#555;">✕</button></div></div>`; let r=""; const u = DATA.unit.toUpperCase(); if(isC){ sets.forEach((s,i)=>{ r+=`<div class="cardio-row"><span class="set-num">${i+1}</span><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.w}" onchange="window.updateSet('${ex}',${i},'w',this.value)"><span class="input-unit">MIN</span></div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.r}" onchange="window.updateSet('${ex}',${i},'r',this.value)"><span class="input-unit">MI</span></div><button class="del-btn" onclick="window.removeSet('${ex}',${i})">✕</button></div>` }); } else { sets.forEach((s,i)=>{ const row = `<div class="set-row"><div class="set-num">${i+1}</div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.w}" onchange="window.updateSet('${ex}',${i},'w',this.value)"><span class="input-unit">${u}</span></div><button class="calc-btn" onclick="window.openCalc(${exIdx},${i})">🧮</button><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.r}" onchange="window.updateSet('${ex}',${i},'r',this.value)"><span class="input-unit">REPS</span></div><button class="del-btn" onclick="window.removeSet('${ex}',${i})">✕</button></div>`; r += row; }); } area.innerHTML+=`${h}<div id="sets-${ex}">${r}</div><button class="btn btn-sec btn-sm" onclick="window.addSet('${ex}')">+ ADD SET</button></div>` }); }
+
+// HELPER: Get Best Lift
+window.getBestLift = function(exName) {
+    const logs = DATA.history.filter(l => l.ex === exName);
+    if(logs.length === 0) return null;
+    const max = Math.max(...logs.map(l => l.rm));
+    return max;
+}
+
+window.renderCart = function(){
+    const area=document.getElementById('active-workout-area'); 
+    area.innerHTML=""; 
+    if(DATA.activeCart.length===0){ area.innerHTML="<div style='text-align:center;padding:30px;color:#555;'>Empty Workout</div>"; return; } 
+    
+    DATA.activeCart.forEach((ex, exIdx)=>{ 
+        const isC=DATA.exTypes[ex]==='cardio';
+        const sets=DATA.sessionData[ex]||[];
+        const isLR=DATA.sessionData[ex+'_LR']===true; 
+        
+        // Fix: Calculate Best on fly
+        const best = window.getBestLift(ex);
+        let histHTML = best ? `<div class="hist-badge">BEST: ${best}</div>` : '';
+        if(isC && best) histHTML = `<div class="hist-badge" style="background:rgba(255,165,2,0.1); border-color:rgba(255,165,2,0.3);">BEST: ${best}</div>`; 
+
+        let h=`<div class="ex-card"><div class="ex-top"><div class="ex-name">${ex}<div class="ex-hist">${histHTML}</div></div><div class="ex-tools"><button onclick="window.removeExFromCart('${ex}')" style="background:none;border:none;color:#555;">✕</button></div></div>`; 
+        let r=""; 
+        const u = DATA.unit.toUpperCase(); 
+        
+        if(isC){ 
+            sets.forEach((s,i)=>{ r+=`<div class="cardio-row"><span class="set-num">${i+1}</span><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.w}" onchange="window.updateSet('${ex}',${i},'w',this.value)"><span class="input-unit">MIN</span></div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.r}" onchange="window.updateSet('${ex}',${i},'r',this.value)"><span class="input-unit">MI</span></div><button class="del-btn" onclick="window.removeSet('${ex}',${i})">✕</button></div>` }); 
+        } else { 
+            sets.forEach((s,i)=>{ 
+                const row = `<div class="set-row"><div class="set-num">${i+1}</div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.w}" onchange="window.updateSet('${ex}',${i},'w',this.value)"><span class="input-unit">${u}</span></div><button class="calc-btn" onclick="window.openCalc(${exIdx},${i})">🧮</button><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.r}" onchange="window.updateSet('${ex}',${i},'r',this.value)"><span class="input-unit">REPS</span></div><button class="del-btn" onclick="window.removeSet('${ex}',${i})">✕</button></div>`; 
+                r += row; 
+            }); 
+        } 
+        area.innerHTML+=`${h}<div id="sets-${ex}">${r}</div><button class="btn btn-sec btn-sm" onclick="window.addSet('${ex}')">+ ADD SET</button></div>` 
+    }); 
+}
+
 window.addSet = function(e){if(!DATA.sessionData[e])DATA.sessionData[e]=[];DATA.sessionData[e].push({w:'',r:''});window.saveData();window.renderCart()}
 window.removeSet = function(e,i){DATA.sessionData[e].splice(i,1);window.saveData();window.renderCart()}
 window.updateSet = function(e,i,f,v){if(!DATA.sessionData[e][i])return;DATA.sessionData[e][i][f]=v;window.saveData()}
-window.finishSession = function(){const t=new Date().toISOString().split('T')[0]; DATA.activeCart.forEach(e=>{ const sets=DATA.sessionData[e]; sets.forEach(s=>{ if(s.w && s.r){ DATA.history.push({date:t, ex:e, w:s.w, r:s.r, rm:Math.round(s.w*(1+0.033*s.r))}); } }); }); window.clearCart(); window.closeSession(); window.showToast("Saved!"); }
+window.finishSession = function(){const t=new Date().toISOString().split('T')[0]; DATA.activeCart.forEach(e=>{ const sets=DATA.sessionData[e]; sets.forEach(s=>{ if(s.w && s.r){ DATA.history.push({date:t, ex:e, w:s.w, r:s.r, rm:Math.round(s.w*(1+0.033*s.r))}); } }); }); window.clearCart(); window.closeSession(); window.showToast("Saved!"); window.renderCart(); }
 
 // --- CALC VISUALIZER & LOGIC ---
 let calcTarget = null; let calcSide=0, calcBar=45, calcMode='bar';
