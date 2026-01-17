@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V27</title>
+<title>NetGains V28</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -95,7 +95,6 @@
   .sleeve { height: 10px; width: 90%; background: #555; position: absolute; border-radius: 5px; z-index: 1; }
   .plate-stack { display: flex; align-items: center; gap: 2px; z-index: 2; }
   .viz-plate { display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; color: black; border-radius: 2px; height: 0; transition: 0.2s; border: 1px solid rgba(0,0,0,0.3); }
-  
   .vp-45 { height: 90px; width: 20px; background: #0984e3; color: white; } 
   .vp-35 { height: 80px; width: 18px; background: #fdcb6e; } 
   .vp-25 { height: 70px; width: 16px; background: #00b894; } 
@@ -104,16 +103,16 @@
   .vp-2_5{ height: 30px; width: 10px; background: #636e72; color: white; }
   .vp-kg-25 { height: 90px; width: 22px; background: #ff4757; color: white; } 
   .vp-kg-20 { height: 90px; width: 20px; background: #0984e3; color: white; } 
-  .vp-kg-15 { height: 80px; width: 18px; background: #f1c40f; color: black; } 
-  .vp-kg-10 { height: 65px; width: 16px; background: #2ecc71; color: white; } 
+  .vp-kg-15 { height: 60px; width: 14px; background: #f1c40f; color: black; } 
+  .vp-kg-10 { height: 50px; width: 12px; background: #2ecc71; color: white; } 
   .vp-kg-5  { height: 45px; width: 14px; background: #dfe6e9; color: black; } 
   .vp-kg-2_5{ height: 35px; width: 12px; background: #2d3436; color: white; } 
   .vp-kg-1_25{ height: 25px; width: 10px; background: #b2bec3; color: black; } 
-
   .plate-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
   .p-btn { background: #222; border: 1px solid #444; color: white; padding: 15px 0; border-radius: 8px; font-weight: bold; cursor: pointer; }
   .p-btn:active { background: #444; }
 
+  /* PICKER */
   .picker-section { margin-bottom: 25px; }
   .picker-label { font-size: 11px; color: #666; font-weight: bold; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase; border-bottom: 1px solid #222; padding-bottom: 5px; }
   .picker-item { background: #1a1a24; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 8px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
@@ -246,7 +245,7 @@
 </div>
 
 <div id="view-prog" class="view">
-  <h1>NETGAINS <span class="brand-span">V27</span></h1>
+  <h1>NETGAINS <span class="brand-span">V28</span></h1>
   <p class="sub">BAECHLE ENGINE</p>
   <div style="background:#222; padding:15px; border-radius:12px; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
@@ -317,7 +316,7 @@
 
 <script>
 // --- GLOBAL INIT ---
-const DB_KEY = 'netgains_v27_db';
+const DB_KEY = 'netgains_v28_db';
 let DATA = { 
     unit:'lbs', 
     inputs:{s:'',b:'',d:''}, 
@@ -467,11 +466,14 @@ window.toggleManualWeek = function(wKey, el, event){
 
 window.toggleDayCheck = function(dKey, event, sw, bw, dw, r) {
     event.stopPropagation();
-    if(DATA.progState[dKey]) {
+    // Toggle Logic
+    if(DATA.progState[dKey] === true) {
+        // If checked, uncheck it
         delete DATA.progState[dKey];
         window.saveData();
         window.genProgram();
     } else {
+        // If unchecked, open modal to log
         window.openProgramLogModal(sw, bw, dw, r, r, r, dKey, event);
     }
 }
