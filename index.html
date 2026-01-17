@@ -6,30 +6,22 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V24</title>
+<title>NetGains V25</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-  /* --- 1. VARIABLES & RESET --- */
   :root { 
     --bg: #0f0f13; --card: #1a1a24; --text: #ffffff; 
     --accent: #ff4757; --success: #2ed573; --danger: #ff4757;
     --drop: #ff6b81; --super: #a29bfe; --assist: #00d2d3; --cardio: #ffa502; 
     --input-bg: #121212; --border: #333;
   }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  
-  /* CLASSIC FONT STACK */
-  body, button, input, select, textarea, div, span, p, h1, h2, h3, .set-num { 
-      font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important; 
-  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important; }
   
   body { margin: 0; padding: 0; background-color: var(--bg); color: var(--text); overflow-x: hidden; padding-bottom: 90px; }
-
-  /* --- 2. UTILS --- */
   .hidden { display: none !important; }
   
-  /* BUTTONS (CLASSIC CHUNKY STYLE) */
+  /* BUTTONS */
   .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-size: 13px; margin-top: 10px; transition: 0.1s; letter-spacing: 0.5px; }
   .btn:active { transform: scale(0.98); }
   .btn-main { background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3); }
@@ -38,12 +30,7 @@
   .btn-sm { padding: 8px; font-size: 11px; width: auto; display: inline-block; margin: 0; }
   
   /* UNIT TOGGLE */
-  #unit-toggle { 
-      position: fixed; top: 15px; right: 15px; 
-      background: #222; border: 1px solid #444; color: var(--accent); 
-      padding: 8px 12px; border-radius: 20px; font-weight: 800; font-size: 11px; 
-      cursor: pointer; z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  }
+  #unit-toggle { position: fixed; top: 15px; right: 15px; background: #222; border: 1px solid #444; color: var(--accent); padding: 8px 12px; border-radius: 20px; font-weight: 800; font-size: 11px; cursor: pointer; z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 
   h1 { text-align: center; margin: 25px 0 5px; font-size: 26px; letter-spacing: -1px; font-weight: 900; color: white; text-transform: uppercase; }
   .brand-span { color: var(--accent); }
@@ -56,13 +43,12 @@
   .input-wrapper input { padding-right: 35px; text-align: center; } 
   .input-unit { position: absolute; right: 8px; top: 42%; transform: translateY(-50%); color: #555; font-size: 9px; pointer-events: none; font-weight: 800; text-transform: uppercase; }
 
-  /* --- 3. LAYOUT --- */
+  /* VIEWS */
   .view { padding: 20px; max-width: 600px; margin: 0 auto; animation: fade 0.3s; }
   @keyframes fade { from{opacity:0; transform:translateY(5px)} to{opacity:1; transform:translateY(0)} }
 
-  /* --- 4. COMPONENTS --- */
+  /* COMPONENTS */
   .gym-selector-header { background: #222; border: 1px solid var(--border); padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; transition: 0.1s; }
-  .gym-selector-header:active { background: #2a2a2a; }
   .gym-label { font-size: 10px; color: #888; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
   .gym-name { font-weight: 900; font-size: 15px; color: var(--accent); margin-top: 2px; }
 
@@ -70,7 +56,7 @@
   .day-card:active { transform: scale(0.99); border-color: #555; }
   .icon-btn { background: #222; border: 1px solid #444; color: #ccc; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
 
-  /* WORKOUT ROWS */
+  /* LOGGING */
   .ex-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border); }
   .ex-top { display: flex; justify-content: space-between; margin-bottom: 5px; align-items: flex-start; }
   .ex-name { font-weight: 800; font-size: 16px; margin-right: 10px; flex-grow: 1; letter-spacing: -0.3px; }
@@ -84,12 +70,11 @@
   
   .calc-btn { background: #222; border: 1px solid #444; color: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; height: 42px; font-size: 14px; }
   .del-btn { background: none; border: none; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  .menu-btn { background: none; border: 1px solid #333; color: #888; border-radius: 6px; cursor: pointer; height: 42px; display: flex; align-items: center; justify-content: center; padding-bottom: 5px; }
-
+  
   .toggle-lr { font-size: 11px; background: #222; color: #aaa; padding: 8px 12px; border-radius: 6px; border: 1px solid #444; cursor: pointer; font-weight: 800; display: inline-block; transition: 0.1s; }
   .toggle-lr.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-  /* SHELF & EDIT MODE */
+  /* SHELF */
   .shelf-header { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; border-top: 1px solid #333; padding-top: 20px; margin-bottom: 15px; }
   .shelf-title { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; }
   .edit-btn { font-size: 10px; font-weight: 800; color: var(--accent); background: none; border: none; cursor: pointer; padding: 5px; text-transform: uppercase; letter-spacing: 1px; }
@@ -100,38 +85,29 @@
   .tile.deleting { border-color: var(--danger); color: var(--danger); background: rgba(255, 71, 87, 0.1); }
   .tile-add { border: 1px dashed #666; color: #888; background: transparent; box-shadow: none; }
 
-  /* STATS PICKER & GRAPH */
+  /* GRAPH */
   .chart-container { position: relative; height: 300px; width: 100%; background: #111; border: 1px solid #333; border-radius: 12px; padding: 10px; margin-top: 15px; }
   .stat-toggle { display: flex; gap: 10px; margin-bottom: 10px; }
   .st-btn { flex: 1; padding: 8px; background: #222; border: 1px solid #333; color: #666; font-size: 11px; border-radius: 6px; font-weight: bold; cursor: pointer; }
   .st-btn.active { background: var(--success); color: black; border-color: var(--success); }
   
-  /* PICKER MODAL */
+  /* MODALS */
+  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+  .modal-box { background: #1e1e1e; padding: 25px; border-radius: 15px; width: 85%; max-width: 350px; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
   .modal-full { background: #0f0f13; width: 100%; height: 100%; max-width: none; border-radius: 0; padding: 20px; overflow-y: auto; }
-  .picker-section { margin-bottom: 25px; }
-  .picker-label { font-size: 11px; color: #666; font-weight: bold; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase; border-bottom: 1px solid #222; padding-bottom: 5px; }
-  .picker-item { background: #1a1a24; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 8px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-  .picker-item:active { background: var(--accent); color: black; }
-  .folder-tag { font-size: 9px; padding: 3px 6px; background: #333; border-radius: 4px; color: #aaa; margin-left: 10px; }
-
-  /* TAGS & CHIPS */
+  .close-x { position: absolute; top: 15px; right: 15px; color: #666; font-size: 20px; cursor: pointer; font-weight: bold; }
+  
+  /* TAGS */
   .tag-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
   .chip { padding: 8px 14px; background: #222; border: 1px solid #444; border-radius: 20px; font-size: 11px; color: #ccc; cursor: pointer; font-weight: 600; }
   .chip:active { background: var(--accent); color: white; }
   .chip-add { border-style: dashed; color: #888; }
 
-  /* MODALS */
-  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-  .modal-box { background: #1e1e1e; padding: 25px; border-radius: 15px; width: 85%; max-width: 350px; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
-  .close-x { position: absolute; top: 15px; right: 15px; color: #666; font-size: 20px; cursor: pointer; font-weight: bold; }
-  
-  /* PLATE CALC VISUALS */
+  /* PLATE VIZ */
   .barbell-viz { display: flex; align-items: center; justify-content: center; height: 100px; background: #111; margin-bottom: 15px; border-radius: 8px; overflow-x: auto; border: 1px solid #333; position: relative; }
   .sleeve { height: 10px; width: 90%; background: #555; position: absolute; border-radius: 5px; z-index: 1; }
   .plate-stack { display: flex; align-items: center; gap: 2px; z-index: 2; }
   .viz-plate { display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; color: black; border-radius: 2px; height: 0; transition: 0.2s; border: 1px solid rgba(0,0,0,0.3); }
-  
-  /* PLATES */
   .vp-45 { height: 90px; width: 20px; background: #0984e3; color: white; } 
   .vp-35 { height: 80px; width: 18px; background: #fdcb6e; } 
   .vp-25 { height: 70px; width: 16px; background: #00b894; } 
@@ -145,10 +121,16 @@
   .vp-kg-5  { height: 45px; width: 14px; background: #dfe6e9; color: black; } 
   .vp-kg-2_5{ height: 35px; width: 12px; background: #2d3436; color: white; } 
   .vp-kg-1_25{ height: 25px; width: 10px; background: #b2bec3; color: black; } 
-
   .plate-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
   .p-btn { background: #222; border: 1px solid #444; color: white; padding: 15px 0; border-radius: 8px; font-weight: bold; cursor: pointer; }
   .p-btn:active { background: #444; }
+
+  /* PICKER */
+  .picker-section { margin-bottom: 25px; }
+  .picker-label { font-size: 11px; color: #666; font-weight: bold; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase; border-bottom: 1px solid #222; padding-bottom: 5px; }
+  .picker-item { background: #1a1a24; border: 1px solid #333; padding: 15px; border-radius: 8px; margin-bottom: 8px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .picker-item:active { background: var(--accent); color: black; }
+  .folder-tag { font-size: 9px; padding: 3px 6px; background: #333; border-radius: 4px; color: #aaa; margin-left: 10px; }
 
   /* PROGRAM CSS */
   .week { background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; overflow: hidden; transition: 0.3s; }
@@ -185,14 +167,13 @@
   .nav-btn { background: none; border: none; color: #666; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
   .nav-btn.active { color: var(--accent); }
   
-  #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #222; border: 1px solid #333; color: white; padding: 12px 24px; border-radius: 30px; font-size: 13px; font-weight: bold; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 3000; }
-  #toast.show { opacity: 1; transform: translateY(-10px); }
+  #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #222; border: 1px solid #333; padding: 10px 20px; border-radius: 30px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 3000; font-size: 12px; font-weight: bold; }
+  #toast.show { opacity: 1; transform: translate(-50%, -10px); }
 </style>
 </head>
 <body>
 
 <button id="unit-toggle" onclick="window.toggleUnit()">LBS</button>
-<div id="debug-status" style="position:fixed; bottom:90px; right:10px; font-size:9px; color:#333; z-index:9000;">System: Active</div>
 <div id="toast">Saved</div>
 
 <div id="modal-calc" class="modal-overlay">
@@ -205,7 +186,7 @@
         <button id="mode-bar" class="btn btn-sm" style="background:var(--success); color:black;" onclick="window.setCalcMode('bar')">BARBELL</button>
         <button id="mode-single" class="btn btn-sm" style="background:#333;" onclick="window.setCalcMode('single')">SINGLE</button>
     </div>
-    <div id="plate-btn-grid" class="plate-grid"></div>
+    <div id="plate-btn-grid" class="plate-btn-grid"></div>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
         <button class="btn btn-sec" onclick="window.resetCalc()">Clear</button>
         <button class="btn btn-main" onclick="window.applyCalc()">Use</button>
@@ -248,7 +229,10 @@
     <h3>New Exercise</h3>
     <input type="text" id="new-ex-name" placeholder="Name...">
     <div id="tag-area" class="tag-grid"></div>
-    <button class="btn btn-main" onclick="window.confirmNewEx('str')">Create</button>
+    <div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <button class="btn btn-main" onclick="window.confirmNewEx('str')">STRENGTH</button>
+        <button class="btn btn-sec" style="border-color:var(--cardio); color:var(--cardio);" onclick="window.confirmNewEx('cardio')">CARDIO</button>
+    </div>
   </div>
 </div>
 
@@ -302,7 +286,7 @@
 </div>
 
 <div id="view-prog" class="view">
-  <h1>NETGAINS <span class="brand-span">V24</span></h1>
+  <h1>NETGAINS <span class="brand-span">V25</span></h1>
   <p class="sub">BAECHLE ENGINE</p>
   <div style="background:#222; padding:15px; border-radius:12px; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
@@ -356,7 +340,6 @@
           <span id="stats-current-label">Select Data...</span>
           <span>▼</span>
       </button>
-      
       <div class="chart-container"><canvas id="perfChart"></canvas></div>
       <div id="stat-details" style="margin-top:15px; font-size:12px; color:#888; text-align:center;"></div>
     </div>
@@ -374,7 +357,7 @@
 
 <script>
 // --- GLOBAL INIT ---
-const DB_KEY = 'netgains_v24_db';
+const DB_KEY = 'netgains_v25_db';
 let DATA = { 
     unit:'lbs', 
     inputs:{s:'',b:'',d:''}, 
@@ -384,7 +367,8 @@ let DATA = {
     gyms: { 'Main Gym': {folders:[], library:{}} }, 
     activeCart: [], 
     sessionData: {},
-    customTags: []
+    customTags: [],
+    exTypes: {}
 };
 
 try {
@@ -630,7 +614,18 @@ window.promptNewEx = function(){ document.getElementById('new-ex-name').value=""
 window.renderTagGrid = function(){const area = document.getElementById('tag-area'); const defaults = ['Barbell', 'Dumbbell', 'Cable', 'Machine', 'Smith']; const all = [...defaults, ...DATA.customTags]; let h = ''; all.forEach(t => { h += `<div class="chip" onclick="window.appendTag(' (${t})')">${t}</div>`; }); h += `<div class="chip chip-add" onclick="window.promptCustomTag()">+</div>`; area.innerHTML = h;}
 window.appendTag = function(t){ document.getElementById('new-ex-name').value += t; }
 window.promptCustomTag = function(){ window.openInputModal("Custom Tag", "E.g. Hoist", (val) => { if(val){ window.appendTag(` (${val})`); if(!DATA.customTags.includes(val)){ DATA.customTags.push(val); window.saveData(); window.renderTagGrid(); } } }); }
-window.confirmNewEx = function(t){ const v=document.getElementById('new-ex-name').value; if(v){ const g=window.getCurrentGymData(); if(!g.library[currentFolder]) g.library[currentFolder]=[]; g.library[currentFolder].push(v); DATA.exTypes[v]=t; window.saveData(); window.renderShelf(); window.addToCart(v); } document.getElementById('modal-new-ex').style.display='none'; }
+window.confirmNewEx = function(t){ 
+    const v=document.getElementById('new-ex-name').value; 
+    if(v){ 
+        const g=window.getCurrentGymData(); 
+        if(!g.library[currentFolder]) g.library[currentFolder]=[]; 
+        g.library[currentFolder].push(v); 
+        if(!DATA.exTypes) DATA.exTypes={};
+        DATA.exTypes[v]=t; 
+        window.saveData(); window.renderShelf(); window.addToCart(v); 
+    } 
+    document.getElementById('modal-new-ex').style.display='none'; 
+}
 window.renderShelf = function(){const a=document.getElementById('tile-area');const g=window.getCurrentGymData();const l=g.library[currentFolder]||[]; a.innerHTML=`<button class="tile tile-add" onclick="window.promptNewEx()">+ NEW</button>`; l.forEach(e=>{const cls = isEditing ? 'tile deleting' : 'tile'; const action = isEditing ? `window.deleteLibItem('${e}')` : `window.addToCart('${e}')`; const content = isEditing ? `✕ ${e}` : e; a.innerHTML+=`<div class="${cls}" onclick="${action}">${content}</div>`;});}
 let isEditing = false;
 window.toggleEditMode = function(){ isEditing = !isEditing; document.getElementById('edit-lib-btn').innerText = isEditing ? 'DONE' : '✎ EDIT'; window.renderShelf(); }
@@ -671,7 +666,7 @@ window.applyCalc = function(){ if(calcTarget){ const val = document.getElementBy
 window.useBW = function(){ if(calcTarget){ DATA.sessionData[calcTarget.ex][calcTarget.idx].w = "BW"; window.saveData(); window.renderCart(); } window.closeCalc(); }
 window.renderPlateViz = function(weight){ const viz = document.getElementById('plate-stack-display'); viz.innerHTML = ""; let rem = weight; const plates = (DATA.unit === 'lbs') ? [{w:45, c:'vp-45', t:'45'}, {w:35, c:'vp-35', t:'35'}, {w:25, c:'vp-25', t:'25'}, {w:10, c:'vp-10', t:'10'}, {w:5, c:'vp-5', t:'5'}, {w:2.5, c:'vp-2_5', t:'2.5'}] : [{w:25, c:'vp-kg-25', t:'25'}, {w:20, c:'vp-kg-20', t:'20'}, {w:15, c:'vp-kg-15', t:'15'}, {w:10, c:'vp-kg-10', t:'10'}, {w:5, c:'vp-kg-5', t:'5'}, {w:2.5, c:'vp-kg-2_5', t:'2.5'}, {w:1.25, c:'vp-kg-1_25', t:'1.25'}]; plates.forEach(p => { while(rem >= p.w - 0.01){ viz.innerHTML += `<div class="viz-plate ${p.c}">${p.t}</div>`; rem -= p.w; } }); }
 
-// --- STATS LOGIC (UPDATED FOR PICKER + FOLDER GRAPH) ---
+// --- STATS LOGIC ---
 let statsMode = 'exercise'; // 'exercise' or 'folder'
 let statsTarget = ''; // e.g. 'Bench Press' or 'Chest'
 
@@ -680,7 +675,7 @@ window.openStatsPicker = function(){
     const content = document.getElementById('picker-content');
     content.innerHTML = '';
     
-    // SECTION 1: FOLDERS (MUSCLE GROUPS)
+    // SECTION 1: FOLDERS
     const gym = DATA.gyms[DATA.currentGym];
     if(gym.folders.length > 0){
         content.innerHTML += `<div class="picker-section"><div class="picker-label">Muscle Groups</div>`;
@@ -728,41 +723,24 @@ window.renderGraph = function(){
 
     try {
         if(statsMode === 'exercise'){
-            // SINGLE EXERCISE
             const logs = DATA.history.filter(l => l.ex === statsTarget).sort((a,b) => new Date(a.date) - new Date(b.date));
             if(logs.length === 0) { det.innerText="No Data"; return; }
-            
             const dataPoints = logs.map(l => ({x: l.date, y: l.rm}));
             logs.forEach(l => allLabels.add(l.date));
-            
             datasets.push({
-                label: statsTarget,
-                data: dataPoints,
-                borderColor: '#2ed573',
-                backgroundColor: 'rgba(46, 213, 115, 0.1)',
-                borderWidth: 2,
-                pointRadius: 3,
-                tension: 0.3
+                label: statsTarget, data: dataPoints, borderColor: '#2ed573', backgroundColor: 'rgba(46, 213, 115, 0.1)', borderWidth: 2, pointRadius: 3, tension: 0.3
             });
             det.innerText = `BEST: ${Math.max(...logs.map(l=>l.rm))}`;
         } else {
-            // FOLDER MODE (MULTI-LINE)
             const gym = DATA.gyms[DATA.currentGym];
             const exercises = gym.library[statsTarget] || [];
-            const colors = ['#ff4757', '#2ed573', '#ffa502', '#a29bfe', '#00d2d3']; // Red, Green, Orange, Purple, Cyan
-            
+            const colors = ['#ff4757', '#2ed573', '#ffa502', '#a29bfe', '#00d2d3'];
             exercises.forEach((ex, idx) => {
                 const logs = DATA.history.filter(l => l.ex === ex).sort((a,b) => new Date(a.date) - new Date(b.date));
                 if(logs.length > 0){
                     logs.forEach(l => allLabels.add(l.date));
                     datasets.push({
-                        label: ex,
-                        data: logs.map(l => ({x: l.date, y: l.rm})),
-                        borderColor: colors[idx % colors.length],
-                        borderWidth: 2,
-                        pointRadius: 0, // Cleaner look for many lines
-                        tension: 0.3,
-                        fill: false
+                        label: ex, data: logs.map(l => ({x: l.date, y: l.rm})), borderColor: colors[idx % colors.length], borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false
                     });
                 }
             });
@@ -770,29 +748,18 @@ window.renderGraph = function(){
         }
 
         if(datasets.length === 0) { det.innerText="No Data in Folder"; return; }
-
         const sortedLabels = Array.from(allLabels).sort();
 
         myChart = new Chart(ctx, {
             type: 'line',
-            data: {
-                labels: sortedLabels,
-                datasets: datasets
-            },
+            data: { labels: sortedLabels, datasets: datasets },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: true, labels: { color:'#888', boxWidth:10, font:{size:10} } } },
-                scales: {
-                    x: { grid:{color:'#333'}, ticks:{color:'#666'} },
-                    y: { grid:{color:'#333'}, ticks:{color:'#666'} }
-                }
+                scales: { x: { grid:{color:'#333'}, ticks:{color:'#666'} }, y: { grid:{color:'#333'}, ticks:{color:'#666'} } }
             }
         });
-    } catch(err) {
-        console.error("Graph Error:", err);
-        det.innerText = "Error loading graph.";
-    }
+    } catch(err) { det.innerText = "Error loading graph."; }
 }
 
 // --- UTILS ---
