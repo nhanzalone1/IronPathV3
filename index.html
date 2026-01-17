@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f0f13">
-<title>NetGains V31</title>
+<title>NetGains V32</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -49,7 +49,6 @@
   @keyframes fade { from{opacity:0; transform:translateY(5px)} to{opacity:1; transform:translateY(0)} }
 
   /* COMPONENTS */
-  /* FIXED FONT FOR GYM SELECTOR */
   .gym-selector { background: #222; border: 1px solid var(--border); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; cursor: pointer; transition: 0.1s; }
   .gym-selector:active { background: #2a2a2a; transform: scale(0.99); }
   .gym-label { font-size: 10px; color: #666; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px; }
@@ -74,9 +73,22 @@
   
   .calc-btn { background: #222; border: 1px solid #444; color: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; height: 42px; font-size: 14px; }
   .del-btn { background: none; border: none; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  
-  .toggle-lr { font-size: 11px; background: #222; color: #aaa; padding: 8px 12px; border-radius: 6px; border: 1px solid #444; cursor: pointer; font-weight: 800; display: inline-block; transition: 0.1s; }
-  .toggle-lr.active { background: var(--accent); color: white; border-color: var(--accent); }
+  /* MENU BTN FOR SET OPTIONS */
+  .menu-btn { background: #222; border: 1px solid #444; color: #888; border-radius: 6px; height: 42px; width: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; padding-bottom: 5px; }
+
+  /* SET TAGS */
+  .set-group-box { padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333; }
+  .set-group-drop { background: rgba(255, 107, 129, 0.05); border-color: var(--drop); }
+  .set-group-super { background: rgba(162, 155, 254, 0.05); border-color: var(--super); }
+  .set-group-assist { background: rgba(0, 210, 211, 0.05); border-color: var(--assist); }
+  .label-drop { color: var(--drop); font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
+  .label-super { color: var(--super); font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
+  .label-assist { color: var(--assist); font-weight: 900; font-size: 10px; letter-spacing: 0.5px; }
+
+  /* SET BUTTONS */
+  .btn-drop { background: var(--drop); color: white; border: none; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+  .btn-super { background: var(--super); color: white; border: none; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+  .btn-assist { background: var(--assist); color: black; border: none; font-weight: 800; }
 
   /* SHELF */
   .shelf-header { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; border-top: 1px solid #333; padding-top: 20px; margin-bottom: 15px; }
@@ -91,9 +103,6 @@
 
   /* GRAPH */
   .chart-container { position: relative; height: 300px; width: 100%; background: #111; border: 1px solid #333; border-radius: 12px; padding: 10px; margin-top: 15px; }
-  .stat-toggle { display: flex; gap: 10px; margin-bottom: 10px; }
-  .st-btn { flex: 1; padding: 8px; background: #222; border: 1px solid #333; color: #666; font-size: 11px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-  .st-btn.active { background: var(--success); color: black; border-color: var(--success); }
   
   /* MODALS */
   .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
@@ -118,13 +127,6 @@
   .vp-10 { height: 50px; width: 14px; background: #dfe6e9; } 
   .vp-5  { height: 40px; width: 12px; background: #d63031; color: white; } 
   .vp-2_5{ height: 30px; width: 10px; background: #636e72; color: white; }
-  .vp-kg-25 { height: 90px; width: 22px; background: #ff4757; color: white; } 
-  .vp-kg-20 { height: 90px; width: 20px; background: #0984e3; color: white; } 
-  .vp-kg-15 { height: 60px; width: 14px; background: #f1c40f; color: black; } 
-  .vp-kg-10 { height: 50px; width: 12px; background: #2ecc71; color: white; } 
-  .vp-kg-5  { height: 45px; width: 14px; background: #dfe6e9; color: black; } 
-  .vp-kg-2_5{ height: 35px; width: 12px; background: #2d3436; color: white; } 
-  .vp-kg-1_25{ height: 25px; width: 10px; background: #b2bec3; color: black; } 
   .plate-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
   .p-btn { background: #222; border: 1px solid #444; color: white; padding: 15px 0; border-radius: 8px; font-weight: bold; cursor: pointer; }
   .p-btn:active { background: #444; }
@@ -139,8 +141,7 @@
   /* PROGRAM CSS */
   .week { background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; overflow: hidden; transition: 0.3s; }
   .week-head { display: flex; justify-content: space-between; padding: 15px; background: #222; border-bottom: 1px solid #333; font-weight: bold; }
-  .day-row { padding: 15px; border-bottom: 1px solid #222; cursor: pointer; position: relative; }
-  .day-row:active { background: #222; }
+  .day-row { padding: 15px; border-bottom: 1px solid #222; position: relative; cursor: pointer; }
   .day-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .day-left-grp { display: flex; align-items: center; gap: 10px; }
   .day-check { width: 24px; height: 24px; border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; z-index: 10; cursor: pointer; background: #111; }
@@ -154,18 +155,17 @@
   .lift-name { color: #888; width: 40px; font-weight: bold; }
   .lift-nums { color: white; font-family: monospace; letter-spacing: -0.5px; }
   .calc-trigger { color: var(--success); cursor: pointer; border-bottom: 1px dashed #444; }
+  
   .warmup-drop { background: #111; padding: 10px; border-top: 1px dashed #333; display: none; margin-top:10px; }
   .warmup-drop.open { display: block; animation: slideDown 0.2s ease-out; }
   .warmup-header { font-size: 10px; color: var(--accent); font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
   .warmup-line { font-size: 11px; color: #aaa; margin-bottom: 3px; font-family: monospace; }
   @keyframes slideDown { from{opacity:0; transform:translateY(-5px)} to{opacity:1; transform:translateY(0)} }
+  
   .chk-box { width: 20px; height: 20px; border: 2px solid #444; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
   .chk-box.checked { background: #444; border-color: #444; }
   .chk-box.checked::after { content: '✓'; color: #888; font-weight: bold; font-size: 12px; }
-  .week-content { transition: 0.3s; }
   .week-content.dimmed { opacity: 0.3; pointer-events: none; filter: grayscale(100%); text-decoration: line-through; }
-  .log-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-  .log-lbl { font-size: 10px; color: #888; text-align: center; }
 
   .nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: #181818; border-top: 1px solid #333; display: grid; grid-template-columns: 1fr 1fr 1fr; z-index: 1000; padding-bottom: 20px; }
   .nav-btn { background: none; border: none; color: #666; font-size: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
@@ -250,6 +250,16 @@
   </div>
 </div>
 
+<div id="modal-set-opt" class="modal-overlay">
+  <div class="modal-box">
+    <h3 style="margin-bottom:15px;">Link Set</h3>
+    <button class="btn btn-drop" style="width:100%; margin-bottom:10px; padding:12px;" onclick="window.applySetType('drop')">💧 Drop Set</button>
+    <button class="btn btn-super" style="width:100%; margin-bottom:10px; padding:12px;" onclick="window.applySetType('super')">🔗 Superset</button>
+    <button class="btn btn-assist" style="width:100%; margin-bottom:10px; padding:12px;" onclick="window.applySetType('assist')">🤝 Assisted</button>
+    <button class="btn btn-sec" style="margin-top:20px" onclick="document.getElementById('modal-set-opt').style.display='none'">Cancel</button>
+  </div>
+</div>
+
 <div id="modal-share" class="modal-overlay">
   <div class="modal-box">
     <div class="close-x" onclick="document.getElementById('modal-share').style.display='none'">✕</div>
@@ -291,7 +301,7 @@
 </div>
 
 <div id="view-prog" class="view">
-  <h1>NETGAINS <span class="brand-span">V31</span></h1>
+  <h1>NETGAINS <span class="brand-span">V32</span></h1>
   <p class="sub">BAECHLE ENGINE</p>
   <div style="background:#222; padding:15px; border-radius:12px; margin-bottom:20px;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
@@ -310,7 +320,7 @@
   <div id="split-manager">
       <div class="gym-selector" onclick="window.showGymManager()">
           <div><div class="gym-label">CURRENT LOCATION</div><div class="gym-name" id="current-gym-display">Main Gym</div></div>
-          <div class="gym-arrow">▼</div>
+          <div style="color:#666">▼</div>
       </div>
       <button class="btn btn-sec" onclick="window.openManualImport()" style="margin-bottom:20px;">📥 IMPORT CODE</button>
       <div id="my-split-list"></div>
@@ -362,7 +372,7 @@
 
 <script>
 // --- GLOBAL INIT ---
-const DB_KEY = 'netgains_v31_db';
+const DB_KEY = 'netgains_v32_db';
 let DATA = { 
     unit:'lbs', 
     inputs:{s:'',b:'',d:''}, 
@@ -579,7 +589,7 @@ window.genProgram = function(){
             <div class="day-row" onclick="window.toggleWarmup(this)">
                 <div class="day-title-row">
                     <div class="day-left-grp">
-                        <div class="day-check ${isDone?'checked':''}" onclick="window.toggleDayCheck('${dKey}', event, ${sw}, ${bw}, ${dw}, ${k.r})"></div>
+                        <div class="day-circle ${isDone?'checked':''}" onclick="window.toggleDayCheck('${dKey}', event, ${sw}, ${bw}, ${dw}, ${k.r})"></div>
                         <span style="font-weight:bold">${dayName}</span>
                     </div>
                     <span class="day-type ${cls}">${typeLabel}</span>
@@ -679,10 +689,37 @@ window.renderCart = function(){
         if(isC){ 
             sets.forEach((s,i)=>{ r+=`<div class="cardio-row"><span class="set-num">${i+1}</span><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.w}" onchange="window.updateSet('${ex}',${i},'w',this.value)"><span class="input-unit">MIN</span></div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.r}" onchange="window.updateSet('${ex}',${i},'r',this.value)"><span class="input-unit">MI</span></div><button class="del-btn" onclick="window.removeSet('${ex}',${i})">✕</button></div>` }); 
         } else { 
-            sets.forEach((s,i)=>{ 
-                const row = `<div class="set-row"><div class="set-num">${i+1}</div><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.w}" onchange="window.updateSet('${ex}',${i},'w',this.value)"><span class="input-unit">${u}</span></div><button class="calc-btn" onclick="window.openCalc(${exIdx},${i})">🧮</button><div class="input-wrapper"><input type="text" inputmode="decimal" value="${s.r}" onchange="window.updateSet('${ex}',${i},'r',this.value)"><span class="input-unit">REPS</span></div><button class="del-btn" onclick="window.removeSet('${ex}',${i})">✕</button></div>`; 
-                r += row; 
-            }); 
+            let i=0;
+            while(i < sets.length) {
+                let s = sets[i];
+                let ns = sets[i+1];
+                const safeEx = ex.replace(/'/g, "\\'");
+                
+                const row = (idx, st, lab) => `
+                    <div class="set-row">
+                        <div class="set-num">${lab}</div>
+                        <div class="input-wrapper"><input type="text" inputmode="decimal" value="${st.w}" onchange="window.updateSet('${safeEx}',${idx},'w',this.value)"><span class="input-unit">${u}</span></div>
+                        <button class="calc-btn" onclick="window.openSessionCalc(${exIdx},${idx})">🧮</button>
+                        <div class="input-wrapper"><input type="text" inputmode="decimal" value="${st.r}" onchange="window.updateSet('${safeEx}',${idx},'r',this.value)"><span class="input-unit">REPS</span></div>
+                        <button class="menu-btn" onclick="window.openSetOpt('${safeEx}',${idx})">...</button>
+                        <button class="del-btn" onclick="window.removeSet('${safeEx}',${idx})">✕</button>
+                    </div>`;
+                
+                // Group Logic
+                if(s.type === 'drop_parent' && ns && ns.type === 'drop_child') {
+                    r += `<div class="set-group-box set-group-drop">${row(i,s,i+1)}${row(i+1,ns,'<span class="label-drop">DROP</span>')}</div>`;
+                    i += 2;
+                } else if(s.type === 'super_parent' && ns && ns.type === 'super_child') {
+                    r += `<div class="set-group-box set-group-super">${row(i,s,i+1)}${row(i+1,ns,'<span class="label-super">SUPER</span>')}</div>`;
+                    i += 2;
+                } else if(s.type === 'assist_parent' && ns && ns.type === 'assist_child') {
+                    r += `<div class="set-group-box set-group-assist">${row(i,s,i+1)}${row(i+1,ns,'<span class="label-assist">ASST</span>')}</div>`;
+                    i += 2;
+                } else {
+                    r += row(i,s,i+1);
+                    i++;
+                }
+            }
         } 
         area.innerHTML+=`${h}<div id="sets-${ex}">${r}</div><button class="btn btn-sec btn-sm" onclick="window.addSet('${ex}')">+ ADD SET</button></div>` 
     }); 
@@ -693,19 +730,59 @@ window.removeSet = function(e,i){DATA.sessionData[e].splice(i,1);window.saveData
 window.updateSet = function(e,i,f,v){if(!DATA.sessionData[e][i])return;DATA.sessionData[e][i][f]=v;window.saveData()}
 window.finishSession = function(){const t=new Date().toISOString().split('T')[0]; DATA.activeCart.forEach(e=>{ const sets=DATA.sessionData[e]; sets.forEach(s=>{ if(s.w && s.r){ DATA.history.push({date:t, ex:e, w:s.w, r:s.r, rm:Math.round(s.w*(1+0.033*s.r))}); } }); }); window.clearCart(); window.closeSession(); window.showToast("Saved!"); window.renderCart(); }
 
+// --- SET OPTIONS ---
+let optTarget = null;
+window.openSetOpt = function(ex, i) {
+    optTarget = {ex, i};
+    document.getElementById('modal-set-opt').style.display = 'flex';
+}
+
+window.applySetType = function(type) {
+    if(optTarget) {
+        const {ex, i} = optTarget;
+        const s = DATA.sessionData[ex][i];
+        
+        // Setup parent
+        s.type = type + '_parent';
+        
+        // Add child set
+        let nw = s.w; 
+        if(type === 'drop') nw = ""; // Drop sets start empty
+        const ns = {w: nw, r: '', type: type + '_child'};
+        DATA.sessionData[ex].splice(i+1, 0, ns);
+        
+        window.saveData();
+        window.renderCart();
+    }
+    document.getElementById('modal-set-opt').style.display = 'none';
+}
+
 // --- CALC VISUALIZER & LOGIC ---
 let calcTarget = null; let calcSide=0, calcBar=45, calcMode='bar';
-window.openCalc = function(exIdx, setIdx){ 
-    if(exIdx !== undefined){ const exName = DATA.activeCart[exIdx]; calcTarget = {ex: exName, idx: setIdx}; } 
-    else { calcTarget = null; }
-    calcBar = (DATA.unit === 'lbs') ? 45 : 20;
-    calcSide=0; 
-    window.setCalcMode('bar'); 
-    window.renderPlateButtons(); 
+
+window.openQuickCalc = function(weight, event) {
+    if(event) event.stopPropagation();
+    calcTarget = null; // No target, just visual
+    window.setCalcMode('bar');
+    document.getElementById('calc-total').value = weight;
+    window.manualCalcUpdate(weight);
+    document.getElementById('modal-plate-calc').style.display='flex';
+}
+
+window.openSessionCalc = function(exIdx, setIdx) {
+    const exName = DATA.activeCart[exIdx]; 
+    calcTarget = {ex: exName, idx: setIdx};
+    
+    // Get current value
+    const currentVal = DATA.sessionData[exName][setIdx].w || 45;
+    window.setCalcMode('bar');
+    document.getElementById('calc-total').value = currentVal;
+    window.manualCalcUpdate(currentVal);
+    window.renderPlateButtons();
     document.getElementById('modal-plate-calc').style.display='flex'; 
 }
+
 window.closeCalc = function(){ document.getElementById('modal-plate-calc').style.display='none'; }
-window.calcPlates = function(){ window.openCalc(); } 
 window.renderPlateButtons = function(){
     const grid = document.getElementById('plate-btn-grid');
     grid.innerHTML = "";
@@ -775,17 +852,24 @@ window.renderGraph = function(){
 
     let datasets = [];
     let allLabels = new Set();
+    
+    // Multiplier Logic: If DATA.unit is KG, but data is assumed LBS, convert visual
+    // Note: This is purely visual. Data remains raw.
+    const multiplier = (DATA.unit === 'kg') ? 0.453592 : 1;
 
     try {
         if(statsMode === 'exercise'){
             const logs = DATA.history.filter(l => l.ex === statsTarget).sort((a,b) => new Date(a.date) - new Date(b.date));
             if(logs.length === 0) { det.innerText="No Data"; return; }
-            const dataPoints = logs.map(l => ({x: l.date, y: l.rm}));
+            
+            const dataPoints = logs.map(l => ({x: l.date, y: Math.round(l.rm * multiplier)}));
             logs.forEach(l => allLabels.add(l.date));
+            
             datasets.push({
                 label: statsTarget, data: dataPoints, borderColor: '#2ed573', backgroundColor: 'rgba(46, 213, 115, 0.1)', borderWidth: 2, pointRadius: 3, tension: 0.3
             });
-            det.innerText = `BEST: ${Math.max(...logs.map(l=>l.rm))}`;
+            const maxVal = Math.max(...logs.map(l=>l.rm));
+            det.innerText = `BEST: ${Math.round(maxVal * multiplier)} ${DATA.unit.toUpperCase()}`;
         } else {
             const gym = DATA.gyms[DATA.currentGym];
             const exercises = gym.library[statsTarget] || [];
@@ -795,7 +879,13 @@ window.renderGraph = function(){
                 if(logs.length > 0){
                     logs.forEach(l => allLabels.add(l.date));
                     datasets.push({
-                        label: ex, data: logs.map(l => ({x: l.date, y: l.rm})), borderColor: colors[idx % colors.length], borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false
+                        label: ex, 
+                        data: logs.map(l => ({x: l.date, y: Math.round(l.rm * multiplier)})), 
+                        borderColor: colors[idx % colors.length], 
+                        borderWidth: 2, 
+                        pointRadius: 0, 
+                        tension: 0.3, 
+                        fill: false
                     });
                 }
             });
